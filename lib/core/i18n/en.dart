@@ -155,4 +155,82 @@ class EnStrings implements AppStrings {
   String get closing => 'CLOSING';
   @override
   String get competitionProgress => 'Competition Progress';
+
+  // Task Management
+  @override
+  String get editTask => 'Edit Task';
+  @override
+  String get taskTitle => 'Task Title';
+  @override
+  String get enterTaskTitle => 'Enter task title';
+  @override
+  String get estimatedDuration => 'Estimated Duration';
+  @override
+  String get save => 'Save';
+  @override
+  String get cancel => 'Cancel';
+  @override
+  String get confirmDeleteTask => 'Confirm Delete Task';
+  @override
+  String get deleteTaskWarning => 'This action cannot be undone. Delete';
+  @override
+  String get confirmDelete => 'Delete';
+  @override
+  String get actualSpent => 'Actual Spent';
+  @override
+  String get completedAt => 'Completed At';
+  @override
+  String get close => 'Close';
+
+  // Module Management
+  @override
+  String get addModule => 'Add Module';
+  @override
+  String get editModule => 'Edit Module';
+  @override
+  String get moduleName => 'Module Name';
+  @override
+  String get enterModuleName => 'Enter module name';
+  @override
+  String get moduleDescription => 'Module Description';
+  @override
+  String get enterModuleDescription => 'Enter module description';
+  @override
+  String get defaultDuration => 'Default Duration';
+  @override
+  String get confirmDeleteModule => 'Confirm Delete Module';
+  @override
+  String get deleteModuleWarning => 'This action will delete the module and all its tasks. Delete';
+  @override
+  String get customDuration => 'Custom Duration';
+
+  // Timer Control
+  @override
+  String get stopTimer => 'Stop Timer';
+  @override
+  String get confirmStopTimer => 'Do you want to stop the current timer? Timer progress will be reset.';
+  @override
+  String get confirmResetTimer => 'Do you want to reset the timer? Current progress will be cleared.';
+
+  // Milestone Management
+  @override
+  String get addMilestone => 'Add Milestone';
+  @override
+  String get editMilestone => 'Edit Milestone';
+  @override
+  String get milestoneTitle => 'Milestone Title';
+  @override
+  String get enterMilestoneTitle => 'Enter milestone title';
+  @override
+  String get targetDateTime => 'Target Date & Time';
+  @override
+  String get milestonePriority => 'Priority';
+  @override
+  String get confirmDeleteMilestone => 'Confirm Delete Milestone';
+  @override
+  String get deleteMilestoneWarning => 'This action cannot be undone. The milestone will be permanently removed.';
+  @override
+  String get noMilestones => 'No milestones yet';
+  @override
+  String get addFirstMilestone => 'Add your first milestone';
 }

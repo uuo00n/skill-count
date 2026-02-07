@@ -84,4 +84,47 @@ abstract class AppStrings {
   String get competitionC2;
   String get closing;
   String get competitionProgress;
+
+  // Task Management
+  String get editTask;
+  String get taskTitle;
+  String get enterTaskTitle;
+  String get estimatedDuration;
+  String get save;
+  String get cancel;
+  String get confirmDeleteTask;
+  String get deleteTaskWarning;
+  String get confirmDelete;
+  String get actualSpent;
+  String get completedAt;
+  String get close;
+
+  // Module Management
+  String get addModule;
+  String get editModule;
+  String get moduleName;
+  String get enterModuleName;
+  String get moduleDescription;
+  String get enterModuleDescription;
+  String get defaultDuration;
+  String get confirmDeleteModule;
+  String get deleteModuleWarning;
+  String get customDuration;
+
+  // Timer Control
+  String get stopTimer;
+  String get confirmStopTimer;
+  String get confirmResetTimer;
+
+  // Milestone Management
+  String get addMilestone;
+  String get editMilestone;
+  String get milestoneTitle;
+  String get enterMilestoneTitle;
+  String get targetDateTime;
+  String get milestonePriority;
+  String get confirmDeleteMilestone;
+  String get deleteMilestoneWarning;
+  String get noMilestones;
+  String get addFirstMilestone;
 }

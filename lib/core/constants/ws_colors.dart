@@ -30,6 +30,9 @@ class WsColors {
   static const Color textPrimary = Color(0xFF1a1a2e);
   static const Color textSecondary = Color(0xFF6b7280);
 
+  // 功能色
+  static const Color errorRed = Color(0xFFFF5252);
+
   // 边框色
   static const Color border = Color(0xFFE5E7EB);
   static const Color borderAccent = Color(0xFFB0D4D8);

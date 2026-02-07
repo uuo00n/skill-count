@@ -50,4 +50,28 @@ class ModuleModel {
       Duration(minutes: 180),
     ],
   });
+
+  ModuleModel copyWith({
+    String? id,
+    String? name,
+    String? description,
+    Duration? defaultDuration,
+    ModuleStatus? status,
+    List<TaskItem>? tasks,
+    ModuleType? type,
+    bool? allowCustomDuration,
+    List<Duration>? presetDurations,
+  }) {
+    return ModuleModel(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      description: description ?? this.description,
+      defaultDuration: defaultDuration ?? this.defaultDuration,
+      status: status ?? this.status,
+      tasks: tasks ?? this.tasks,
+      type: type ?? this.type,
+      allowCustomDuration: allowCustomDuration ?? this.allowCustomDuration,
+      presetDurations: presetDurations ?? this.presetDurations,
+    );
+  }
 }

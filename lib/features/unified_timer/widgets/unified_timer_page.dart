@@ -5,9 +5,16 @@ import '../../../core/constants/ws_colors.dart';
 import '../../../core/i18n/locale_provider.dart';
 import '../controllers/unified_timer_controller.dart';
 import '../models/unified_timer_model.dart';
+import 'module_delete_dialog.dart';
+import 'module_edit_dialog.dart';
+import 'task_delete_dialog.dart';
+import 'task_detail_dialog.dart';
+import 'task_edit_dialog.dart';
 
 class UnifiedTimerPage extends StatefulWidget {
   const UnifiedTimerPage({super.key});
+
+  static final ValueNotifier<bool> isTimerRunning = ValueNotifier(false);
 
   @override
   State<UnifiedTimerPage> createState() => _UnifiedTimerPageState();
@@ -20,13 +27,15 @@ class _UnifiedTimerPageState extends State<UnifiedTimerPage> {
   bool _isPracticeMode = false;
   int _selectedModuleIndex = 1;
   int _selectedMinutes = 90;
+  int? _hoveredTaskIndex;
+  int? _hoveredModuleIndex;
 
   static const _durationOptions = [45, 60, 90, 120, 180];
 
   // Competition modules
-  late final List<ModuleModel> _competitionModules;
+  late List<ModuleModel> _competitionModules;
   // Practice modules
-  late final List<ModuleModel> _practiceModules;
+  late List<ModuleModel> _practiceModules;
 
   List<ModuleModel> get _currentModules =>
       _isPracticeMode ? _practiceModules : _competitionModules;
@@ -227,6 +236,7 @@ class _UnifiedTimerPageState extends State<UnifiedTimerPage> {
       totalDuration: _competitionModules[_selectedModuleIndex].defaultDuration,
       onTick: () {
         setState(() {});
+        UnifiedTimerPage.isTimerRunning.value = _controller.isRunning;
         if (_controller.remaining.inSeconds == 0 &&
             !_hasCompleted &&
             _controller.totalDuration.inSeconds > 0) {
@@ -280,15 +290,312 @@ class _UnifiedTimerPageState extends State<UnifiedTimerPage> {
     });
   }
 
-  void _addTask(String title) {
+  void _editTask(int index) {
+    final task = _selectedModule.tasks[index];
+    showDialog(
+      context: context,
+      builder: (ctx) => TaskEditDialog(
+        task: task,
+        onSave: (updatedTask) {
+          setState(() {
+            _selectedModule.tasks[index] = updatedTask;
+          });
+        },
+      ),
+    );
+  }
+
+  void _deleteTask(int index) {
+    final task = _selectedModule.tasks[index];
+    showDialog(
+      context: context,
+      builder: (ctx) => TaskDeleteDialog(
+        taskTitle: task.title,
+        onConfirm: () {
+          setState(() {
+            _selectedModule.tasks.removeAt(index);
+            _hoveredTaskIndex = null;
+          });
+        },
+      ),
+    );
+  }
+
+  void _showTaskDetail(int index) {
+    final task = _selectedModule.tasks[index];
+    showDialog(
+      context: context,
+      builder: (ctx) => TaskDetailDialog(
+        task: task,
+        onUpdate: (updatedTask) {
+          setState(() {
+            _selectedModule.tasks[index] = updatedTask;
+          });
+        },
+      ),
+    );
+  }
+
+  void _showAddTaskDialog(BuildContext context, dynamic s) {
+    showDialog(
+      context: context,
+      builder: (ctx) => TaskEditDialog(
+        onSave: (newTask) {
+          setState(() {
+            _selectedModule.tasks.add(newTask);
+          });
+        },
+      ),
+    );
+  }
+
+  void _addModule() {
+    showDialog(
+      context: context,
+      builder: (ctx) => ModuleEditDialog(
+        moduleType:
+            _isPracticeMode ? ModuleType.practice : ModuleType.competition,
+        onSave: (newModule) {
+          setState(() {
+            _currentModules.add(newModule);
+            _selectedModuleIndex = _currentModules.length - 1;
+            _controller.startModule(newModule);
+            _hasCompleted = false;
+          });
+        },
+      ),
+    );
+  }
+
+  void _editModule(int index) {
+    final module = _currentModules[index];
+    showDialog(
+      context: context,
+      builder: (ctx) => ModuleEditDialog(
+        module: module,
+        moduleType: module.type,
+        onSave: (updatedModule) {
+          setState(() {
+            _currentModules[index] = updatedModule;
+            if (index == _selectedModuleIndex) {
+              _controller.startModule(updatedModule);
+            }
+          });
+        },
+      ),
+    );
+  }
+
+  void _deleteModule(int index) {
+    if (_currentModules.length <= 1) return;
+    final module = _currentModules[index];
+    showDialog(
+      context: context,
+      builder: (ctx) => ModuleDeleteDialog(
+        moduleName: module.name,
+        taskCount: module.tasks.length,
+        onConfirm: () {
+          setState(() {
+            _currentModules.removeAt(index);
+            _hoveredModuleIndex = null;
+            if (_selectedModuleIndex >= _currentModules.length) {
+              _selectedModuleIndex = _currentModules.length - 1;
+            } else if (_selectedModuleIndex == index) {
+              _selectedModuleIndex = 0;
+            } else if (_selectedModuleIndex > index) {
+              _selectedModuleIndex--;
+            }
+            _controller.startModule(_currentModules[_selectedModuleIndex]);
+            _hasCompleted = false;
+          });
+        },
+      ),
+    );
+  }
+
+  void _onReorder(int oldIndex, int newIndex) {
     setState(() {
-      _selectedModule.tasks.add(TaskItem(
-        id: 'custom_${DateTime.now().millisecondsSinceEpoch}',
-        title: title,
-        status: TaskStatus.upcoming,
-        estimatedDuration: const Duration(minutes: 15),
-      ));
+      if (newIndex > oldIndex) newIndex -= 1;
+      final task = _selectedModule.tasks.removeAt(oldIndex);
+      _selectedModule.tasks.insert(newIndex, task);
     });
+  }
+
+  void _stopTimer() {
+    final s = LocaleScope.of(context);
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: WsColors.surface,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 48,
+              height: 48,
+              decoration: BoxDecoration(
+                color: WsColors.errorRed.withAlpha(20),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.stop_circle_outlined,
+                size: 24,
+                color: WsColors.errorRed,
+              ),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              s.stopTimer,
+              style: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: WsColors.textPrimary,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              s.confirmStopTimer,
+              style: const TextStyle(
+                fontSize: 13,
+                color: WsColors.textSecondary,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: Text(
+              s.cancel,
+              style: const TextStyle(
+                color: WsColors.textSecondary,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.of(ctx).pop();
+              setState(() {
+                _controller.reset();
+                _hasCompleted = false;
+              });
+              UnifiedTimerPage.isTimerRunning.value = false;
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: WsColors.errorRed,
+              foregroundColor: WsColors.white,
+              padding: const EdgeInsets.symmetric(
+                horizontal: 24,
+                vertical: 12,
+              ),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+            child: Text(
+              s.stopTimer,
+              style: const TextStyle(
+                fontWeight: FontWeight.w700,
+                letterSpacing: 1,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _confirmReset() {
+    final s = LocaleScope.of(context);
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: WsColors.surface,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 48,
+              height: 48,
+              decoration: BoxDecoration(
+                color: WsColors.accentCyan.withAlpha(20),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.refresh,
+                size: 24,
+                color: WsColors.accentCyan,
+              ),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              s.reset,
+              style: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: WsColors.textPrimary,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              s.confirmResetTimer,
+              style: const TextStyle(
+                fontSize: 13,
+                color: WsColors.textSecondary,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: Text(
+              s.cancel,
+              style: const TextStyle(
+                color: WsColors.textSecondary,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.of(ctx).pop();
+              setState(() {
+                _controller.reset();
+                _hasCompleted = false;
+              });
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: WsColors.accentCyan,
+              foregroundColor: WsColors.white,
+              padding: const EdgeInsets.symmetric(
+                horizontal: 24,
+                vertical: 12,
+              ),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+            child: Text(
+              s.reset,
+              style: const TextStyle(
+                fontWeight: FontWeight.w700,
+                letterSpacing: 1,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -388,10 +695,44 @@ class _UnifiedTimerPageState extends State<UnifiedTimerPage> {
               itemBuilder: (context, index) {
                 final module = _currentModules[index];
                 final isSelected = index == _selectedModuleIndex;
-                return _buildModuleCard(s, module, isSelected, () {
-                  _selectModule(index);
+                return _buildModuleCard(s, module, isSelected, index, () {
+                  if (!_controller.isRunning) _selectModule(index);
                 });
               },
+            ),
+          ),
+          // Add module button
+          const SizedBox(height: 8),
+          Material(
+            color: Colors.transparent,
+            child: InkWell(
+              borderRadius: BorderRadius.circular(8),
+              onTap: _controller.isRunning ? null : _addModule,
+              child: Container(
+                padding: const EdgeInsets.symmetric(vertical: 10),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(
+                    color: WsColors.textSecondary.withAlpha(40),
+                  ),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(Icons.add,
+                        size: 16, color: WsColors.textSecondary),
+                    const SizedBox(width: 6),
+                    Text(
+                      s.addModule,
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: WsColors.textSecondary,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ),
           ),
         ],
@@ -410,7 +751,9 @@ class _UnifiedTimerPageState extends State<UnifiedTimerPage> {
         children: [
           Expanded(
             child: GestureDetector(
-              onTap: _isPracticeMode ? _toggleMode : null,
+              onTap: _isPracticeMode && !_controller.isRunning
+                  ? _toggleMode
+                  : null,
               child: Container(
                 padding: const EdgeInsets.symmetric(vertical: 7),
                 decoration: BoxDecoration(
@@ -453,7 +796,9 @@ class _UnifiedTimerPageState extends State<UnifiedTimerPage> {
           ),
           Expanded(
             child: GestureDetector(
-              onTap: !_isPracticeMode ? _toggleMode : null,
+              onTap: !_isPracticeMode && !_controller.isRunning
+                  ? _toggleMode
+                  : null,
               child: Container(
                 padding: const EdgeInsets.symmetric(vertical: 7),
                 decoration: BoxDecoration(
@@ -503,6 +848,7 @@ class _UnifiedTimerPageState extends State<UnifiedTimerPage> {
     dynamic s,
     ModuleModel module,
     bool isSelected,
+    int index,
     VoidCallback onTap,
   ) {
     String statusLabel;
@@ -521,82 +867,102 @@ class _UnifiedTimerPageState extends State<UnifiedTimerPage> {
 
     final accentColor =
         _isPracticeMode ? WsColors.accentGreen : WsColors.accentCyan;
+    final isHovered = _hoveredModuleIndex == index;
 
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        borderRadius: BorderRadius.circular(10),
-        onTap: onTap,
-        child: Container(
-          padding: const EdgeInsets.all(14),
-          decoration: BoxDecoration(
-            color: isSelected ? accentColor.withAlpha(20) : WsColors.surface,
-            borderRadius: BorderRadius.circular(10),
-            border: Border.all(
-              color: isSelected ? accentColor.withAlpha(80) : WsColors.border,
-            ),
-          ),
-          child: Row(
-            children: [
-              Container(
-                width: 3,
-                height: 40,
-                decoration: BoxDecoration(
-                  color: statusColor,
-                  borderRadius: BorderRadius.circular(2),
-                ),
+    return MouseRegion(
+      onEnter: (_) => setState(() => _hoveredModuleIndex = index),
+      onExit: (_) => setState(() => _hoveredModuleIndex = null),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(10),
+          onTap: onTap,
+          child: Container(
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              color:
+                  isSelected ? accentColor.withAlpha(20) : WsColors.surface,
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(
+                color:
+                    isSelected ? accentColor.withAlpha(80) : WsColors.border,
               ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 6, vertical: 2),
-                      decoration: BoxDecoration(
-                        color: statusColor.withAlpha(25),
-                        borderRadius: BorderRadius.circular(3),
-                      ),
-                      child: Text(
-                        statusLabel,
-                        style: TextStyle(
-                          fontSize: 8,
-                          fontWeight: FontWeight.w700,
-                          color: statusColor,
-                          letterSpacing: 1,
+            ),
+            child: Row(
+              children: [
+                Container(
+                  width: 3,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: statusColor,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 6, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: statusColor.withAlpha(25),
+                          borderRadius: BorderRadius.circular(3),
+                        ),
+                        child: Text(
+                          statusLabel,
+                          style: TextStyle(
+                            fontSize: 8,
+                            fontWeight: FontWeight.w700,
+                            color: statusColor,
+                            letterSpacing: 1,
+                          ),
                         ),
                       ),
-                    ),
-                    const SizedBox(height: 6),
-                    Text(
-                      module.name,
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight:
-                            isSelected ? FontWeight.bold : FontWeight.w600,
-                        color: WsColors.textPrimary,
+                      const SizedBox(height: 6),
+                      Text(
+                        module.name,
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight:
+                              isSelected ? FontWeight.bold : FontWeight.w600,
+                          color: WsColors.textPrimary,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      '${module.defaultDuration.inHours}h ${module.defaultDuration.inMinutes % 60}m',
-                      style: const TextStyle(
-                        fontSize: 11,
-                        fontFamily: 'JetBrainsMono',
-                        color: WsColors.textSecondary,
+                      const SizedBox(height: 2),
+                      Text(
+                        '${module.defaultDuration.inHours}h ${module.defaultDuration.inMinutes % 60}m',
+                        style: const TextStyle(
+                          fontSize: 11,
+                          fontFamily: 'JetBrainsMono',
+                          color: WsColors.textSecondary,
+                        ),
                       ),
+                    ],
+                  ),
+                ),
+                if (isHovered && !_controller.isRunning) ...[
+                  _buildTaskActionIcon(
+                    icon: Icons.edit_outlined,
+                    onTap: () => _editModule(index),
+                    color: WsColors.accentCyan,
+                  ),
+                  const SizedBox(width: 4),
+                  if (_currentModules.length > 1)
+                    _buildTaskActionIcon(
+                      icon: Icons.delete_outline,
+                      onTap: () => _deleteModule(index),
+                      color: WsColors.errorRed,
                     ),
-                  ],
-                ),
-              ),
-              if (isSelected)
-                Icon(
-                  Icons.arrow_forward_ios,
-                  size: 12,
-                  color: accentColor,
-                ),
-            ],
+                ] else if (isSelected)
+                  Icon(
+                    Icons.arrow_forward_ios,
+                    size: 12,
+                    color: accentColor,
+                  ),
+              ],
+            ),
           ),
         ),
       ),
@@ -711,21 +1077,65 @@ class _UnifiedTimerPageState extends State<UnifiedTimerPage> {
           Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              _buildCircleButton(
-                icon: Icons.refresh,
-                onTap: () {
-                  _controller.reset();
-                  _hasCompleted = false;
-                },
-              ),
-              const SizedBox(width: 20),
+              if (!_controller.isRunning)
+                _buildCircleButton(
+                  icon: Icons.refresh,
+                  onTap: _confirmReset,
+                ),
+              if (_controller.isRunning) ...[
+                Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(24),
+                    onTap: _stopTimer,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 20,
+                        vertical: 12,
+                      ),
+                      decoration: BoxDecoration(
+                        color: WsColors.errorRed,
+                        borderRadius: BorderRadius.circular(24),
+                      ),
+                      child: Row(
+                        children: [
+                          const Icon(
+                            Icons.stop,
+                            color: WsColors.white,
+                            size: 20,
+                          ),
+                          const SizedBox(width: 6),
+                          Text(
+                            s.stopTimer.toUpperCase(),
+                            style: const TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w700,
+                              color: WsColors.white,
+                              letterSpacing: 1,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+              ],
+              if (!_controller.isRunning) const SizedBox(width: 20),
               Material(
                 color: Colors.transparent,
                 child: InkWell(
                   borderRadius: BorderRadius.circular(24),
-                  onTap: _controller.isRunning
-                      ? _controller.pause
-                      : _controller.start,
+                  onTap: () {
+                    if (_controller.isRunning) {
+                      _controller.pause();
+                    } else {
+                      _controller.start();
+                    }
+                    setState(() {});
+                    UnifiedTimerPage.isTimerRunning.value =
+                        _controller.isRunning;
+                  },
                   child: Container(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 28,
@@ -762,10 +1172,11 @@ class _UnifiedTimerPageState extends State<UnifiedTimerPage> {
                 ),
               ),
               const SizedBox(width: 20),
-              _buildCircleButton(
-                icon: Icons.tune,
-                onTap: () {},
-              ),
+              if (!_controller.isRunning)
+                _buildCircleButton(
+                  icon: Icons.tune,
+                  onTap: () => _editModule(_selectedModuleIndex),
+                ),
             ],
           ),
           // Description (below controls, compact)
@@ -854,7 +1265,9 @@ class _UnifiedTimerPageState extends State<UnifiedTimerPage> {
           ),
           const SizedBox(height: 4),
           Text(
-            _isPracticeMode ? s.practiceMode : 'Web Technologies · ${_selectedModule.id}',
+            _isPracticeMode
+                ? s.practiceMode
+                : 'Web Technologies · ${_selectedModule.id}',
             style: const TextStyle(
               fontSize: 12,
               color: WsColors.textSecondary,
@@ -922,10 +1335,22 @@ class _UnifiedTimerPageState extends State<UnifiedTimerPage> {
           // Progress summary
           _buildProgressSummary(s),
           const SizedBox(height: 12),
-          // Task list
+          // Task list (ReorderableListView)
           Expanded(
-            child: ListView.builder(
+            child: ReorderableListView.builder(
               itemCount: _selectedModule.tasks.length,
+              buildDefaultDragHandles: false,
+              onReorder: _controller.isRunning
+                  ? (_, __) {}
+                  : _onReorder,
+              proxyDecorator: (child, index, animation) {
+                return Material(
+                  color: Colors.transparent,
+                  elevation: 4,
+                  borderRadius: BorderRadius.circular(8),
+                  child: child,
+                );
+              },
               itemBuilder: (context, index) {
                 final task = _selectedModule.tasks[index];
                 return _buildTaskItem(s, task, index);
@@ -938,7 +1363,9 @@ class _UnifiedTimerPageState extends State<UnifiedTimerPage> {
             color: Colors.transparent,
             child: InkWell(
               borderRadius: BorderRadius.circular(8),
-              onTap: () => _showAddTaskDialog(context, s),
+              onTap: _controller.isRunning
+                  ? null
+                  : () => _showAddTaskDialog(context, s),
               child: Container(
                 padding: const EdgeInsets.symmetric(vertical: 10),
                 decoration: BoxDecoration(
@@ -1033,6 +1460,7 @@ class _UnifiedTimerPageState extends State<UnifiedTimerPage> {
   Widget _buildTaskItem(dynamic s, TaskItem task, int index) {
     final isCurrent = task.status == TaskStatus.current;
     final isDone = task.status == TaskStatus.done;
+    final isHovered = _hoveredTaskIndex == index;
 
     Color statusColor;
     String statusLabel;
@@ -1040,9 +1468,8 @@ class _UnifiedTimerPageState extends State<UnifiedTimerPage> {
       statusColor = WsColors.accentGreen;
       statusLabel = s.done.toUpperCase();
     } else if (isCurrent) {
-      statusColor = _isPracticeMode
-          ? WsColors.accentGreen
-          : WsColors.accentCyan;
+      statusColor =
+          _isPracticeMode ? WsColors.accentGreen : WsColors.accentCyan;
       statusLabel = s.current.toUpperCase();
     } else {
       statusColor = WsColors.textSecondary;
@@ -1052,73 +1479,144 @@ class _UnifiedTimerPageState extends State<UnifiedTimerPage> {
     final accentColor =
         _isPracticeMode ? WsColors.accentGreen : WsColors.accentCyan;
 
-    return GestureDetector(
-      onTap: () => _toggleTask(index),
-      child: Container(
-        margin: const EdgeInsets.only(bottom: 8),
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: isCurrent
-              ? accentColor.withAlpha(15)
-              : WsColors.bgDeep.withAlpha(120),
-          borderRadius: BorderRadius.circular(8),
-          border: Border.all(
-            color: isCurrent ? accentColor.withAlpha(60) : WsColors.border,
+    return MouseRegion(
+      key: ValueKey(task.id),
+      onEnter: (_) => setState(() => _hoveredTaskIndex = index),
+      onExit: (_) => setState(() => _hoveredTaskIndex = null),
+      child: GestureDetector(
+        onTap: () => _toggleTask(index),
+        onDoubleTap:
+            _controller.isRunning ? null : () => _showTaskDetail(index),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          margin: const EdgeInsets.only(bottom: 8),
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: isCurrent
+                ? accentColor.withAlpha(15)
+                : WsColors.bgDeep.withAlpha(120),
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(
+              color: isCurrent ? accentColor.withAlpha(60) : WsColors.border,
+            ),
           ),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
-                  decoration: BoxDecoration(
-                    color: statusColor.withAlpha(20),
-                    borderRadius: BorderRadius.circular(3),
-                  ),
-                  child: Text(
-                    statusLabel,
-                    style: TextStyle(
-                      fontSize: 8,
-                      fontWeight: FontWeight.w700,
-                      color: statusColor,
-                      letterSpacing: 0.5,
+          child: Row(
+            children: [
+              // Drag handle (hidden when timer is running)
+              if (!_controller.isRunning)
+                ReorderableDragStartListener(
+                  index: index,
+                  child: Padding(
+                    padding: const EdgeInsets.only(right: 8),
+                    child: Icon(
+                      Icons.drag_indicator,
+                      size: 16,
+                      color: isHovered
+                          ? WsColors.textSecondary
+                          : WsColors.textSecondary.withAlpha(60),
                     ),
                   ),
                 ),
-                if (task.estimatedDuration != null && !isDone) ...[
-                  const SizedBox(width: 6),
-                  Text(
-                    '${task.estimatedDuration!.inMinutes} MIN',
-                    style: const TextStyle(
-                      fontSize: 9,
-                      fontWeight: FontWeight.w600,
-                      color: WsColors.textSecondary,
+              // Task content
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 5, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: statusColor.withAlpha(20),
+                            borderRadius: BorderRadius.circular(3),
+                          ),
+                          child: Text(
+                            statusLabel,
+                            style: TextStyle(
+                              fontSize: 8,
+                              fontWeight: FontWeight.w700,
+                              color: statusColor,
+                              letterSpacing: 0.5,
+                            ),
+                          ),
+                        ),
+                        if (task.estimatedDuration != null &&
+                            !isDone) ...[
+                          const SizedBox(width: 6),
+                          Text(
+                            '${task.estimatedDuration!.inMinutes} MIN',
+                            style: const TextStyle(
+                              fontSize: 9,
+                              fontWeight: FontWeight.w600,
+                              color: WsColors.textSecondary,
+                            ),
+                          ),
+                        ],
+                        const Spacer(),
+                        if (isDone)
+                          const Icon(Icons.check_circle,
+                              size: 16, color: WsColors.accentGreen)
+                        else if (!isCurrent)
+                          const Icon(Icons.radio_button_unchecked,
+                              size: 16, color: WsColors.textSecondary),
+                      ],
                     ),
-                  ),
-                ],
-                const Spacer(),
-                if (isDone)
-                  const Icon(Icons.check_circle,
-                      size: 16, color: WsColors.accentGreen)
-                else if (!isCurrent)
-                  const Icon(Icons.radio_button_unchecked,
-                      size: 16, color: WsColors.textSecondary),
-              ],
-            ),
-            const SizedBox(height: 6),
-            Text(
-              task.title,
-              style: TextStyle(
-                fontSize: 13,
-                fontWeight: isCurrent ? FontWeight.w600 : FontWeight.normal,
-                color: WsColors.textPrimary,
-                decoration: isDone ? TextDecoration.lineThrough : null,
+                    const SizedBox(height: 6),
+                    Text(
+                      task.title,
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight:
+                            isCurrent ? FontWeight.w600 : FontWeight.normal,
+                        color: WsColors.textPrimary,
+                        decoration:
+                            isDone ? TextDecoration.lineThrough : null,
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            ),
-          ],
+              // Hover action buttons
+              if (isHovered && !_controller.isRunning) ...[
+                const SizedBox(width: 4),
+                _buildTaskActionIcon(
+                  icon: Icons.edit_outlined,
+                  onTap: () => _editTask(index),
+                  color: WsColors.accentCyan,
+                ),
+                const SizedBox(width: 4),
+                _buildTaskActionIcon(
+                  icon: Icons.delete_outline,
+                  onTap: () => _deleteTask(index),
+                  color: WsColors.errorRed,
+                ),
+              ],
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTaskActionIcon({
+    required IconData icon,
+    required VoidCallback onTap,
+    required Color color,
+  }) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(6),
+        onTap: onTap,
+        child: Container(
+          width: 24,
+          height: 24,
+          decoration: BoxDecoration(
+            color: color.withAlpha(20),
+            borderRadius: BorderRadius.circular(6),
+          ),
+          child: Icon(icon, size: 14, color: color),
         ),
       ),
     );
@@ -1144,47 +1642,6 @@ class _UnifiedTimerPageState extends State<UnifiedTimerPage> {
           ),
           child: Icon(icon, size: 18, color: WsColors.textSecondary),
         ),
-      ),
-    );
-  }
-
-  void _showAddTaskDialog(BuildContext context, dynamic s) {
-    final controller = TextEditingController();
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: WsColors.surface,
-        title: Text(s.addTask,
-            style: const TextStyle(color: WsColors.textPrimary)),
-        content: TextField(
-          controller: controller,
-          autofocus: true,
-          style: const TextStyle(color: WsColors.textPrimary),
-          decoration: InputDecoration(
-            hintText: s.taskDescription,
-            hintStyle: const TextStyle(color: WsColors.textSecondary),
-            enabledBorder: const UnderlineInputBorder(
-              borderSide: BorderSide(color: WsColors.accentCyan),
-            ),
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: Text(s.reset,
-                style: const TextStyle(color: WsColors.textSecondary)),
-          ),
-          TextButton(
-            onPressed: () {
-              if (controller.text.trim().isNotEmpty) {
-                _addTask(controller.text.trim());
-                Navigator.pop(ctx);
-              }
-            },
-            child: Text(s.start,
-                style: const TextStyle(color: WsColors.accentCyan)),
-          ),
-        ],
       ),
     );
   }

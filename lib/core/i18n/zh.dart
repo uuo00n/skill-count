@@ -155,4 +155,82 @@ class ZhStrings implements AppStrings {
   String get closing => '闭幕';
   @override
   String get competitionProgress => '竞赛进度';
+
+  // Task Management
+  @override
+  String get editTask => '编辑任务';
+  @override
+  String get taskTitle => '任务标题';
+  @override
+  String get enterTaskTitle => '请输入任务标题';
+  @override
+  String get estimatedDuration => '预估时间';
+  @override
+  String get save => '保存';
+  @override
+  String get cancel => '取消';
+  @override
+  String get confirmDeleteTask => '确认删除任务';
+  @override
+  String get deleteTaskWarning => '此操作无法撤销，确定要删除';
+  @override
+  String get confirmDelete => '确认删除';
+  @override
+  String get actualSpent => '实际用时';
+  @override
+  String get completedAt => '完成时间';
+  @override
+  String get close => '关闭';
+
+  // Module Management
+  @override
+  String get addModule => '添加模块';
+  @override
+  String get editModule => '编辑模块';
+  @override
+  String get moduleName => '模块名称';
+  @override
+  String get enterModuleName => '请输入模块名称';
+  @override
+  String get moduleDescription => '模块描述';
+  @override
+  String get enterModuleDescription => '请输入模块描述';
+  @override
+  String get defaultDuration => '默认时长';
+  @override
+  String get confirmDeleteModule => '确认删除模块';
+  @override
+  String get deleteModuleWarning => '此操作将删除该模块及其所有任务，确定要删除';
+  @override
+  String get customDuration => '自定义时长';
+
+  // Timer Control
+  @override
+  String get stopTimer => '终止计时';
+  @override
+  String get confirmStopTimer => '是否要终止当前计时？计时进度将被重置。';
+  @override
+  String get confirmResetTimer => '是否要重置计时？当前进度将被清零。';
+
+  // Milestone Management
+  @override
+  String get addMilestone => '添加里程碑';
+  @override
+  String get editMilestone => '编辑里程碑';
+  @override
+  String get milestoneTitle => '里程碑标题';
+  @override
+  String get enterMilestoneTitle => '请输入里程碑标题';
+  @override
+  String get targetDateTime => '目标日期时间';
+  @override
+  String get milestonePriority => '优先级';
+  @override
+  String get confirmDeleteMilestone => '确认删除里程碑';
+  @override
+  String get deleteMilestoneWarning => '此操作无法撤销，里程碑将被永久删除。';
+  @override
+  String get noMilestones => '暂无里程碑';
+  @override
+  String get addFirstMilestone => '添加第一个里程碑';
 }

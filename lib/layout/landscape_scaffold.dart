@@ -9,7 +9,6 @@ import '../features/settings/settings_page.dart';
 import '../features/timezone/timezone_converter.dart';
 import '../features/timezone/timezone_page.dart';
 import '../features/unified_timer/widgets/unified_timer_page.dart';
-import '../widgets/competition_timeline.dart';
 import '../widgets/grid_background.dart';
 
 class LandscapeScaffold extends ConsumerStatefulWidget {
@@ -36,8 +35,12 @@ class _LandscapeScaffoldState extends ConsumerState<LandscapeScaffold> {
         child: Column(
           children: [
             _buildHeader(context),
-            Expanded(child: _pages[_selectedIndex]),
-            const CompetitionTimeline(),
+            Expanded(
+              child: IndexedStack(
+                index: _selectedIndex,
+                children: _pages,
+              ),
+            ),
             _buildBottomNav(context),
           ],
         ),
@@ -230,7 +233,17 @@ class _LandscapeScaffoldState extends ConsumerState<LandscapeScaffold> {
         children: [
           _buildNavTab(0, Icons.dashboard_outlined, s.dashboard),
           const SizedBox(width: 8),
-          _buildNavTab(1, Icons.timer_outlined, s.unifiedTimer),
+          ValueListenableBuilder<bool>(
+            valueListenable: UnifiedTimerPage.isTimerRunning,
+            builder: (context, isRunning, child) {
+              return _buildNavTab(
+                1,
+                Icons.timer_outlined,
+                s.unifiedTimer,
+                showDot: isRunning,
+              );
+            },
+          ),
           const SizedBox(width: 8),
           _buildNavTab(2, Icons.public_outlined, s.timezone),
           const SizedBox(width: 8),
@@ -267,45 +280,70 @@ class _LandscapeScaffoldState extends ConsumerState<LandscapeScaffold> {
     );
   }
 
-  Widget _buildNavTab(int index, IconData icon, String label) {
+  Widget _buildNavTab(int index, IconData icon, String label,
+      {bool showDot = false}) {
     final isSelected = _selectedIndex == index;
     return Material(
       color: Colors.transparent,
       child: InkWell(
         borderRadius: BorderRadius.circular(8),
         onTap: () => setState(() => _selectedIndex = index),
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          decoration: BoxDecoration(
-            color: isSelected
-                ? WsColors.accentCyan.withAlpha(20)
-                : Colors.transparent,
-            borderRadius: BorderRadius.circular(8),
-            border: isSelected
-                ? Border.all(color: WsColors.accentCyan.withAlpha(60))
-                : null,
-          ),
-          child: Row(
-            children: [
-              Icon(
-                icon,
-                size: 18,
+        child: Stack(
+          clipBehavior: Clip.none,
+          children: [
+            Container(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              decoration: BoxDecoration(
                 color: isSelected
-                    ? WsColors.accentCyan
-                    : WsColors.textSecondary,
+                    ? WsColors.accentCyan.withAlpha(20)
+                    : Colors.transparent,
+                borderRadius: BorderRadius.circular(8),
+                border: isSelected
+                    ? Border.all(color: WsColors.accentCyan.withAlpha(60))
+                    : null,
               ),
-              const SizedBox(width: 8),
-              Text(
-                label,
-                style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-                  color:
-                      isSelected ? WsColors.darkBlue : WsColors.textSecondary,
+              child: Row(
+                children: [
+                  Icon(
+                    icon,
+                    size: 18,
+                    color: isSelected
+                        ? WsColors.accentCyan
+                        : WsColors.textSecondary,
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    label,
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight:
+                          isSelected ? FontWeight.w600 : FontWeight.normal,
+                      color: isSelected
+                          ? WsColors.darkBlue
+                          : WsColors.textSecondary,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            if (showDot)
+              Positioned(
+                top: -2,
+                left: 0,
+                right: 0,
+                child: Center(
+                  child: Container(
+                    width: 6,
+                    height: 6,
+                    decoration: const BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: WsColors.accentGreen,
+                    ),
+                  ),
                 ),
               ),
-            ],
-          ),
+          ],
         ),
       ),
     );
