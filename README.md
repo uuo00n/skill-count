@@ -7,6 +7,8 @@
 
 A professional Pomodoro timer application themed around the WorldSkills Competition, designed to help participants and teams prepare effectively for international skill competitions. The application features a modern, clean UI optimized for landscape usage on desktop and tablet devices.
 
+Chinese version: [README_CN.md](README_CN.md)
+
 ## Features
 
 ### Core Timer Functionality
@@ -22,10 +24,11 @@ A professional Pomodoro timer application themed around the WorldSkills Competit
 
 ### User Experience
 - **Landscape Optimization** - Professional landscape layout designed for desktop and tablet use
-- **Multi-language Support** - Chinese and English language options
+- **Multi-language Support** - Chinese, English, Japanese, German, French, Korean
 - **Modern UI Design** - WorldSkills 2026 color scheme with glass morphism effects
 - **Custom Typography** - Inter and JetBrains Mono fonts for optimal readability
 - **Responsive Layout** - Adapts to various screen sizes and orientations
+- **Auto Fullscreen** - Desktop and web launch in fullscreen when supported
 
 ### UI Components
 - **Circular Progress Indicator** - Animated ring progress for timer visualization
@@ -162,11 +165,18 @@ skillcount/
 │   │   │   ├── locale_provider.dart  # Language management
 │   │   │   ├── strings.dart        # String interface
 │   │   │   ├── zh.dart            # Chinese translations
-│   │   │   └── en.dart            # English translations
+│   │   │   ├── en.dart            # English translations
+│   │   │   ├── ja.dart            # Japanese translations
+│   │   │   ├── de.dart            # German translations
+│   │   │   ├── fr.dart            # French translations
+│   │   │   └── ko.dart            # Korean translations
 │   │   ├── theme/
 │   │   │   └── app_theme.dart      # Material Design theme
 │   │   └── utils/
-│   │       └── time_utils.dart       # Time calculation utilities
+│   │       ├── time_utils.dart       # Time calculation utilities
+│   │       ├── fullscreen_helper.dart
+│   │       ├── fullscreen_helper_io.dart
+│   │       └── fullscreen_helper_web.dart
 │   ├── features/
 │   │   ├── countdown/
 │   │   │   └── countdown_page.dart     # Main countdown page
@@ -214,6 +224,8 @@ skillcount/
 - `flutter_svg: ^2.2.3` - SVG image support
 - `percent_indicator: ^4.2.5` - Animated progress indicators
 - `confetti: ^0.8.0` - Celebration effects
+- `window_size: ^0.1.0` - Desktop window sizing
+- `universal_html: ^2.2.4` - Web fullscreen
 
 ### Development Tools
 - `flutter_lints: ^5.0.0` - Code quality lints
@@ -255,6 +267,10 @@ SystemChrome.setPreferredOrientations([
 Default language is Chinese (zh). Available languages:
 - Chinese (zh)
 - English (en)
+- Japanese (ja)
+- German (de)
+- French (fr)
+- Korean (ko)
 
 To change the default language, modify the locale parameter in `lib/app.dart`:
 
@@ -339,7 +355,6 @@ Contributions are welcome! Please follow these guidelines:
 - Follow Dart official style guide
 - Use `const` constructors where possible
 - Keep functions focused and single-purpose
-- Add inline comments for complex logic
 - Maintain existing naming conventions
 
 ### Issue Reporting
