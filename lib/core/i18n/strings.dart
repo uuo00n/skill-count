@@ -127,4 +127,9 @@ abstract class AppStrings {
   String get deleteMilestoneWarning;
   String get noMilestones;
   String get addFirstMilestone;
+
+  // White Noise
+  String get whiteNoise;
+  String get whiteNoisePlaying;
+  String get whiteNoiseStopped;
 }

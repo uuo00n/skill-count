@@ -233,4 +233,12 @@ class EnStrings implements AppStrings {
   String get noMilestones => 'No milestones yet';
   @override
   String get addFirstMilestone => 'Add your first milestone';
+
+  // White Noise
+  @override
+  String get whiteNoise => 'White Noise';
+  @override
+  String get whiteNoisePlaying => 'White Noise Playing';
+  @override
+  String get whiteNoiseStopped => 'White Noise Stopped';
 }

@@ -45,6 +45,9 @@ dependencies:
   # Timezone (IANA database)
   timezone: ^0.10.0
 
+  # Audio playback
+  just_audio: ^0.10.5
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -74,6 +77,7 @@ flutter:
 
   assets:
     - assets/images/
+    - assets/audio/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

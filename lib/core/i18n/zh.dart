@@ -233,4 +233,12 @@ class ZhStrings implements AppStrings {
   String get noMilestones => '暂无里程碑';
   @override
   String get addFirstMilestone => '添加第一个里程碑';
+
+  // White Noise
+  @override
+  String get whiteNoise => '白噪音';
+  @override
+  String get whiteNoisePlaying => '白噪音播放中';
+  @override
+  String get whiteNoiseStopped => '白噪音已停止';
 }
