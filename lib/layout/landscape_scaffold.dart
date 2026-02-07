@@ -3,8 +3,7 @@ import 'package:flutter/material.dart';
 import '../core/constants/ws_colors.dart';
 import '../core/i18n/locale_provider.dart';
 import '../features/countdown/countdown_page.dart';
-import '../features/module_timer/module_timer_page.dart';
-import '../features/pomodoro/pomodoro_page.dart';
+import '../features/unified_timer/widgets/unified_timer_page.dart';
 import '../features/settings/settings_page.dart';
 import '../features/timezone/timezone_page.dart';
 import '../widgets/competition_timeline.dart';
@@ -24,8 +23,7 @@ class _LandscapeScaffoldState extends State<LandscapeScaffold> {
 
   static const _pages = <Widget>[
     CountdownPage(),
-    PomodoroPage(),
-    ModuleTimerPage(),
+    UnifiedTimerPage(),
     TimezonePage(),
     SettingsPage(),
   ];
@@ -72,8 +70,8 @@ class _LandscapeScaffoldState extends State<LandscapeScaffold> {
       case 0:
         subtitle = s.compTimerDashboard;
       case 1:
-        subtitle = s.trainingMode;
-      case 4:
+        subtitle = s.competitionSimulation;
+      case 3:
         subtitle = s.settings.toUpperCase();
       default:
         subtitle = s.competitionSimulation;
@@ -240,34 +238,32 @@ class _LandscapeScaffoldState extends State<LandscapeScaffold> {
         children: [
           _buildNavTab(0, Icons.dashboard_outlined, s.dashboard),
           const SizedBox(width: 8),
-          _buildNavTab(1, Icons.timer_outlined, s.skillPomodoro),
+          _buildNavTab(1, Icons.timer_outlined, s.unifiedTimer),
           const SizedBox(width: 8),
-          _buildNavTab(2, Icons.view_module_outlined, s.moduleTimer),
-          const SizedBox(width: 8),
-          _buildNavTab(3, Icons.public_outlined, s.timezone),
+          _buildNavTab(2, Icons.public_outlined, s.timezone),
           const SizedBox(width: 8),
           // Settings icon
           Material(
             color: Colors.transparent,
             child: InkWell(
               borderRadius: BorderRadius.circular(8),
-              onTap: () => setState(() => _selectedIndex = 4),
+              onTap: () => setState(() => _selectedIndex = 3),
               child: Container(
                 padding:
                     const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                 decoration: BoxDecoration(
-                  color: _selectedIndex == 4
+                  color: _selectedIndex == 3
                       ? WsColors.accentCyan.withAlpha(20)
                       : Colors.transparent,
                   borderRadius: BorderRadius.circular(8),
-                  border: _selectedIndex == 4
+                  border: _selectedIndex == 3
                       ? Border.all(color: WsColors.accentCyan.withAlpha(60))
                       : null,
                 ),
                 child: Icon(
                   Icons.settings_outlined,
                   size: 20,
-                  color: _selectedIndex == 4
+                  color: _selectedIndex == 3
                       ? WsColors.accentCyan
                       : WsColors.textSecondary,
                 ),

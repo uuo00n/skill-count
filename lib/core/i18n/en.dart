@@ -126,6 +126,22 @@ class EnStrings implements AppStrings {
   @override
   String get environment => 'Environment';
 
+  // Unified Timer
+  @override
+  String get competition => 'Competition';
+  @override
+  String get practice => 'Practice';
+  @override
+  String get competitionModules => 'Competition Modules';
+  @override
+  String get practiceModules => 'Practice Modules';
+  @override
+  String get practiceMode => 'Practice Mode';
+  @override
+  String get progress => 'Progress';
+  @override
+  String get unifiedTimer => 'Timer';
+
   // Competition Timeline
   @override
   String get arrival => 'ARRIVAL';

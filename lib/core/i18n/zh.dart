@@ -126,6 +126,22 @@ class ZhStrings implements AppStrings {
   @override
   String get environment => '竞赛环境';
 
+  // Unified Timer
+  @override
+  String get competition => '竞赛';
+  @override
+  String get practice => '练习';
+  @override
+  String get competitionModules => '竞赛模块';
+  @override
+  String get practiceModules => '练习模块';
+  @override
+  String get practiceMode => '练习模式';
+  @override
+  String get progress => '进度';
+  @override
+  String get unifiedTimer => '计时器';
+
   // Competition Timeline
   @override
   String get arrival => '抵达';

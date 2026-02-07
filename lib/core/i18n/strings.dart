@@ -68,6 +68,15 @@ abstract class AppStrings {
   String get taskDescription;
   String get environment;
 
+  // Unified Timer
+  String get competition;
+  String get practice;
+  String get competitionModules;
+  String get practiceModules;
+  String get practiceMode;
+  String get progress;
+  String get unifiedTimer;
+
   // Competition Timeline
   String get arrival;
   String get familiarization;
