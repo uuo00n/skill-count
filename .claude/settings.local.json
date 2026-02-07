@@ -5,7 +5,16 @@
       "mcp__stitch__list_projects",
       "mcp__stitch__list_screens",
       "mcp__stitch__get_screen",
-      "WebFetch(domain:contribution.usercontent.google.com)"
+      "WebFetch(domain:contribution.usercontent.google.com)",
+      "mcp__chrome-devtools__new_page",
+      "mcp__chrome-devtools__take_screenshot",
+      "WebFetch(domain:lh3.googleusercontent.com)",
+      "Bash(curl:*)",
+      "Bash(flutter analyze:*)",
+      "Bash(cd:*)",
+      "Bash(flutter test:*)",
+      "mcp__chrome-devtools__list_pages",
+      "Bash(flutter --version:*)"
     ]
   }
 }
