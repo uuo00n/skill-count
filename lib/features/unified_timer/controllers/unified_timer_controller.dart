@@ -1,68 +1,67 @@
 import 'dart:async';
+
+import '../../../core/timer/competition_timer.dart';
 import '../models/unified_timer_model.dart';
 
+/// 统一计时器控制器
+///
+/// 包装 [CompetitionTimer]，在核心计时能力之上增加
+/// 模块选择、任务管理等业务逻辑。
 class UnifiedTimerController {
   ModuleModel? currentModule;
   TaskItem? currentTask;
   Duration totalDuration;
-  Duration remaining;
-  bool isRunning = false;
   bool isPracticeMode = false;
-  Timer? _timer;
   final void Function() onTick;
+
+  CompetitionTimer _timer;
+  StreamSubscription<Duration>? _subscription;
 
   UnifiedTimerController({
     required this.totalDuration,
     required this.onTick,
-  }) : remaining = totalDuration;
+  }) : _timer = CompetitionTimer(
+          totalDuration: totalDuration,
+          mode: TimerMode.countDown,
+        ) {
+    _listenTimer();
+  }
+
+  // — 代理属性 ——————————————————————————————
+
+  Duration get remaining => _timer.remaining;
+  bool get isRunning => _timer.isRunning;
+  bool get isCompleted => _timer.isCompleted;
+  double get progress => _timer.progress;
+
+  // — 模块操作 ——————————————————————————————
 
   void startModule(ModuleModel module) {
-    _timer?.cancel();
     currentModule = module;
     totalDuration = module.defaultDuration;
-    remaining = totalDuration;
-    isRunning = false;
     isPracticeMode = module.type == ModuleType.practice;
+    _replaceTimer(totalDuration);
     onTick();
   }
 
   void setDuration(Duration duration) {
-    _timer?.cancel();
-    isRunning = false;
     totalDuration = duration;
-    remaining = duration;
+    _replaceTimer(duration);
     onTick();
   }
 
-  void start() {
-    if (isRunning) return;
-    isRunning = true;
-    _timer = Timer.periodic(const Duration(seconds: 1), (_) {
-      if (remaining.inSeconds > 0) {
-        remaining -= const Duration(seconds: 1);
-        if (currentTask != null) {
-          currentTask!.actualSpent += const Duration(seconds: 1);
-        }
-        onTick();
-      } else {
-        pause();
-      }
-    });
-    onTick();
-  }
+  // — 计时器控制 ——————————————————————————————
 
-  void pause() {
-    _timer?.cancel();
-    isRunning = false;
-    onTick();
-  }
+  void start() => _timer.start();
+
+  void pause() => _timer.pause();
 
   void reset() {
-    _timer?.cancel();
-    isRunning = false;
-    remaining = totalDuration;
+    _timer.reset();
     onTick();
   }
+
+  // — 任务操作 ——————————————————————————————
 
   void selectTask(TaskItem task) {
     currentTask = task;
@@ -90,7 +89,31 @@ class UnifiedTimerController {
     }
   }
 
+  // — 生命周期 ——————————————————————————————
+
   void dispose() {
-    _timer?.cancel();
+    _subscription?.cancel();
+    _timer.dispose();
+  }
+
+  // — 私有方法 ——————————————————————————————
+
+  void _replaceTimer(Duration duration) {
+    _subscription?.cancel();
+    _timer.dispose();
+    _timer = CompetitionTimer(
+      totalDuration: duration,
+      mode: TimerMode.countDown,
+    );
+    _listenTimer();
+  }
+
+  void _listenTimer() {
+    _subscription = _timer.timeUpdates.listen((_) {
+      if (currentTask != null && isRunning) {
+        currentTask!.actualSpent += const Duration(seconds: 1);
+      }
+      onTick();
+    });
   }
 }

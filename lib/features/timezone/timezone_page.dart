@@ -1,47 +1,20 @@
-import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import '../../core/constants/ws_colors.dart';
 import '../../core/i18n/locale_provider.dart';
+import '../../core/providers/time_providers.dart';
 import '../../widgets/glass_panel.dart';
-import 'timezone_model.dart';
 import 'timezone_converter.dart';
+import 'timezone_model.dart';
 
-class TimezonePage extends StatefulWidget {
+class TimezonePage extends ConsumerWidget {
   const TimezonePage({super.key});
 
   @override
-  State<TimezonePage> createState() => _TimezonePageState();
-}
-
-class _TimezonePageState extends State<TimezonePage> {
-  late Timer _timer;
-  DateTime _now = DateTime.now().toUtc();
-
-  static const _cities = [
-    TimeZoneCity(name: '上海', utcOffset: 8),
-    TimeZoneCity(name: 'Lyon', utcOffset: 1),
-    TimeZoneCity(name: 'Tokyo', utcOffset: 9),
-    TimeZoneCity(name: 'New York', utcOffset: -5),
-    TimeZoneCity(name: 'London', utcOffset: 0),
-  ];
-
-  @override
-  void initState() {
-    super.initState();
-    _timer = Timer.periodic(const Duration(seconds: 1), (_) {
-      setState(() => _now = DateTime.now().toUtc());
-    });
-  }
-
-  @override
-  void dispose() {
-    _timer.cancel();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final s = LocaleScope.of(context);
+    final utcNow = ref.watch(unifiedTimeProvider);
 
     return Center(
       child: SingleChildScrollView(
@@ -68,9 +41,10 @@ class _TimezonePageState extends State<TimezonePage> {
               ),
             ),
             const SizedBox(height: 32),
-            ..._cities.map((city) {
-              final localTime = TimezoneConverter.convert(_now, city.utcOffset);
-              final isShanghai = city.utcOffset == 8;
+            ...TimeZoneCity.cities.map((city) {
+              final localTime =
+                  TimezoneConverter.convert(utcNow, city.timezoneId);
+              final isShanghai = city.timezoneId == 'Asia/Shanghai';
               return Padding(
                 padding: const EdgeInsets.only(bottom: 10),
                 child: GlassPanel(
@@ -117,7 +91,9 @@ class _TimezonePageState extends State<TimezonePage> {
                         ),
                       ),
                       Text(
-                        '${localTime.hour.toString().padLeft(2, '0')}:${localTime.minute.toString().padLeft(2, '0')}:${localTime.second.toString().padLeft(2, '0')}',
+                        '${localTime.hour.toString().padLeft(2, '0')}:'
+                        '${localTime.minute.toString().padLeft(2, '0')}:'
+                        '${localTime.second.toString().padLeft(2, '0')}',
                         style: TextStyle(
                           fontFamily: 'JetBrainsMono',
                           fontSize: 24,
@@ -129,7 +105,9 @@ class _TimezonePageState extends State<TimezonePage> {
                       ),
                       const SizedBox(width: 16),
                       Text(
-                        '${localTime.year}-${localTime.month.toString().padLeft(2, '0')}-${localTime.day.toString().padLeft(2, '0')}',
+                        '${localTime.year}-'
+                        '${localTime.month.toString().padLeft(2, '0')}-'
+                        '${localTime.day.toString().padLeft(2, '0')}',
                         style: const TextStyle(
                           fontSize: 13,
                           color: WsColors.textSecondary,

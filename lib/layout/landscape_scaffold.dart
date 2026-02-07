@@ -1,25 +1,26 @@
-import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import '../core/constants/ws_colors.dart';
 import '../core/i18n/locale_provider.dart';
+import '../core/providers/time_providers.dart';
 import '../features/countdown/countdown_page.dart';
-import '../features/unified_timer/widgets/unified_timer_page.dart';
 import '../features/settings/settings_page.dart';
+import '../features/timezone/timezone_converter.dart';
 import '../features/timezone/timezone_page.dart';
+import '../features/unified_timer/widgets/unified_timer_page.dart';
 import '../widgets/competition_timeline.dart';
 import '../widgets/grid_background.dart';
 
-class LandscapeScaffold extends StatefulWidget {
+class LandscapeScaffold extends ConsumerStatefulWidget {
   const LandscapeScaffold({super.key});
 
   @override
-  State<LandscapeScaffold> createState() => _LandscapeScaffoldState();
+  ConsumerState<LandscapeScaffold> createState() => _LandscapeScaffoldState();
 }
 
-class _LandscapeScaffoldState extends State<LandscapeScaffold> {
+class _LandscapeScaffoldState extends ConsumerState<LandscapeScaffold> {
   int _selectedIndex = 0;
-  late Timer _clockTimer;
-  DateTime _now = DateTime.now();
 
   static const _pages = <Widget>[
     CountdownPage(),
@@ -27,20 +28,6 @@ class _LandscapeScaffoldState extends State<LandscapeScaffold> {
     TimezonePage(),
     SettingsPage(),
   ];
-
-  @override
-  void initState() {
-    super.initState();
-    _clockTimer = Timer.periodic(const Duration(seconds: 1), (_) {
-      setState(() => _now = DateTime.now());
-    });
-  }
-
-  @override
-  void dispose() {
-    _clockTimer.cancel();
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -61,9 +48,14 @@ class _LandscapeScaffoldState extends State<LandscapeScaffold> {
   Widget _buildHeader(BuildContext context) {
     final s = LocaleScope.of(context);
     final provider = LocaleScope.providerOf(context);
-    final hours = _now.hour.toString().padLeft(2, '0');
-    final minutes = _now.minute.toString().padLeft(2, '0');
-    final seconds = _now.second.toString().padLeft(2, '0');
+
+    // 使用统一时间源 + IANA 时区
+    final utcNow = ref.watch(unifiedTimeProvider);
+    final shanghaiTime =
+        TimezoneConverter.convert(utcNow, 'Asia/Shanghai');
+    final hours = shanghaiTime.hour.toString().padLeft(2, '0');
+    final minutes = shanghaiTime.minute.toString().padLeft(2, '0');
+    final seconds = shanghaiTime.second.toString().padLeft(2, '0');
 
     String subtitle;
     switch (_selectedIndex) {
@@ -134,7 +126,7 @@ class _LandscapeScaffoldState extends State<LandscapeScaffold> {
             ],
           ),
           const Spacer(),
-          // Real-time clock
+          // Real-time clock (Shanghai)
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
             decoration: BoxDecoration(

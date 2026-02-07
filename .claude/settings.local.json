@@ -15,7 +15,9 @@
       "Bash(flutter test:*)",
       "mcp__chrome-devtools__list_pages",
       "Bash(flutter --version:*)",
-      "Bash(flutter pub add:*)"
+      "Bash(flutter pub add:*)",
+      "Bash(flutter pub get:*)",
+      "Bash(flutter run:*)"
     ]
   }
 }
