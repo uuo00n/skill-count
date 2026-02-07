@@ -54,6 +54,9 @@ abstract class AppStrings {
 
   // Settings
   String get language;
+  String get competitionCountdown;
+  String get countdownTarget;
+  String get setCountdown;
   String get about;
   String get aboutDescription;
   String get version;

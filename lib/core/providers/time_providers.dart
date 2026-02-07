@@ -3,6 +3,8 @@ import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:timezone/timezone.dart' as tz;
 
+import '../constants/ws_times.dart';
+
 /// 统一时间服务 — 全局唯一时间源
 ///
 /// 每秒更新一次 UTC 时间，所有页面通过 ref.watch 消费，
@@ -37,4 +39,8 @@ class UnifiedTimeService extends StateNotifier<DateTime> {
 final unifiedTimeProvider =
     StateNotifierProvider<UnifiedTimeService, DateTime>(
   (ref) => UnifiedTimeService(),
+);
+
+final competitionCountdownProvider = StateProvider<DateTime>(
+  (ref) => WsTimes.competitionOpenTime,
 );

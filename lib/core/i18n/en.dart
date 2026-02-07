@@ -102,6 +102,12 @@ class EnStrings implements AppStrings {
   @override
   String get language => 'Language';
   @override
+  String get competitionCountdown => 'Competition Countdown';
+  @override
+  String get countdownTarget => 'Target Time';
+  @override
+  String get setCountdown => 'Set';
+  @override
   String get about => 'About';
   @override
   String get aboutDescription => 'WorldSkills Competition Timer';

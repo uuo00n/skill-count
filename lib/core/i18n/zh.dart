@@ -102,6 +102,12 @@ class ZhStrings implements AppStrings {
   @override
   String get language => '语言';
   @override
+  String get competitionCountdown => '技能大赛倒计时';
+  @override
+  String get countdownTarget => '目标时间';
+  @override
+  String get setCountdown => '设置';
+  @override
   String get about => '关于';
   @override
   String get aboutDescription => 'WorldSkills 竞赛专用计时器';

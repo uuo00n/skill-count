@@ -1,14 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import '../../core/constants/ws_colors.dart';
 import '../../core/i18n/locale_provider.dart';
+import '../../core/providers/time_providers.dart';
 
-class SettingsPage extends StatelessWidget {
+class SettingsPage extends ConsumerWidget {
   const SettingsPage({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final s = LocaleScope.of(context);
     final provider = LocaleScope.providerOf(context);
+    final targetTime = ref.watch(competitionCountdownProvider).toLocal();
 
     return Center(
       child: ConstrainedBox(
@@ -28,32 +32,45 @@ class SettingsPage extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 24),
-              // Language setting
               _buildSettingTile(
-                icon: Icons.language,
-                title: s.language,
-                trailing: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    _buildLangChip('EN', !provider.isChinese, () {
-                      provider.setLocale(false);
-                    }),
-                    const SizedBox(width: 8),
-                    _buildLangChip('CN', provider.isChinese, () {
-                      provider.setLocale(true);
-                    }),
-                  ],
+                icon: Icons.timer_outlined,
+                title: s.competitionCountdown,
+                subtitle: '${s.countdownTarget}  ${_formatDateTime(targetTime)}',
+                trailing: TextButton(
+                  onPressed: () => _selectCountdownTarget(
+                    context,
+                    ref,
+                    ref.read(competitionCountdownProvider),
+                  ),
+                  style: TextButton.styleFrom(
+                    foregroundColor: WsColors.accentCyan,
+                  ),
+                  child: Text(
+                    s.setCountdown,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: 0.5,
+                    ),
+                  ),
                 ),
               ),
               const SizedBox(height: 12),
-              // About
+              _buildSettingTile(
+                icon: Icons.language,
+                title: s.language,
+                trailing: _buildLanguageDropdown(
+                  context,
+                  provider.isChinese,
+                  (isChinese) => provider.setLocale(isChinese),
+                ),
+              ),
+              const SizedBox(height: 12),
               _buildSettingTile(
                 icon: Icons.info_outline,
                 title: s.about,
                 subtitle: s.aboutDescription,
               ),
               const SizedBox(height: 12),
-              // Version
               _buildSettingTile(
                 icon: Icons.verified_outlined,
                 title: s.version,
@@ -77,6 +94,7 @@ class SettingsPage extends StatelessWidget {
     required IconData icon,
     required String title,
     String? subtitle,
+    Widget? body,
     Widget? trailing,
   }) {
     return Container(
@@ -102,7 +120,12 @@ class SettingsPage extends StatelessWidget {
                     color: WsColors.textPrimary,
                   ),
                 ),
-                if (subtitle != null)
+                if (body != null)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 8),
+                    child: body,
+                  )
+                else if (subtitle != null)
                   Padding(
                     padding: const EdgeInsets.only(top: 4),
                     child: Text(
@@ -122,29 +145,91 @@ class SettingsPage extends StatelessWidget {
     );
   }
 
-  Widget _buildLangChip(String label, bool isActive, VoidCallback onTap) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-        decoration: BoxDecoration(
-          color: isActive ? WsColors.accentCyan : Colors.transparent,
-          borderRadius: BorderRadius.circular(6),
-          border: Border.all(
-            color: isActive
-                ? WsColors.accentCyan
-                : WsColors.textSecondary.withAlpha(60),
-          ),
+  Widget _buildLanguageDropdown(
+    BuildContext context,
+    bool isChinese,
+    ValueChanged<bool> onChanged,
+  ) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12),
+      decoration: BoxDecoration(
+        color: WsColors.bgDeep.withAlpha(80),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(
+          color: WsColors.textSecondary.withAlpha(40),
         ),
-        child: Text(
-          label,
-          style: TextStyle(
-            fontSize: 12,
-            fontWeight: FontWeight.w600,
-            color: isActive ? WsColors.white : WsColors.textSecondary,
+      ),
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<bool>(
+          value: isChinese,
+          dropdownColor: WsColors.surface,
+          icon: const Icon(
+            Icons.keyboard_arrow_down,
+            color: WsColors.textSecondary,
           ),
+          style: const TextStyle(
+            fontSize: 13,
+            fontWeight: FontWeight.w600,
+            color: WsColors.textPrimary,
+          ),
+          onChanged: (value) {
+            if (value == null) return;
+            onChanged(value);
+          },
+          items: const [
+            DropdownMenuItem<bool>(
+              value: false,
+              child: Text('EN'),
+            ),
+            DropdownMenuItem<bool>(
+              value: true,
+              child: Text('CN'),
+            ),
+          ],
         ),
       ),
     );
+  }
+
+  Future<void> _selectCountdownTarget(
+    BuildContext context,
+    WidgetRef ref,
+    DateTime current,
+  ) async {
+    final pickedDate = await showDatePicker(
+      context: context,
+      initialDate: current.toLocal(),
+      firstDate: DateTime(2024),
+      lastDate: DateTime(2100),
+    );
+
+    if (!context.mounted) return;
+
+    if (pickedDate == null) return;
+
+    final pickedTime = await showTimePicker(
+      context: context,
+      initialTime: TimeOfDay.fromDateTime(current.toLocal()),
+    );
+
+    if (!context.mounted) return;
+
+    if (pickedTime == null) return;
+
+    final localDateTime = DateTime(
+      pickedDate.year,
+      pickedDate.month,
+      pickedDate.day,
+      pickedTime.hour,
+      pickedTime.minute,
+    );
+
+    ref.read(competitionCountdownProvider.notifier).state =
+        localDateTime.toUtc();
+  }
+
+  String _formatDateTime(DateTime dateTime) {
+    return '${dateTime.year}-${dateTime.month.toString().padLeft(2, '0')}-${dateTime.day.toString().padLeft(2, '0')} '
+        '${dateTime.hour.toString().padLeft(2, '0')}:${dateTime.minute.toString().padLeft(2, '0')}';
   }
 }
