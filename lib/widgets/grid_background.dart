@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import '../core/constants/ws_colors.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
-/// Blueprint grid background pattern
+/// WorldSkills isometric cube pattern background
 class GridBackground extends StatelessWidget {
   final Widget child;
 
@@ -12,49 +12,42 @@ class GridBackground extends StatelessWidget {
     return Stack(
       children: [
         Positioned.fill(
-          child: CustomPaint(
-            painter: _GridPainter(),
+          child: Opacity(
+            opacity: 0.06,
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                // Tile the SVG pattern to fill the screen
+                const tileWidth = 778.0;
+                const tileHeight = 745.0;
+                final cols =
+                    (constraints.maxWidth / tileWidth).ceil() + 1;
+                final rows =
+                    (constraints.maxHeight / tileHeight).ceil() + 1;
+
+                return ClipRect(
+                  child: Stack(
+                    children: [
+                      for (int r = 0; r < rows; r++)
+                        for (int c = 0; c < cols; c++)
+                          Positioned(
+                            left: c * tileWidth,
+                            top: r * tileHeight,
+                            width: tileWidth,
+                            height: tileHeight,
+                            child: SvgPicture.asset(
+                              'assets/images/P24.svg',
+                              fit: BoxFit.none,
+                            ),
+                          ),
+                    ],
+                  ),
+                );
+              },
+            ),
           ),
         ),
         child,
       ],
     );
   }
-}
-
-class _GridPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = WsColors.accentBlue.withAlpha(8)
-      ..strokeWidth = 1;
-
-    const spacing = 40.0;
-
-    // Vertical lines
-    for (double x = 0; x < size.width; x += spacing) {
-      canvas.drawLine(Offset(x, 0), Offset(x, size.height), paint);
-    }
-
-    // Horizontal lines
-    for (double y = 0; y < size.height; y += spacing) {
-      canvas.drawLine(Offset(0, y), Offset(size.width, y), paint);
-    }
-
-    // Subtle accent lines every 4th line
-    final accentPaint = Paint()
-      ..color = WsColors.accentBlue.withAlpha(15)
-      ..strokeWidth = 1;
-
-    for (double x = 0; x < size.width; x += spacing * 4) {
-      canvas.drawLine(Offset(x, 0), Offset(x, size.height), accentPaint);
-    }
-
-    for (double y = 0; y < size.height; y += spacing * 4) {
-      canvas.drawLine(Offset(0, y), Offset(size.width, y), accentPaint);
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
