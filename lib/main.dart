@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:timezone/data/latest.dart' as tz_data;
 
 import 'app.dart';
+import 'core/utils/fullscreen_helper.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -16,4 +17,8 @@ void main() {
   tz_data.initializeTimeZones();
 
   runApp(const ProviderScope(child: App()));
+
+  WidgetsBinding.instance.addPostFrameCallback((_) {
+    enterFullscreen();
+  });
 }

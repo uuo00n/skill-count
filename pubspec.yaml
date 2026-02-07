@@ -45,6 +45,12 @@ dependencies:
   # Timezone (IANA database)
   timezone: ^0.10.0
 
+  # Window control (desktop)
+  window_size: ^0.1.0
+
+  # Web fullscreen
+  universal_html: ^2.2.4
+
   # Audio playback
   just_audio: ^0.10.5
 
