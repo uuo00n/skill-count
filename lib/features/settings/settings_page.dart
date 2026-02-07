@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/constants/ws_colors.dart';
 import '../../core/i18n/locale_provider.dart';
+import '../../core/i18n/strings.dart';
 import '../../core/providers/time_providers.dart';
 
 class SettingsPage extends ConsumerWidget {
@@ -69,6 +70,7 @@ class SettingsPage extends ConsumerWidget {
                 icon: Icons.info_outline,
                 title: s.about,
                 subtitle: s.aboutDescription,
+                onTap: () => _showAppInfoDialog(context, s),
               ),
               const SizedBox(height: 12),
               _buildSettingTile(
@@ -96,52 +98,158 @@ class SettingsPage extends ConsumerWidget {
     String? subtitle,
     Widget? body,
     Widget? trailing,
+    VoidCallback? onTap,
   }) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: WsColors.surface,
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: WsColors.border),
-      ),
-      child: Row(
-        children: [
-          Icon(icon, size: 20, color: WsColors.accentCyan),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: const TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w600,
-                    color: WsColors.textPrimary,
-                  ),
-                ),
-                if (body != null)
-                  Padding(
-                    padding: const EdgeInsets.only(top: 8),
-                    child: body,
-                  )
-                else if (subtitle != null)
-                  Padding(
-                    padding: const EdgeInsets.only(top: 4),
-                    child: Text(
-                      subtitle,
+        child: Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: WsColors.surface,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: WsColors.border),
+          ),
+          child: Row(
+            children: [
+              Icon(icon, size: 20, color: WsColors.accentCyan),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
                       style: const TextStyle(
-                        fontSize: 12,
-                        color: WsColors.textSecondary,
+                        fontSize: 15,
+                        fontWeight: FontWeight.w600,
+                        color: WsColors.textPrimary,
                       ),
                     ),
+                    if (body != null)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 8),
+                        child: body,
+                      )
+                    else if (subtitle != null)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 4),
+                        child: Text(
+                          subtitle,
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: WsColors.textSecondary,
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+              if (trailing != null) trailing,
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _showAppInfoDialog(BuildContext context, AppStrings s) async {
+    await showDialog<void>(
+      context: context,
+      builder: (context) {
+        return Dialog(
+          backgroundColor: WsColors.surface,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Container(
+            width: 420,
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: WsColors.accentCyan.withAlpha(20),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: const Icon(
+                        Icons.info_outline,
+                        size: 20,
+                        color: WsColors.accentCyan,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Text(
+                      s.about,
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w700,
+                        color: WsColors.textPrimary,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 20),
+                _buildInfoLine(s.appTitle, 'v1.0.0'),
+                const SizedBox(height: 8),
+                _buildInfoLine(s.about, s.aboutDescription),
+                const SizedBox(height: 8),
+                _buildInfoLine('Author', 'HuangJunBo'),
+                const SizedBox(height: 24),
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: TextButton(
+                    onPressed: () => Navigator.of(context).pop(),
+                    style: TextButton.styleFrom(
+                      foregroundColor: WsColors.accentCyan,
+                    ),
+                    child: Text(
+                      s.close,
+                      style: const TextStyle(fontWeight: FontWeight.w700),
+                    ),
                   ),
+                ),
               ],
             ),
           ),
-          if (trailing != null) trailing,
-        ],
-      ),
+        );
+      },
+    );
+  }
+
+  Widget _buildInfoLine(String title, String value) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SizedBox(
+          width: 100,
+          child: Text(
+            title,
+            style: const TextStyle(
+              fontSize: 12,
+              color: WsColors.textSecondary,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ),
+        Expanded(
+          child: Text(
+            value,
+            style: const TextStyle(
+              fontSize: 13,
+              color: WsColors.textPrimary,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ),
+      ],
     );
   }
 
