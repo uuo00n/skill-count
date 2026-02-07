@@ -22,6 +22,11 @@ class CountdownPage extends ConsumerWidget {
     final hours = safe.inHours % 24;
     final minutes = safe.inMinutes % 60;
     final seconds = safe.inSeconds % 60;
+    final is2026 = DateTime.now().year == 2026;
+    final logoAsset = is2026
+        ? 'assets/images/Logo_WS_Shanghai2026_White_RGB.png'
+        : 'assets/images/WS_Logo_DarkBlue_RGB.png';
+    final logoColor = is2026 ? WsColors.darkBlue : null;
 
     return Row(
       children: [
@@ -37,9 +42,11 @@ class CountdownPage extends ConsumerWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Image.asset(
-                  'assets/images/WS_Logo_DarkBlue_RGB.png',
-                  height: 150,
+                  logoAsset,
+                  height: 200,
                   fit: BoxFit.contain,
+                  color: logoColor,
+                  colorBlendMode: logoColor == null ? null : BlendMode.srcIn,
                 ),
                 const SizedBox(height: 24),
                 FittedBox(
