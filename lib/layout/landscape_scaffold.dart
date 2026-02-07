@@ -11,6 +11,7 @@ import '../features/timezone/timezone_converter.dart';
 import '../features/timezone/timezone_page.dart';
 import '../features/unified_timer/widgets/unified_timer_page.dart';
 import '../features/white_noise/white_noise_page.dart';
+import '../widgets/fade_indexed_stack.dart';
 import '../widgets/grid_background.dart';
 
 class LandscapeScaffold extends ConsumerStatefulWidget {
@@ -39,7 +40,7 @@ class _LandscapeScaffoldState extends ConsumerState<LandscapeScaffold> {
           children: [
             _buildHeader(context),
             Expanded(
-              child: IndexedStack(
+              child: FadeIndexedStack(
                 index: _selectedIndex,
                 children: _pages,
               ),
