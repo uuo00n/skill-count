@@ -20,14 +20,12 @@ class WsTimerText extends StatelessWidget {
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
           decoration: BoxDecoration(
-            color: WsColors.bgDeep,
+            color: WsColors.surface,
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: const Color(0xFF1e3a5f),
-            ),
+            border: Border.all(color: WsColors.border),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withAlpha(80),
+                color: Colors.black.withAlpha(10),
                 blurRadius: 8,
                 offset: const Offset(0, 4),
               ),
@@ -39,7 +37,7 @@ class WsTimerText extends StatelessWidget {
               fontFamily: 'JetBrainsMono',
               fontSize: 56,
               fontWeight: FontWeight.bold,
-              color: WsColors.white,
+              color: WsColors.darkBlue,
               letterSpacing: 2,
               height: 1.1,
             ),

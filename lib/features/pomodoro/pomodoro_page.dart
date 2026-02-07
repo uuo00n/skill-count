@@ -1,5 +1,6 @@
-import 'dart:math';
+import 'package:confetti/confetti.dart';
 import 'package:flutter/material.dart';
+import 'package:percent_indicator/circular_percent_indicator.dart';
 import '../../core/constants/ws_colors.dart';
 import '../../core/i18n/locale_provider.dart';
 import 'pomodoro_controller.dart';
@@ -25,7 +26,9 @@ class PomodoroPage extends StatefulWidget {
 
 class _PomodoroPageState extends State<PomodoroPage> {
   late PomodoroController _controller;
+  late ConfettiController _confettiController;
   int _selectedMinutes = 90;
+  bool _hasCompleted = false;
 
   static const _durationOptions = [45, 60, 90, 120, 180];
 
@@ -52,15 +55,27 @@ class _PomodoroPageState extends State<PomodoroPage> {
   @override
   void initState() {
     super.initState();
+    _confettiController =
+        ConfettiController(duration: const Duration(seconds: 3));
     _controller = PomodoroController(
       totalDuration: const Duration(minutes: 90),
-      onTick: () => setState(() {}),
+      onTick: () {
+        setState(() {});
+        // Trigger confetti when timer reaches zero
+        if (_controller.remaining.inSeconds == 0 &&
+            !_hasCompleted &&
+            _controller.totalDuration.inSeconds > 0) {
+          _hasCompleted = true;
+          _confettiController.play();
+        }
+      },
     );
   }
 
   @override
   void dispose() {
     _controller.dispose();
+    _confettiController.dispose();
     super.dispose();
   }
 
@@ -96,52 +111,54 @@ class _PomodoroPageState extends State<PomodoroPage> {
     final minutes = _controller.remaining.inMinutes;
     final seconds = _controller.remaining.inSeconds % 60;
 
-    return Row(
+    return Stack(
       children: [
-        // Left: circular timer
-        Expanded(
-          flex: 3,
-          child: Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                // Status label
-                Row(
-                  mainAxisSize: MainAxisSize.min,
+        Row(
+          children: [
+            // Left: circular timer
+            Expanded(
+              flex: 3,
+              child: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Container(
-                      width: 8,
-                      height: 8,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: _controller.isRunning
-                            ? WsColors.accentGreen
-                            : WsColors.accentYellow,
-                      ),
+                    // Status label
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Container(
+                          width: 8,
+                          height: 8,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: _controller.isRunning
+                                ? WsColors.accentGreen
+                                : WsColors.accentCyan,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          _controller.isRunning
+                              ? s.focusSession.toUpperCase()
+                              : s.ready.toUpperCase(),
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            color: _controller.isRunning
+                                ? WsColors.accentGreen
+                                : WsColors.accentCyan,
+                            letterSpacing: 2,
+                          ),
+                        ),
+                      ],
                     ),
-                    const SizedBox(width: 8),
-                    Text(
-                      _controller.isRunning
-                          ? s.focusSession.toUpperCase()
-                          : s.ready.toUpperCase(),
-                      style: const TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                        color: WsColors.accentYellow,
-                        letterSpacing: 2,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 24),
-                // Ring timer
-                SizedBox(
-                  width: 280,
-                  height: 280,
-                  child: CustomPaint(
-                    painter: _RingPainter(progress: progress),
-                    child: Center(
-                      child: Column(
+                    const SizedBox(height: 24),
+                    // Ring timer using CircularPercentIndicator
+                    CircularPercentIndicator(
+                      radius: 140.0,
+                      lineWidth: 8.0,
+                      percent: progress.clamp(0.0, 1.0),
+                      center: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Text(
@@ -150,7 +167,7 @@ class _PomodoroPageState extends State<PomodoroPage> {
                               fontFamily: 'JetBrainsMono',
                               fontSize: 52,
                               fontWeight: FontWeight.bold,
-                              color: WsColors.white,
+                              color: WsColors.darkBlue,
                               height: 1.0,
                             ),
                           ),
@@ -166,231 +183,263 @@ class _PomodoroPageState extends State<PomodoroPage> {
                           ),
                         ],
                       ),
+                      progressColor: WsColors.accentCyan,
+                      backgroundColor: WsColors.secondaryMint.withAlpha(60),
+                      circularStrokeCap: CircularStrokeCap.round,
+                      animation: true,
+                      animationDuration: 300,
+                      animateFromLastPercent: true,
                     ),
-                  ),
-                ),
-                const SizedBox(height: 28),
-                // Controls
-                Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    _buildCircleButton(
-                      icon: Icons.refresh,
-                      onTap: _controller.reset,
-                    ),
-                    const SizedBox(width: 20),
-                    Material(
-                      color: Colors.transparent,
-                      child: InkWell(
-                        borderRadius: BorderRadius.circular(24),
-                        onTap: _controller.isRunning
-                            ? _controller.pause
-                            : _controller.start,
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 28,
-                            vertical: 12,
-                          ),
-                          decoration: BoxDecoration(
-                            color: WsColors.darkBlue,
+                    const SizedBox(height: 28),
+                    // Controls
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        _buildCircleButton(
+                          icon: Icons.refresh,
+                          onTap: () {
+                            _controller.reset();
+                            _hasCompleted = false;
+                          },
+                        ),
+                        const SizedBox(width: 20),
+                        Material(
+                          color: Colors.transparent,
+                          child: InkWell(
                             borderRadius: BorderRadius.circular(24),
-                            border: Border.all(
-                              color: WsColors.accentBlue.withAlpha(80),
+                            onTap: _controller.isRunning
+                                ? _controller.pause
+                                : _controller.start,
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 28,
+                                vertical: 12,
+                              ),
+                              decoration: BoxDecoration(
+                                color: WsColors.accentCyan,
+                                borderRadius: BorderRadius.circular(24),
+                              ),
+                              child: Row(
+                                children: [
+                                  Icon(
+                                    _controller.isRunning
+                                        ? Icons.pause
+                                        : Icons.play_arrow,
+                                    color: WsColors.white,
+                                    size: 20,
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    _controller.isRunning
+                                        ? s.pause.toUpperCase()
+                                        : s.start.toUpperCase(),
+                                    style: const TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w700,
+                                      color: WsColors.white,
+                                      letterSpacing: 1,
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
-                          child: Row(
-                            children: [
-                              Icon(
-                                _controller.isRunning
-                                    ? Icons.pause
-                                    : Icons.play_arrow,
-                                color: WsColors.white,
-                                size: 20,
-                              ),
-                              const SizedBox(width: 8),
-                              Text(
-                                _controller.isRunning
-                                    ? s.pause.toUpperCase()
-                                    : s.start.toUpperCase(),
-                                style: const TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w700,
-                                  color: WsColors.white,
-                                  letterSpacing: 1,
-                                ),
-                              ),
-                            ],
-                          ),
                         ),
-                      ),
-                    ),
-                    const SizedBox(width: 20),
-                    _buildCircleButton(
-                      icon: Icons.tune,
-                      onTap: () {},
+                        const SizedBox(width: 20),
+                        _buildCircleButton(
+                          icon: Icons.tune,
+                          onTap: () {},
+                        ),
+                      ],
                     ),
                   ],
                 ),
-              ],
+              ),
             ),
-          ),
-        ),
-        // Right: task panel
-        Container(
-          width: 320,
-          margin: const EdgeInsets.only(right: 20, top: 16, bottom: 16),
-          decoration: BoxDecoration(
-            color: WsColors.bgPanel.withAlpha(200),
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(
-              color: const Color(0xFF1e3a5f),
-            ),
-          ),
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Header
-              Row(
+            // Right: task panel
+            Container(
+              width: 320,
+              margin: const EdgeInsets.only(right: 20, top: 16, bottom: 16),
+              decoration: BoxDecoration(
+                color: WsColors.surface,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: WsColors.border),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withAlpha(8),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    s.moduleTasks,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: WsColors.textPrimary,
+                  // Header
+                  Row(
+                    children: [
+                      Text(
+                        s.moduleTasks,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: WsColors.textPrimary,
+                        ),
+                      ),
+                      const Spacer(),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 3,
+                        ),
+                        decoration: BoxDecoration(
+                          color: WsColors.accentCyan.withAlpha(25),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Text(
+                          '$_completedCount/${_tasks.length}',
+                          style: const TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            color: WsColors.accentCyan,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 4),
+                  const Text(
+                    'Web Technologies · Module C',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: WsColors.textSecondary,
                     ),
                   ),
-                  const Spacer(),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 3,
+                  const SizedBox(height: 16),
+                  // Duration selector
+                  Row(
+                    children: _durationOptions.map((m) {
+                      final isSelected = _selectedMinutes == m;
+                      return Expanded(
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 2),
+                          child: Material(
+                            color: Colors.transparent,
+                            child: InkWell(
+                              borderRadius: BorderRadius.circular(6),
+                              onTap: _controller.isRunning
+                                  ? null
+                                  : () {
+                                      setState(() => _selectedMinutes = m);
+                                      _controller.setDuration(
+                                        Duration(minutes: m),
+                                      );
+                                      _hasCompleted = false;
+                                    },
+                              child: Container(
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 6),
+                                decoration: BoxDecoration(
+                                  color: isSelected
+                                      ? WsColors.accentCyan.withAlpha(30)
+                                      : Colors.transparent,
+                                  borderRadius: BorderRadius.circular(6),
+                                  border: Border.all(
+                                    color: isSelected
+                                        ? WsColors.accentCyan
+                                        : WsColors.textSecondary.withAlpha(40),
+                                  ),
+                                ),
+                                child: Center(
+                                  child: Text(
+                                    '${m}m',
+                                    style: TextStyle(
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w600,
+                                      color: isSelected
+                                          ? WsColors.accentCyan
+                                          : WsColors.textSecondary,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                  const SizedBox(height: 16),
+                  // Task list
+                  Expanded(
+                    child: ListView.builder(
+                      itemCount: _tasks.length,
+                      itemBuilder: (context, index) {
+                        final task = _tasks[index];
+                        return _buildTaskItem(
+                          s,
+                          task,
+                          index,
+                        );
+                      },
                     ),
-                    decoration: BoxDecoration(
-                      color: WsColors.accentBlue.withAlpha(25),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: Text(
-                      '$_completedCount/${_tasks.length}',
-                      style: const TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                        color: WsColors.accentBlue,
+                  ),
+                  // Add task button
+                  const SizedBox(height: 8),
+                  Material(
+                    color: Colors.transparent,
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(8),
+                      onTap: () => _showAddTaskDialog(context, s),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(vertical: 10),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(
+                            color: WsColors.textSecondary.withAlpha(40),
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Icon(Icons.add,
+                                size: 16, color: WsColors.textSecondary),
+                            const SizedBox(width: 6),
+                            Text(
+                              s.addTask,
+                              style: const TextStyle(
+                                fontSize: 12,
+                                color: WsColors.textSecondary,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ),
                 ],
               ),
-              const SizedBox(height: 4),
-              const Text(
-                'Web Technologies · Module C',
-                style: TextStyle(
-                  fontSize: 12,
-                  color: WsColors.textSecondary,
-                ),
-              ),
-              const SizedBox(height: 16),
-              // Duration selector
-              Row(
-                children: _durationOptions.map((m) {
-                  final isSelected = _selectedMinutes == m;
-                  return Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 2),
-                      child: Material(
-                        color: Colors.transparent,
-                        child: InkWell(
-                          borderRadius: BorderRadius.circular(6),
-                          onTap: _controller.isRunning
-                              ? null
-                              : () {
-                                  setState(() => _selectedMinutes = m);
-                                  _controller.setDuration(
-                                    Duration(minutes: m),
-                                  );
-                                },
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(vertical: 6),
-                            decoration: BoxDecoration(
-                              color: isSelected
-                                  ? WsColors.accentBlue.withAlpha(30)
-                                  : Colors.transparent,
-                              borderRadius: BorderRadius.circular(6),
-                              border: Border.all(
-                                color: isSelected
-                                    ? WsColors.accentBlue
-                                    : WsColors.textSecondary.withAlpha(40),
-                              ),
-                            ),
-                            child: Center(
-                              child: Text(
-                                '${m}m',
-                                style: TextStyle(
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.w600,
-                                  color: isSelected
-                                      ? WsColors.accentBlue
-                                      : WsColors.textSecondary,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  );
-                }).toList(),
-              ),
-              const SizedBox(height: 16),
-              // Task list
-              Expanded(
-                child: ListView.builder(
-                  itemCount: _tasks.length,
-                  itemBuilder: (context, index) {
-                    final task = _tasks[index];
-                    return _buildTaskItem(
-                      s,
-                      task,
-                      index,
-                    );
-                  },
-                ),
-              ),
-              // Add task button
-              const SizedBox(height: 8),
-              Material(
-                color: Colors.transparent,
-                child: InkWell(
-                  borderRadius: BorderRadius.circular(8),
-                  onTap: () => _showAddTaskDialog(context, s),
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(vertical: 10),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(
-                        color: WsColors.textSecondary.withAlpha(40),
-                        style: BorderStyle.solid,
-                      ),
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Icon(Icons.add, size: 16, color: WsColors.textSecondary),
-                        const SizedBox(width: 6),
-                        Text(
-                          s.addTask,
-                          style: const TextStyle(
-                            fontSize: 12,
-                            color: WsColors.textSecondary,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
+            ),
+          ],
+        ),
+        // Confetti overlay
+        Align(
+          alignment: Alignment.topCenter,
+          child: ConfettiWidget(
+            confettiController: _confettiController,
+            blastDirectionality: BlastDirectionality.explosive,
+            maxBlastForce: 20,
+            minBlastForce: 8,
+            emissionFrequency: 0.05,
+            numberOfParticles: 25,
+            gravity: 0.1,
+            colors: const [
+              WsColors.accentCyan,
+              WsColors.secondaryMint,
+              WsColors.white,
+              WsColors.accentGreen,
             ],
           ),
         ),
@@ -403,7 +452,7 @@ class _PomodoroPageState extends State<PomodoroPage> {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: WsColors.bgPanel,
+        backgroundColor: WsColors.surface,
         title: Text(s.addTask,
             style: const TextStyle(color: WsColors.textPrimary)),
         content: TextField(
@@ -414,7 +463,7 @@ class _PomodoroPageState extends State<PomodoroPage> {
             hintText: s.taskDescription,
             hintStyle: const TextStyle(color: WsColors.textSecondary),
             enabledBorder: const UnderlineInputBorder(
-              borderSide: BorderSide(color: WsColors.accentBlue),
+              borderSide: BorderSide(color: WsColors.accentCyan),
             ),
           ),
         ),
@@ -432,7 +481,7 @@ class _PomodoroPageState extends State<PomodoroPage> {
               }
             },
             child: Text(s.start,
-                style: const TextStyle(color: WsColors.accentBlue)),
+                style: const TextStyle(color: WsColors.accentCyan)),
           ),
         ],
       ),
@@ -473,7 +522,7 @@ class _PomodoroPageState extends State<PomodoroPage> {
       statusColor = WsColors.accentGreen;
       statusLabel = s.done.toUpperCase();
     } else if (isCurrent) {
-      statusColor = WsColors.accentYellow;
+      statusColor = WsColors.accentCyan;
       statusLabel = s.current.toUpperCase();
     } else {
       statusColor = WsColors.textSecondary;
@@ -487,13 +536,13 @@ class _PomodoroPageState extends State<PomodoroPage> {
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
           color: isCurrent
-              ? WsColors.accentYellow.withAlpha(15)
+              ? WsColors.accentCyan.withAlpha(15)
               : WsColors.bgDeep.withAlpha(120),
           borderRadius: BorderRadius.circular(8),
           border: Border.all(
             color: isCurrent
-                ? WsColors.accentYellow.withAlpha(60)
-                : const Color(0xFF1e3a5f),
+                ? WsColors.accentCyan.withAlpha(60)
+                : WsColors.border,
           ),
         ),
         child: Column(
@@ -502,7 +551,8 @@ class _PomodoroPageState extends State<PomodoroPage> {
             Row(
               children: [
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
                   decoration: BoxDecoration(
                     color: statusColor.withAlpha(20),
                     borderRadius: BorderRadius.circular(3),
@@ -530,7 +580,8 @@ class _PomodoroPageState extends State<PomodoroPage> {
                 ],
                 const Spacer(),
                 if (isDone)
-                  const Icon(Icons.check_circle, size: 16, color: WsColors.accentGreen)
+                  const Icon(Icons.check_circle,
+                      size: 16, color: WsColors.accentGreen)
                 else if (!isCurrent)
                   const Icon(Icons.radio_button_unchecked,
                       size: 16, color: WsColors.textSecondary),
@@ -550,44 +601,5 @@ class _PomodoroPageState extends State<PomodoroPage> {
         ),
       ),
     );
-  }
-}
-
-class _RingPainter extends CustomPainter {
-  final double progress;
-
-  _RingPainter({required this.progress});
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final center = Offset(size.width / 2, size.height / 2);
-    final radius = size.width / 2 - 12;
-    const strokeWidth = 6.0;
-
-    final bgPaint = Paint()
-      ..color = const Color(0xFF1e3a5f)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = strokeWidth;
-    canvas.drawCircle(center, radius, bgPaint);
-
-    final progressPaint = Paint()
-      ..color = WsColors.accentYellow
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = strokeWidth
-      ..strokeCap = StrokeCap.round;
-
-    final sweepAngle = 2 * pi * progress;
-    canvas.drawArc(
-      Rect.fromCircle(center: center, radius: radius),
-      -pi / 2,
-      sweepAngle,
-      false,
-      progressPaint,
-    );
-  }
-
-  @override
-  bool shouldRepaint(covariant _RingPainter oldDelegate) {
-    return oldDelegate.progress != progress;
   }
 }

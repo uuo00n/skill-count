@@ -64,7 +64,7 @@ class _TimezonePageState extends State<TimezonePage> {
               style: const TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
-                color: WsColors.accentYellow,
+                color: WsColors.accentCyan,
               ),
             ),
             const SizedBox(height: 32),
@@ -86,8 +86,8 @@ class _TimezonePageState extends State<TimezonePage> {
                         height: 36,
                         decoration: BoxDecoration(
                           color: isShanghai
-                              ? WsColors.accentYellow
-                              : WsColors.accentBlue,
+                              ? WsColors.accentCyan
+                              : WsColors.secondaryMint,
                           borderRadius: BorderRadius.circular(2),
                         ),
                       ),
@@ -123,7 +123,7 @@ class _TimezonePageState extends State<TimezonePage> {
                           fontSize: 24,
                           fontWeight: FontWeight.bold,
                           color: isShanghai
-                              ? WsColors.accentYellow
+                              ? WsColors.accentCyan
                               : WsColors.textPrimary,
                         ),
                       ),

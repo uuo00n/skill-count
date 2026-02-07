@@ -82,13 +82,13 @@ class SettingsPage extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: WsColors.bgPanel.withAlpha(200),
+        color: WsColors.surface,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFF1e3a5f)),
+        border: Border.all(color: WsColors.border),
       ),
       child: Row(
         children: [
-          Icon(icon, size: 20, color: WsColors.accentBlue),
+          Icon(icon, size: 20, color: WsColors.accentCyan),
           const SizedBox(width: 16),
           Expanded(
             child: Column(
@@ -128,11 +128,11 @@ class SettingsPage extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         decoration: BoxDecoration(
-          color: isActive ? WsColors.accentBlue : Colors.transparent,
+          color: isActive ? WsColors.accentCyan : Colors.transparent,
           borderRadius: BorderRadius.circular(6),
           border: Border.all(
             color: isActive
-                ? WsColors.accentBlue
+                ? WsColors.accentCyan
                 : WsColors.textSecondary.withAlpha(60),
           ),
         ),

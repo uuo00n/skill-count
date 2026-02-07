@@ -39,7 +39,7 @@ class MilestoneList extends StatelessWidget {
             const Icon(
               Icons.flag_outlined,
               size: 16,
-              color: WsColors.accentYellow,
+              color: WsColors.accentCyan,
             ),
             const SizedBox(width: 8),
             Text(

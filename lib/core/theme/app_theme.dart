@@ -7,30 +7,29 @@ class AppTheme {
   static ThemeData get light {
     return ThemeData(
       useMaterial3: true,
-      brightness: Brightness.dark,
+      brightness: Brightness.light,
       fontFamily: 'Inter',
-      scaffoldBackgroundColor: WsColors.bgPrimary,
-      colorScheme: const ColorScheme.dark(
-        primary: WsColors.darkBlue,
-        secondary: WsColors.accentBlue,
-        surface: WsColors.bgPanel,
+      scaffoldBackgroundColor: WsColors.white,
+      colorScheme: const ColorScheme.light(
+        primary: WsColors.accentCyan,
+        secondary: WsColors.secondaryMint,
+        surface: WsColors.surface,
         onPrimary: WsColors.white,
-        onSecondary: WsColors.white,
+        onSecondary: WsColors.darkBlue,
         onSurface: WsColors.textPrimary,
       ),
       appBarTheme: const AppBarTheme(
-        backgroundColor: WsColors.bgPanel,
+        backgroundColor: WsColors.surface,
         foregroundColor: WsColors.textPrimary,
         elevation: 0,
       ),
       cardTheme: CardThemeData(
-        color: WsColors.bgPanel,
-        elevation: 0,
+        color: WsColors.surface,
+        elevation: 2,
+        shadowColor: Colors.black.withAlpha(15),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
-          side: BorderSide(
-            color: WsColors.textSecondary.withAlpha(30),
-          ),
+          side: const BorderSide(color: WsColors.border),
         ),
       ),
       textTheme: const TextTheme(
@@ -68,11 +67,20 @@ class AppTheme {
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
-          backgroundColor: WsColors.accentBlue,
+          backgroundColor: WsColors.accentCyan,
           foregroundColor: WsColors.white,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(8),
           ),
+        ),
+      ),
+      dialogTheme: const DialogThemeData(
+        backgroundColor: WsColors.surface,
+        titleTextStyle: TextStyle(
+          color: WsColors.textPrimary,
+          fontSize: 18,
+          fontWeight: FontWeight.w600,
+          fontFamily: 'Inter',
         ),
       ),
     );

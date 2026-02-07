@@ -1,6 +1,6 @@
 import 'dart:async';
-import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:percent_indicator/circular_percent_indicator.dart';
 import '../../core/constants/ws_colors.dart';
 import '../../core/i18n/locale_provider.dart';
 import 'module_model.dart';
@@ -23,7 +23,8 @@ class _ModuleTimerPageState extends State<ModuleTimerPage> {
     ModuleModel(
       id: 'A',
       name: 'Module A - Design',
-      description: 'Create responsive web design mockups and implement HTML/CSS layouts according to specifications.',
+      description:
+          'Create responsive web design mockups and implement HTML/CSS layouts according to specifications.',
       duration: Duration(hours: 3),
       status: ModuleStatus.completed,
       tasks: [
@@ -36,7 +37,8 @@ class _ModuleTimerPageState extends State<ModuleTimerPage> {
     ModuleModel(
       id: 'B',
       name: 'Module B - Frontend',
-      description: 'Build interactive frontend components with JavaScript frameworks and client-side logic.',
+      description:
+          'Build interactive frontend components with JavaScript frameworks and client-side logic.',
       duration: Duration(hours: 3),
       status: ModuleStatus.inProgress,
       tasks: [
@@ -49,7 +51,8 @@ class _ModuleTimerPageState extends State<ModuleTimerPage> {
     ModuleModel(
       id: 'C',
       name: 'Module C - Backend',
-      description: 'Develop server-side APIs, database schemas, and business logic implementation.',
+      description:
+          'Develop server-side APIs, database schemas, and business logic implementation.',
       duration: Duration(hours: 3),
       status: ModuleStatus.upcoming,
       tasks: [
@@ -62,7 +65,8 @@ class _ModuleTimerPageState extends State<ModuleTimerPage> {
     ModuleModel(
       id: 'D',
       name: 'Module D - Integration',
-      description: 'Connect frontend and backend, deploy application, and perform integration testing.',
+      description:
+          'Connect frontend and backend, deploy application, and perform integration testing.',
       duration: Duration(hours: 3),
       status: ModuleStatus.upcoming,
       tasks: [
@@ -113,9 +117,16 @@ class _ModuleTimerPageState extends State<ModuleTimerPage> {
           width: 280,
           margin: const EdgeInsets.only(left: 20, top: 16, bottom: 16),
           decoration: BoxDecoration(
-            color: WsColors.bgPanel.withAlpha(200),
+            color: WsColors.surface,
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: const Color(0xFF1e3a5f)),
+            border: Border.all(color: WsColors.border),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withAlpha(8),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
+              ),
+            ],
           ),
           padding: const EdgeInsets.all(16),
           child: ModuleListPanel(
@@ -147,40 +158,42 @@ class _ModuleTimerPageState extends State<ModuleTimerPage> {
                   ),
                 ),
                 const SizedBox(height: 24),
-                // Timer ring
-                SizedBox(
-                  width: 220,
-                  height: 220,
-                  child: CustomPaint(
-                    painter: _ModuleRingPainter(progress: progress),
-                    child: Center(
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            '${rHours.toString().padLeft(2, '0')}:${rMinutes.toString().padLeft(2, '0')}:${rSeconds.toString().padLeft(2, '0')}',
-                            style: const TextStyle(
-                              fontFamily: 'JetBrainsMono',
-                              fontSize: 36,
-                              fontWeight: FontWeight.bold,
-                              color: WsColors.white,
-                              height: 1.0,
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            s.remaining.toUpperCase(),
-                            style: const TextStyle(
-                              fontSize: 9,
-                              fontWeight: FontWeight.w500,
-                              color: WsColors.textSecondary,
-                              letterSpacing: 1.5,
-                            ),
-                          ),
-                        ],
+                // Timer ring using CircularPercentIndicator
+                CircularPercentIndicator(
+                  radius: 110.0,
+                  lineWidth: 8.0,
+                  percent: progress.clamp(0.0, 1.0),
+                  center: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        '${rHours.toString().padLeft(2, '0')}:${rMinutes.toString().padLeft(2, '0')}:${rSeconds.toString().padLeft(2, '0')}',
+                        style: const TextStyle(
+                          fontFamily: 'JetBrainsMono',
+                          fontSize: 36,
+                          fontWeight: FontWeight.bold,
+                          color: WsColors.darkBlue,
+                          height: 1.0,
+                        ),
                       ),
-                    ),
+                      const SizedBox(height: 4),
+                      Text(
+                        s.remaining.toUpperCase(),
+                        style: const TextStyle(
+                          fontSize: 9,
+                          fontWeight: FontWeight.w500,
+                          color: WsColors.textSecondary,
+                          letterSpacing: 1.5,
+                        ),
+                      ),
+                    ],
                   ),
+                  progressColor: WsColors.accentCyan,
+                  backgroundColor: WsColors.secondaryMint.withAlpha(60),
+                  circularStrokeCap: CircularStrokeCap.round,
+                  animation: true,
+                  animationDuration: 300,
+                  animateFromLastPercent: true,
                 ),
                 const SizedBox(height: 20),
                 // Controls
@@ -199,16 +212,14 @@ class _ModuleTimerPageState extends State<ModuleTimerPage> {
                       color: Colors.transparent,
                       child: InkWell(
                         borderRadius: BorderRadius.circular(24),
-                        onTap: () => setState(() => _isRunning = !_isRunning),
+                        onTap: () =>
+                            setState(() => _isRunning = !_isRunning),
                         child: Container(
                           padding: const EdgeInsets.symmetric(
                               horizontal: 24, vertical: 10),
                           decoration: BoxDecoration(
-                            color: WsColors.darkBlue,
+                            color: WsColors.accentCyan,
                             borderRadius: BorderRadius.circular(24),
-                            border: Border.all(
-                              color: WsColors.accentBlue.withAlpha(80),
-                            ),
                           ),
                           child: Row(
                             children: [
@@ -246,10 +257,9 @@ class _ModuleTimerPageState extends State<ModuleTimerPage> {
                       child: Container(
                         padding: const EdgeInsets.all(14),
                         decoration: BoxDecoration(
-                          color: WsColors.bgPanel.withAlpha(200),
+                          color: WsColors.surface,
                           borderRadius: BorderRadius.circular(10),
-                          border:
-                              Border.all(color: const Color(0xFF1e3a5f)),
+                          border: Border.all(color: WsColors.border),
                         ),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -282,10 +292,9 @@ class _ModuleTimerPageState extends State<ModuleTimerPage> {
                       child: Container(
                         padding: const EdgeInsets.all(14),
                         decoration: BoxDecoration(
-                          color: WsColors.bgPanel.withAlpha(200),
+                          color: WsColors.surface,
                           borderRadius: BorderRadius.circular(10),
-                          border:
-                              Border.all(color: const Color(0xFF1e3a5f)),
+                          border: Border.all(color: WsColors.border),
                         ),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -301,8 +310,7 @@ class _ModuleTimerPageState extends State<ModuleTimerPage> {
                             ),
                             const SizedBox(height: 6),
                             ...module.tasks.map((task) => Padding(
-                                  padding:
-                                      const EdgeInsets.only(bottom: 4),
+                                  padding: const EdgeInsets.only(bottom: 4),
                                   child: Row(
                                     children: [
                                       Icon(
@@ -363,44 +371,5 @@ class _ModuleTimerPageState extends State<ModuleTimerPage> {
         ),
       ),
     );
-  }
-}
-
-class _ModuleRingPainter extends CustomPainter {
-  final double progress;
-
-  _ModuleRingPainter({required this.progress});
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final center = Offset(size.width / 2, size.height / 2);
-    final radius = size.width / 2 - 10;
-    const strokeWidth = 6.0;
-
-    final bgPaint = Paint()
-      ..color = const Color(0xFF1e3a5f)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = strokeWidth;
-    canvas.drawCircle(center, radius, bgPaint);
-
-    final progressPaint = Paint()
-      ..color = WsColors.accentBlue
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = strokeWidth
-      ..strokeCap = StrokeCap.round;
-
-    final sweepAngle = 2 * pi * progress;
-    canvas.drawArc(
-      Rect.fromCircle(center: center, radius: radius),
-      -pi / 2,
-      sweepAngle,
-      false,
-      progressPaint,
-    );
-  }
-
-  @override
-  bool shouldRepaint(covariant _ModuleRingPainter oldDelegate) {
-    return oldDelegate.progress != progress;
   }
 }

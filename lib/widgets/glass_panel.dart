@@ -24,10 +24,15 @@ class GlassPanel extends StatelessWidget {
           padding: padding ?? const EdgeInsets.all(20),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(borderRadius),
-            color: WsColors.bgPanel.withAlpha(180),
-            border: Border.all(
-              color: WsColors.textSecondary.withAlpha(30),
-            ),
+            color: WsColors.surface.withAlpha(230),
+            border: Border.all(color: WsColors.border),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withAlpha(8),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
+              ),
+            ],
           ),
           child: child,
         ),

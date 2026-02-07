@@ -26,9 +26,9 @@ class CompetitionTimeline extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
       decoration: const BoxDecoration(
-        color: WsColors.bgDeep,
+        color: WsColors.surface,
         border: Border(
-          top: BorderSide(color: Color(0xFF1e3a5f), width: 1),
+          top: BorderSide(color: WsColors.border, width: 1),
         ),
       ),
       child: Column(
@@ -37,7 +37,7 @@ class CompetitionTimeline extends StatelessWidget {
         children: [
           Row(
             children: [
-              const Icon(Icons.timeline, size: 14, color: WsColors.accentBlue),
+              const Icon(Icons.timeline, size: 14, color: WsColors.accentCyan),
               const SizedBox(width: 8),
               Text(
                 s.competitionProgress.toUpperCase(),
@@ -68,7 +68,7 @@ class CompetitionTimeline extends StatelessWidget {
                       height: 4,
                       decoration: BoxDecoration(
                         color: isActive
-                            ? WsColors.accentYellow
+                            ? WsColors.accentCyan
                             : isPast
                                 ? WsColors.accentGreen
                                 : WsColors.textSecondary.withAlpha(40),
@@ -84,7 +84,7 @@ class CompetitionTimeline extends StatelessWidget {
                         fontWeight:
                             isActive ? FontWeight.w700 : FontWeight.w500,
                         color: isActive
-                            ? WsColors.accentYellow
+                            ? WsColors.accentCyan
                             : isPast
                                 ? WsColors.accentGreen
                                 : WsColors.textSecondary,

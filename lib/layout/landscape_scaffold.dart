@@ -82,11 +82,18 @@ class _LandscapeScaffoldState extends State<LandscapeScaffold> {
     return Container(
       height: 56,
       padding: const EdgeInsets.symmetric(horizontal: 20),
-      decoration: const BoxDecoration(
-        color: WsColors.bgDeep,
-        border: Border(
-          bottom: BorderSide(color: Color(0xFF1e3a5f), width: 1),
+      decoration: BoxDecoration(
+        color: WsColors.surface,
+        border: const Border(
+          bottom: BorderSide(color: WsColors.border, width: 1),
         ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withAlpha(8),
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: Row(
         children: [
@@ -96,11 +103,11 @@ class _LandscapeScaffoldState extends State<LandscapeScaffold> {
             height: 32,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              border: Border.all(color: WsColors.accentYellow, width: 2),
+              border: Border.all(color: WsColors.accentCyan, width: 2),
             ),
             child: const Icon(
               Icons.hexagon_outlined,
-              color: WsColors.accentYellow,
+              color: WsColors.accentCyan,
               size: 18,
             ),
           ),
@@ -114,7 +121,7 @@ class _LandscapeScaffoldState extends State<LandscapeScaffold> {
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
-                  color: WsColors.textPrimary,
+                  color: WsColors.darkBlue,
                 ),
               ),
               Text(
@@ -133,10 +140,10 @@ class _LandscapeScaffoldState extends State<LandscapeScaffold> {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
             decoration: BoxDecoration(
-              color: WsColors.accentGreen.withAlpha(25),
+              color: WsColors.accentGreen.withAlpha(20),
               borderRadius: BorderRadius.circular(20),
               border: Border.all(
-                color: WsColors.accentGreen.withAlpha(60),
+                color: WsColors.accentGreen.withAlpha(50),
               ),
             ),
             child: Row(
@@ -190,11 +197,11 @@ class _LandscapeScaffoldState extends State<LandscapeScaffold> {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
         decoration: BoxDecoration(
-          color: isActive ? WsColors.accentBlue : Colors.transparent,
+          color: isActive ? WsColors.accentCyan : Colors.transparent,
           borderRadius: BorderRadius.circular(4),
           border: Border.all(
             color: isActive
-                ? WsColors.accentBlue
+                ? WsColors.accentCyan
                 : WsColors.textSecondary.withAlpha(60),
           ),
         ),
@@ -215,11 +222,18 @@ class _LandscapeScaffoldState extends State<LandscapeScaffold> {
 
     return Container(
       height: 52,
-      decoration: const BoxDecoration(
-        color: WsColors.bgDeep,
-        border: Border(
-          top: BorderSide(color: Color(0xFF1e3a5f), width: 1),
+      decoration: BoxDecoration(
+        color: WsColors.surface,
+        border: const Border(
+          top: BorderSide(color: WsColors.border, width: 1),
         ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withAlpha(8),
+            blurRadius: 4,
+            offset: const Offset(0, -2),
+          ),
+        ],
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -243,18 +257,18 @@ class _LandscapeScaffoldState extends State<LandscapeScaffold> {
                     const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                 decoration: BoxDecoration(
                   color: _selectedIndex == 4
-                      ? WsColors.darkBlue.withAlpha(180)
+                      ? WsColors.accentCyan.withAlpha(20)
                       : Colors.transparent,
                   borderRadius: BorderRadius.circular(8),
                   border: _selectedIndex == 4
-                      ? Border.all(color: WsColors.accentBlue.withAlpha(80))
+                      ? Border.all(color: WsColors.accentCyan.withAlpha(60))
                       : null,
                 ),
                 child: Icon(
                   Icons.settings_outlined,
                   size: 20,
                   color: _selectedIndex == 4
-                      ? WsColors.accentYellow
+                      ? WsColors.accentCyan
                       : WsColors.textSecondary,
                 ),
               ),
@@ -276,11 +290,11 @@ class _LandscapeScaffoldState extends State<LandscapeScaffold> {
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           decoration: BoxDecoration(
             color: isSelected
-                ? WsColors.darkBlue.withAlpha(180)
+                ? WsColors.accentCyan.withAlpha(20)
                 : Colors.transparent,
             borderRadius: BorderRadius.circular(8),
             border: isSelected
-                ? Border.all(color: WsColors.accentBlue.withAlpha(80))
+                ? Border.all(color: WsColors.accentCyan.withAlpha(60))
                 : null,
           ),
           child: Row(
@@ -289,7 +303,7 @@ class _LandscapeScaffoldState extends State<LandscapeScaffold> {
                 icon,
                 size: 18,
                 color: isSelected
-                    ? WsColors.accentYellow
+                    ? WsColors.accentCyan
                     : WsColors.textSecondary,
               ),
               const SizedBox(width: 8),
@@ -299,7 +313,7 @@ class _LandscapeScaffoldState extends State<LandscapeScaffold> {
                   fontSize: 13,
                   fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
                   color:
-                      isSelected ? WsColors.textPrimary : WsColors.textSecondary,
+                      isSelected ? WsColors.darkBlue : WsColors.textSecondary,
                 ),
               ),
             ],

@@ -27,10 +27,10 @@ class MilestoneCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: WsColors.bgDeep.withAlpha(180),
+        color: WsColors.surface,
         borderRadius: BorderRadius.circular(10),
         border: Border.all(
-          color: const Color(0xFF1e3a5f),
+          color: WsColors.border,
         ),
       ),
       child: Row(

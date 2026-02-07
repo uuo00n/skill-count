@@ -24,7 +24,7 @@ class ModuleListPanel extends StatelessWidget {
       children: [
         Row(
           children: [
-            const Icon(Icons.view_module, size: 16, color: WsColors.accentBlue),
+            const Icon(Icons.view_module, size: 16, color: WsColors.accentCyan),
             const SizedBox(width: 8),
             Text(
               s.moduleTimerTitle.toUpperCase(),
@@ -86,13 +86,13 @@ class ModuleListPanel extends StatelessWidget {
           padding: const EdgeInsets.all(14),
           decoration: BoxDecoration(
             color: isSelected
-                ? WsColors.accentBlue.withAlpha(20)
-                : WsColors.bgDeep.withAlpha(180),
+                ? WsColors.accentCyan.withAlpha(20)
+                : WsColors.surface,
             borderRadius: BorderRadius.circular(10),
             border: Border.all(
               color: isSelected
-                  ? WsColors.accentBlue.withAlpha(80)
-                  : const Color(0xFF1e3a5f),
+                  ? WsColors.accentCyan.withAlpha(80)
+                  : WsColors.border,
             ),
           ),
           child: Row(
@@ -153,7 +153,7 @@ class ModuleListPanel extends StatelessWidget {
                 const Icon(
                   Icons.arrow_forward_ios,
                   size: 12,
-                  color: WsColors.accentBlue,
+                  color: WsColors.accentCyan,
                 ),
             ],
           ),
