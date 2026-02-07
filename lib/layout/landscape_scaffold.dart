@@ -34,8 +34,12 @@ class _LandscapeScaffoldState extends ConsumerState<LandscapeScaffold> {
 
   @override
   Widget build(BuildContext context) {
+    // Show grid background only when NOT on Timezone page (index 2)
+    final showGridBackground = _selectedIndex != 2;
+
     return Scaffold(
       body: GridBackground(
+        showGrid: showGridBackground,
         child: Column(
           children: [
             _buildHeader(context),

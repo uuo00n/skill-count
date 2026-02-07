@@ -5,6 +5,7 @@ import '../../core/constants/ws_colors.dart';
 import '../../core/i18n/locale_provider.dart';
 import '../../core/providers/time_providers.dart';
 import '../../widgets/glass_panel.dart';
+import '../../widgets/scrolling_map_background.dart';
 import 'timezone_converter.dart';
 import 'timezone_model.dart';
 
@@ -16,21 +17,28 @@ class TimezonePage extends ConsumerWidget {
     final s = LocaleScope.of(context);
     final utcNow = ref.watch(unifiedTimeProvider);
 
-    return Center(
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.all(32),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              s.worldTimezones.toUpperCase(),
-              style: const TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-                color: WsColors.textSecondary,
-                letterSpacing: 3,
-              ),
-            ),
+    return Stack(
+      children: [
+        const ScrollingMapBackground(
+          imagePath:
+              'assets/images/WorldSkills_Map_countries_DarkBlueMint_89_Nigeria.png',
+          opacity: 0.15,
+        ),
+        Center(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(32),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  s.worldTimezones.toUpperCase(),
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: WsColors.textSecondary,
+                    letterSpacing: 3,
+                  ),
+                ),
             const SizedBox(height: 8),
             Text(
               s.internationalCollaboration,
@@ -121,6 +129,8 @@ class TimezonePage extends ConsumerWidget {
           ],
         ),
       ),
+    ),
+      ],
     );
   }
 }

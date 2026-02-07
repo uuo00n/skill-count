@@ -4,8 +4,13 @@ import 'package:flutter_svg/flutter_svg.dart';
 /// WorldSkills isometric cube pattern background with slow scrolling animation
 class GridBackground extends StatefulWidget {
   final Widget child;
+  final bool showGrid;
 
-  const GridBackground({super.key, required this.child});
+  const GridBackground({
+    super.key,
+    required this.child,
+    this.showGrid = true,
+  });
 
   @override
   State<GridBackground> createState() => _GridBackgroundState();
@@ -45,8 +50,9 @@ class _GridBackgroundState extends State<GridBackground>
     return Stack(
       children: [
         Positioned.fill(
-          child: Opacity(
-            opacity: 0.15,
+          child: AnimatedOpacity(
+            duration: const Duration(milliseconds: 500),
+            opacity: widget.showGrid ? 0.15 : 0.0,
             child: LayoutBuilder(
               builder: (context, constraints) {
                 final cols =
