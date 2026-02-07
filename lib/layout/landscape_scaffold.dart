@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 import '../core/constants/ws_colors.dart';
 import '../core/i18n/locale_provider.dart';
@@ -91,17 +92,13 @@ class _LandscapeScaffoldState extends ConsumerState<LandscapeScaffold> {
       child: Row(
         children: [
           // Logo
-          Container(
+          SizedBox(
             width: 32,
             height: 32,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              border: Border.all(color: WsColors.accentCyan, width: 2),
-            ),
-            child: const Icon(
-              Icons.hexagon_outlined,
-              color: WsColors.accentCyan,
-              size: 18,
+            child: SvgPicture.asset(
+              'assets/images/cube_logo.svg',
+              fit: BoxFit.scaleDown,
+              semanticsLabel: 'SkillCount Logo',
             ),
           ),
           const SizedBox(width: 12),

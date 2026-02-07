@@ -135,7 +135,7 @@ class _MilestoneListState extends State<MilestoneList> {
         borderRadius: BorderRadius.circular(8),
         onTap: _showAddDialog,
         child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+          padding: const EdgeInsets.all(6),
           decoration: BoxDecoration(
             color: WsColors.accentCyan.withAlpha(20),
             borderRadius: BorderRadius.circular(8),
@@ -143,25 +143,10 @@ class _MilestoneListState extends State<MilestoneList> {
               color: WsColors.accentCyan.withAlpha(60),
             ),
           ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Icon(
-                Icons.add,
-                size: 14,
-                color: WsColors.accentCyan,
-              ),
-              const SizedBox(width: 4),
-              Text(
-                s.addMilestone,
-                style: const TextStyle(
-                  fontSize: 11,
-                  fontWeight: FontWeight.w600,
-                  color: WsColors.accentCyan,
-                  letterSpacing: 1,
-                ),
-              ),
-            ],
+          child: const Icon(
+            Icons.add,
+            size: 18,
+            color: WsColors.accentCyan,
           ),
         ),
       ),
