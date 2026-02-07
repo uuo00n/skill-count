@@ -179,40 +179,28 @@ class _LandscapeScaffoldState extends ConsumerState<LandscapeScaffold> {
             ),
           ),
           const SizedBox(width: 16),
-          // Language toggle
-          _buildLangButton('EN', !provider.isChinese, () {
-            provider.setLocale(false);
-          }),
-          const SizedBox(width: 4),
-          _buildLangButton('CN', provider.isChinese, () {
-            provider.setLocale(true);
-          }),
+          _buildLangBadge(provider.currentAbbr),
         ],
       ),
     );
   }
 
-  Widget _buildLangButton(String label, bool isActive, VoidCallback onTap) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-        decoration: BoxDecoration(
-          color: isActive ? WsColors.accentCyan : Colors.transparent,
-          borderRadius: BorderRadius.circular(4),
-          border: Border.all(
-            color: isActive
-                ? WsColors.accentCyan
-                : WsColors.textSecondary.withAlpha(60),
-          ),
+  Widget _buildLangBadge(String label) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      decoration: BoxDecoration(
+        color: WsColors.accentCyan.withAlpha(20),
+        borderRadius: BorderRadius.circular(4),
+        border: Border.all(
+          color: WsColors.accentCyan.withAlpha(80),
         ),
-        child: Text(
-          label,
-          style: TextStyle(
-            fontSize: 11,
-            fontWeight: FontWeight.w600,
-            color: isActive ? WsColors.white : WsColors.textSecondary,
-          ),
+      ),
+      child: Text(
+        label,
+        style: const TextStyle(
+          fontSize: 11,
+          fontWeight: FontWeight.w700,
+          color: WsColors.accentCyan,
         ),
       ),
     );

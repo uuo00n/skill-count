@@ -59,9 +59,9 @@ class SettingsPage extends ConsumerWidget {
                 icon: Icons.language,
                 title: s.language,
                 trailing: _buildLanguageDropdown(
-                  context,
-                  provider.isChinese,
-                  (isChinese) => provider.setLocale(isChinese),
+                  provider.locale,
+                  provider.locales,
+                  (locale) => provider.setLocale(locale),
                 ),
               ),
               const SizedBox(height: 12),
@@ -146,9 +146,9 @@ class SettingsPage extends ConsumerWidget {
   }
 
   Widget _buildLanguageDropdown(
-    BuildContext context,
-    bool isChinese,
-    ValueChanged<bool> onChanged,
+    AppLocale currentLocale,
+    List<LocaleOption> locales,
+    ValueChanged<AppLocale> onChanged,
   ) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -160,8 +160,8 @@ class SettingsPage extends ConsumerWidget {
         ),
       ),
       child: DropdownButtonHideUnderline(
-        child: DropdownButton<bool>(
-          value: isChinese,
+        child: DropdownButton<AppLocale>(
+          value: currentLocale,
           dropdownColor: WsColors.surface,
           icon: const Icon(
             Icons.keyboard_arrow_down,
@@ -176,16 +176,14 @@ class SettingsPage extends ConsumerWidget {
             if (value == null) return;
             onChanged(value);
           },
-          items: const [
-            DropdownMenuItem<bool>(
-              value: false,
-              child: Text('EN'),
-            ),
-            DropdownMenuItem<bool>(
-              value: true,
-              child: Text('CN'),
-            ),
-          ],
+          items: locales
+              .map(
+                (option) => DropdownMenuItem<AppLocale>(
+                  value: option.locale,
+                  child: Text(option.label),
+                ),
+              )
+              .toList(),
         ),
       ),
     );
