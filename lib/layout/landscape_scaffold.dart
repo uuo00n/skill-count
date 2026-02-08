@@ -11,6 +11,7 @@ import '../features/timezone/timezone_converter.dart';
 import '../features/timezone/timezone_page.dart';
 import '../features/unified_timer/widgets/unified_timer_page.dart';
 import '../features/white_noise/white_noise_page.dart';
+import '../features/practice_history/practice_history_page.dart';
 import '../widgets/fade_indexed_stack.dart';
 import '../widgets/grid_background.dart';
 
@@ -27,6 +28,7 @@ class _LandscapeScaffoldState extends ConsumerState<LandscapeScaffold> {
   static const _pages = <Widget>[
     CountdownPage(),
     UnifiedTimerPage(),
+    PracticeHistoryPage(),
     TimezonePage(),
     WhiteNoisePage(),
     SettingsPage(),
@@ -75,10 +77,12 @@ class _LandscapeScaffoldState extends ConsumerState<LandscapeScaffold> {
       case 1:
         subtitle = s.competitionSimulation;
       case 2:
-        subtitle = s.worldTimezones.toUpperCase();
+        subtitle = s.practiceHistory.toUpperCase();
       case 3:
-        subtitle = s.whiteNoise.toUpperCase();
+        subtitle = s.worldTimezones.toUpperCase();
       case 4:
+        subtitle = s.whiteNoise.toUpperCase();
+      case 5:
         subtitle = s.settings.toUpperCase();
       default:
         subtitle = s.competitionSimulation;
@@ -241,32 +245,34 @@ class _LandscapeScaffoldState extends ConsumerState<LandscapeScaffold> {
             },
           ),
           const SizedBox(width: 8),
-          _buildNavTab(2, Icons.public_outlined, s.timezone),
+          _buildNavTab(2, Icons.history_outlined, s.practiceHistory),
           const SizedBox(width: 8),
-          _buildNavTab(3, Icons.surround_sound_outlined, s.whiteNoise),
+          _buildNavTab(3, Icons.public_outlined, s.timezone),
+          const SizedBox(width: 8),
+          _buildNavTab(4, Icons.surround_sound_outlined, s.whiteNoise),
           const SizedBox(width: 8),
           // Settings icon
           Material(
             color: Colors.transparent,
             child: InkWell(
               borderRadius: BorderRadius.circular(8),
-              onTap: () => setState(() => _selectedIndex = 4),
+              onTap: () => setState(() => _selectedIndex = 5),
               child: Container(
                 padding:
                     const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                 decoration: BoxDecoration(
-                  color: _selectedIndex == 4
+                  color: _selectedIndex == 5
                       ? WsColors.accentCyan.withAlpha(20)
                       : Colors.transparent,
                   borderRadius: BorderRadius.circular(8),
-                  border: _selectedIndex == 4
+                  border: _selectedIndex == 5
                       ? Border.all(color: WsColors.accentCyan.withAlpha(60))
                       : null,
                 ),
                 child: Icon(
                   Icons.settings_outlined,
                   size: 20,
-                  color: _selectedIndex == 4
+                  color: _selectedIndex == 5
                       ? WsColors.accentCyan
                       : WsColors.textSecondary,
                 ),

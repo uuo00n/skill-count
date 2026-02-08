@@ -247,4 +247,24 @@ class EnStrings implements AppStrings {
   String get whiteNoisePlaying => 'White Noise Playing';
   @override
   String get whiteNoiseStopped => 'White Noise Stopped';
+
+  // Practice History
+  @override
+  String get practiceHistory => 'Practice History';
+  @override
+  String get recordsList => 'Records';
+  @override
+  String get analyticsCharts => 'Analytics';
+  @override
+  String get moduleEfficiency => 'Module Efficiency';
+  @override
+  String get timeTrend => 'Time Trend';
+  @override
+  String get completionRate => 'Completion Rate';
+  @override
+  String get averageDuration => 'Avg Duration';
+  @override
+  String get noRecords => 'No practice records yet';
+  @override
+  String get practiceCompleted => 'Practice Completed';
 }

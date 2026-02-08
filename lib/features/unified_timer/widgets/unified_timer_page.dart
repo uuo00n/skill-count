@@ -1,8 +1,11 @@
 import 'package:confetti/confetti.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
 import '../../../core/constants/ws_colors.dart';
 import '../../../core/i18n/locale_provider.dart';
+import '../../../core/providers/practice_history_provider.dart';
+import '../../practice_history/models/practice_record_model.dart' as ph;
 import '../controllers/unified_timer_controller.dart';
 import '../models/unified_timer_model.dart';
 import 'module_delete_dialog.dart';
@@ -11,23 +14,27 @@ import 'task_delete_dialog.dart';
 import 'task_detail_dialog.dart';
 import 'task_edit_dialog.dart';
 
-class UnifiedTimerPage extends StatefulWidget {
+class UnifiedTimerPage extends ConsumerStatefulWidget {
   const UnifiedTimerPage({super.key});
 
   static final ValueNotifier<bool> isTimerRunning = ValueNotifier(false);
 
   @override
-  State<UnifiedTimerPage> createState() => _UnifiedTimerPageState();
+  ConsumerState<UnifiedTimerPage> createState() => _UnifiedTimerPageState();
 }
 
-class _UnifiedTimerPageState extends State<UnifiedTimerPage> {
+class _UnifiedTimerPageState extends ConsumerState<UnifiedTimerPage> {
   late UnifiedTimerController _controller;
   late ConfettiController _confettiController;
   bool _hasCompleted = false;
+  bool _hasSavedRecord = false;
+  bool _hasStartedSession = false;
+  bool _isSavingRecord = false;
   bool _isPracticeMode = false;
   int _selectedModuleIndex = 1;
   int? _hoveredTaskIndex;
   int? _hoveredModuleIndex;
+  final List<ph.KeyEvent> _sessionKeyEvents = [];
 
   // Competition modules
   late List<ModuleModel> _competitionModules;
@@ -237,8 +244,7 @@ class _UnifiedTimerPageState extends State<UnifiedTimerPage> {
         if (_controller.remaining.inSeconds == 0 &&
             !_hasCompleted &&
             _controller.totalDuration.inSeconds > 0) {
-          _hasCompleted = true;
-          _confettiController.play();
+          _finalizeModuleCompletion(isManual: false);
         }
       },
     );
@@ -262,7 +268,7 @@ class _UnifiedTimerPageState extends State<UnifiedTimerPage> {
       _selectedModuleIndex = index;
       final module = _currentModules[index];
       _controller.startModule(module);
-      _hasCompleted = false;
+      _resetSessionState();
     });
   }
 
@@ -272,7 +278,7 @@ class _UnifiedTimerPageState extends State<UnifiedTimerPage> {
       _selectedModuleIndex = 0;
       final module = _currentModules[0];
       _controller.startModule(module);
-      _hasCompleted = false;
+      _resetSessionState();
     });
   }
 
@@ -323,15 +329,92 @@ class _UnifiedTimerPageState extends State<UnifiedTimerPage> {
       _controller.completeTask();
       _controller.nextTask();
     });
+    _addKeyEvent(ph.KeyEventType.taskComplete);
   }
 
   void _handleModuleComplete() {
+    if (!_controller.isRunning) return;
+    _finalizeModuleCompletion(isManual: true);
+  }
+
+  void _finalizeModuleCompletion({required bool isManual}) {
+    if (_hasCompleted) return;
+    final allTasksDone = !_hasPendingTasks;
+    _addKeyEvent(
+      ph.KeyEventType.moduleComplete,
+      data: {
+        'manual': isManual,
+        'allTasksDone': allTasksDone,
+      },
+    );
     setState(() {
       _hasCompleted = true;
       _confettiController.play();
       _controller.pause();
       UnifiedTimerPage.isTimerRunning.value = false;
     });
+    _savePracticeRecord(
+      recordType: allTasksDone
+          ? ph.RecordType.moduleComplete
+          : ph.RecordType.partial,
+    );
+  }
+
+  void _resetSessionState() {
+    _hasCompleted = false;
+    _hasSavedRecord = false;
+    _hasStartedSession = false;
+    _isSavingRecord = false;
+    _sessionKeyEvents.clear();
+  }
+
+  void _addKeyEvent(ph.KeyEventType type, {Map<String, dynamic>? data}) {
+    _sessionKeyEvents.add(
+      ph.KeyEvent(
+        type: type,
+        timestamp: DateTime.now(),
+        data: data,
+      ),
+    );
+  }
+
+  Future<void> _savePracticeRecord({required ph.RecordType recordType}) async {
+    if (_hasSavedRecord || _isSavingRecord) return;
+    _isSavingRecord = true;
+    final module = _controller.currentModule ?? _selectedModule;
+    final actualDuration = _controller.totalDuration - _controller.remaining;
+    final safeActualDuration =
+        actualDuration.isNegative ? Duration.zero : actualDuration;
+    final record = ph.PracticeRecord(
+      id: 'record_${DateTime.now().millisecondsSinceEpoch}',
+      moduleId: module.id,
+      moduleName: module.name,
+      recordType: recordType,
+      completedAt: DateTime.now(),
+      totalDuration: safeActualDuration,
+      estimatedDuration: _controller.totalDuration,
+      taskRecords: module.tasks
+          .map(
+            (task) => ph.TaskRecord(
+              taskId: task.id,
+              taskTitle: task.title,
+              actualSpent: task.actualSpent,
+              estimatedDuration: task.estimatedDuration,
+              status: task.status.name,
+            ),
+          )
+          .toList(),
+      keyEvents: List<ph.KeyEvent>.from(_sessionKeyEvents),
+    );
+
+    try {
+      final service = await ref.read(practiceHistoryServiceProvider.future);
+      await service.addRecord(record);
+      ref.read(recordsRefreshTriggerProvider.notifier).state++;
+      _hasSavedRecord = true;
+    } finally {
+      _isSavingRecord = false;
+    }
   }
 
   void _editTask(int index) {
@@ -404,7 +487,7 @@ class _UnifiedTimerPageState extends State<UnifiedTimerPage> {
             _currentModules.add(newModule);
             _selectedModuleIndex = _currentModules.length - 1;
             _controller.startModule(newModule);
-            _hasCompleted = false;
+            _resetSessionState();
           });
         },
       ),
@@ -423,6 +506,7 @@ class _UnifiedTimerPageState extends State<UnifiedTimerPage> {
             _currentModules[index] = updatedModule;
             if (index == _selectedModuleIndex) {
               _controller.startModule(updatedModule);
+              _resetSessionState();
             }
           });
         },
@@ -450,7 +534,7 @@ class _UnifiedTimerPageState extends State<UnifiedTimerPage> {
               _selectedModuleIndex--;
             }
             _controller.startModule(_currentModules[_selectedModuleIndex]);
-            _hasCompleted = false;
+            _resetSessionState();
           });
         },
       ),
@@ -526,7 +610,8 @@ class _UnifiedTimerPageState extends State<UnifiedTimerPage> {
               Navigator.of(ctx).pop();
               setState(() {
                 _controller.reset();
-                _hasCompleted = false;
+                _addKeyEvent(ph.KeyEventType.timerStop);
+                _resetSessionState();
               });
               UnifiedTimerPage.isTimerRunning.value = false;
             },
@@ -615,7 +700,7 @@ class _UnifiedTimerPageState extends State<UnifiedTimerPage> {
               Navigator.of(ctx).pop();
               setState(() {
                 _controller.reset();
-                _hasCompleted = false;
+                _resetSessionState();
               });
             },
             style: ElevatedButton.styleFrom(
@@ -1213,9 +1298,16 @@ class _UnifiedTimerPageState extends State<UnifiedTimerPage> {
                     setState(() {
                       if (_controller.isRunning) {
                         _controller.pause();
+                        _addKeyEvent(ph.KeyEventType.timerPause);
                       } else {
                         _controller.start();
                         _ensureCurrentTask();
+                        if (_hasStartedSession) {
+                          _addKeyEvent(ph.KeyEventType.timerResume);
+                        } else {
+                          _addKeyEvent(ph.KeyEventType.timerStart);
+                          _hasStartedSession = true;
+                        }
                       }
                       UnifiedTimerPage.isTimerRunning.value =
                           _controller.isRunning;

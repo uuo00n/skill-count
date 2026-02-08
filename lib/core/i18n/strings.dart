@@ -135,4 +135,15 @@ abstract class AppStrings {
   String get whiteNoise;
   String get whiteNoisePlaying;
   String get whiteNoiseStopped;
+
+  // Practice History
+  String get practiceHistory;
+  String get recordsList;
+  String get analyticsCharts;
+  String get moduleEfficiency;
+  String get timeTrend;
+  String get completionRate;
+  String get averageDuration;
+  String get noRecords;
+  String get practiceCompleted;
 }

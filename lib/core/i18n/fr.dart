@@ -233,4 +233,24 @@ class FrStrings implements AppStrings {
   String get whiteNoisePlaying => 'Bruit blanc en lecture';
   @override
   String get whiteNoiseStopped => 'Bruit blanc arrêté';
+
+  // Practice History
+  @override
+  String get practiceHistory => 'Historique des pratiques';
+  @override
+  String get recordsList => 'Enregistrements';
+  @override
+  String get analyticsCharts => 'Analyses';
+  @override
+  String get moduleEfficiency => 'Efficacité du module';
+  @override
+  String get timeTrend => 'Tendance temporelle';
+  @override
+  String get completionRate => 'Taux de réussite';
+  @override
+  String get averageDuration => 'Durée moyenne';
+  @override
+  String get noRecords => 'Aucun enregistrement de pratique';
+  @override
+  String get practiceCompleted => 'Pratique complétée';
 }

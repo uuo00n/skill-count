@@ -233,4 +233,24 @@ class KoStrings implements AppStrings {
   String get whiteNoisePlaying => '화이트 노이즈 재생 중';
   @override
   String get whiteNoiseStopped => '화이트 노이즈 정지';
+
+  // Practice History
+  @override
+  String get practiceHistory => '연습 기록';
+  @override
+  String get recordsList => '기록';
+  @override
+  String get analyticsCharts => '분석';
+  @override
+  String get moduleEfficiency => '모듈 효율';
+  @override
+  String get timeTrend => '시간 추세';
+  @override
+  String get completionRate => '완료율';
+  @override
+  String get averageDuration => '평균 기간';
+  @override
+  String get noRecords => '연습 기록 없음';
+  @override
+  String get practiceCompleted => '연습 완료';
 }

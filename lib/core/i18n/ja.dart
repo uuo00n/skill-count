@@ -233,4 +233,24 @@ class JaStrings implements AppStrings {
   String get whiteNoisePlaying => 'ホワイトノイズ再生中';
   @override
   String get whiteNoiseStopped => 'ホワイトノイズ停止中';
+
+  // Practice History
+  @override
+  String get practiceHistory => '練習履歴';
+  @override
+  String get recordsList => 'レコード';
+  @override
+  String get analyticsCharts => '分析';
+  @override
+  String get moduleEfficiency => 'モジュール効率';
+  @override
+  String get timeTrend => '時間トレンド';
+  @override
+  String get completionRate => '完了率';
+  @override
+  String get averageDuration => '平均期間';
+  @override
+  String get noRecords => '練習記録がありません';
+  @override
+  String get practiceCompleted => '練習完了';
 }

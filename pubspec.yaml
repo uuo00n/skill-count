@@ -54,6 +54,12 @@ dependencies:
   # Audio playback
   just_audio: ^0.10.5
 
+  # Local storage and persistence
+  shared_preferences: ^2.2.2
+
+  # Charts and data visualization
+  fl_chart: ^0.68.0
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

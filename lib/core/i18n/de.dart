@@ -233,4 +233,24 @@ class DeStrings implements AppStrings {
   String get whiteNoisePlaying => 'Weißes Rauschen läuft';
   @override
   String get whiteNoiseStopped => 'Weißes Rauschen gestoppt';
+
+  // Practice History
+  @override
+  String get practiceHistory => 'Übungsverlauf';
+  @override
+  String get recordsList => 'Aufzeichnungen';
+  @override
+  String get analyticsCharts => 'Analytik';
+  @override
+  String get moduleEfficiency => 'Moduleffizienz';
+  @override
+  String get timeTrend => 'Zeittest';
+  @override
+  String get completionRate => 'Fertigstellungsrate';
+  @override
+  String get averageDuration => 'Durchschnittliche Dauer';
+  @override
+  String get noRecords => 'Keine Übungsdatensätze';
+  @override
+  String get practiceCompleted => 'Übung abgeschlossen';
 }

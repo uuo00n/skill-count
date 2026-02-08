@@ -247,4 +247,24 @@ class ZhStrings implements AppStrings {
   String get whiteNoisePlaying => '白噪音播放中';
   @override
   String get whiteNoiseStopped => '白噪音已停止';
+
+  // Practice History
+  @override
+  String get practiceHistory => '练习历史';
+  @override
+  String get recordsList => '记录列表';
+  @override
+  String get analyticsCharts => '数据分析';
+  @override
+  String get moduleEfficiency => '模块效率';
+  @override
+  String get timeTrend => '时间趋势';
+  @override
+  String get completionRate => '完成率';
+  @override
+  String get averageDuration => '平均耗时';
+  @override
+  String get noRecords => '暂无练习记录';
+  @override
+  String get practiceCompleted => '练习完成';
 }
