@@ -26,11 +26,8 @@ class _UnifiedTimerPageState extends State<UnifiedTimerPage> {
   bool _hasCompleted = false;
   bool _isPracticeMode = false;
   int _selectedModuleIndex = 1;
-  int _selectedMinutes = 90;
   int? _hoveredTaskIndex;
   int? _hoveredModuleIndex;
-
-  static const _durationOptions = [45, 60, 90, 120, 180];
 
   // Competition modules
   late List<ModuleModel> _competitionModules;
@@ -257,6 +254,8 @@ class _UnifiedTimerPageState extends State<UnifiedTimerPage> {
 
   int get _completedTaskCount =>
       _selectedModule.tasks.where((t) => t.status == TaskStatus.done).length;
+  bool get _hasPendingTasks =>
+      _selectedModule.tasks.any((t) => t.status != TaskStatus.done);
 
   void _selectModule(int index) {
     setState(() {
@@ -287,6 +286,42 @@ class _UnifiedTimerPageState extends State<UnifiedTimerPage> {
         task.status = TaskStatus.done;
         task.completedAt = DateTime.now();
       }
+    });
+  }
+
+  void _ensureCurrentTask() {
+    final currentTask = _controller.currentTask;
+    if (currentTask != null &&
+        _selectedModule.tasks.contains(currentTask) &&
+        currentTask.status != TaskStatus.done) {
+      if (currentTask.status != TaskStatus.current) {
+        _controller.selectTask(currentTask);
+      }
+      return;
+    }
+
+    for (final task in _selectedModule.tasks) {
+      if (task.status == TaskStatus.current) {
+        _controller.selectTask(task);
+        return;
+      }
+    }
+
+    for (final task in _selectedModule.tasks) {
+      if (task.status == TaskStatus.upcoming) {
+        _controller.selectTask(task);
+        return;
+      }
+    }
+  }
+
+  void _completeCurrentTask() {
+    if (!_controller.isRunning) return;
+    setState(() {
+      _ensureCurrentTask();
+      if (_controller.currentTask == null) return;
+      _controller.completeTask();
+      _controller.nextTask();
     });
   }
 
@@ -1083,6 +1118,44 @@ class _UnifiedTimerPageState extends State<UnifiedTimerPage> {
                   onTap: _confirmReset,
                 ),
               if (_controller.isRunning) ...[
+                if (_hasPendingTasks)
+                  Material(
+                    color: Colors.transparent,
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(24),
+                      onTap: _completeCurrentTask,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 20,
+                          vertical: 12,
+                        ),
+                        decoration: BoxDecoration(
+                          color: WsColors.accentGreen,
+                          borderRadius: BorderRadius.circular(24),
+                        ),
+                        child: Row(
+                          children: [
+                            const Icon(
+                              Icons.check,
+                              color: WsColors.white,
+                              size: 20,
+                            ),
+                            const SizedBox(width: 6),
+                            Text(
+                              s.done.toUpperCase(),
+                              style: const TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w700,
+                                color: WsColors.white,
+                                letterSpacing: 1,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                const SizedBox(width: 12),
                 Material(
                   color: Colors.transparent,
                   child: InkWell(
@@ -1127,14 +1200,16 @@ class _UnifiedTimerPageState extends State<UnifiedTimerPage> {
                 child: InkWell(
                   borderRadius: BorderRadius.circular(24),
                   onTap: () {
-                    if (_controller.isRunning) {
-                      _controller.pause();
-                    } else {
-                      _controller.start();
-                    }
-                    setState(() {});
-                    UnifiedTimerPage.isTimerRunning.value =
-                        _controller.isRunning;
+                    setState(() {
+                      if (_controller.isRunning) {
+                        _controller.pause();
+                      } else {
+                        _controller.start();
+                        _ensureCurrentTask();
+                      }
+                      UnifiedTimerPage.isTimerRunning.value =
+                          _controller.isRunning;
+                    });
                   },
                   child: Container(
                     padding: const EdgeInsets.symmetric(
@@ -1274,64 +1349,6 @@ class _UnifiedTimerPageState extends State<UnifiedTimerPage> {
             ),
           ),
           const SizedBox(height: 16),
-          // Duration selector (practice mode only)
-          if (_isPracticeMode || _selectedModule.allowCustomDuration) ...[
-            Row(
-              children: _durationOptions.map((m) {
-                final isSelected = _selectedMinutes == m;
-                final accentColor = _isPracticeMode
-                    ? WsColors.accentGreen
-                    : WsColors.accentCyan;
-                return Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 2),
-                    child: Material(
-                      color: Colors.transparent,
-                      child: InkWell(
-                        borderRadius: BorderRadius.circular(6),
-                        onTap: _controller.isRunning
-                            ? null
-                            : () {
-                                setState(() => _selectedMinutes = m);
-                                _controller.setDuration(
-                                  Duration(minutes: m),
-                                );
-                                _hasCompleted = false;
-                              },
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(vertical: 6),
-                          decoration: BoxDecoration(
-                            color: isSelected
-                                ? accentColor.withAlpha(30)
-                                : Colors.transparent,
-                            borderRadius: BorderRadius.circular(6),
-                            border: Border.all(
-                              color: isSelected
-                                  ? accentColor
-                                  : WsColors.textSecondary.withAlpha(40),
-                            ),
-                          ),
-                          child: Center(
-                            child: Text(
-                              '${m}m',
-                              style: TextStyle(
-                                fontSize: 11,
-                                fontWeight: FontWeight.w600,
-                                color: isSelected
-                                    ? accentColor
-                                    : WsColors.textSecondary,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                );
-              }).toList(),
-            ),
-            const SizedBox(height: 16),
-          ],
           // Progress summary
           _buildProgressSummary(s),
           const SizedBox(height: 12),
