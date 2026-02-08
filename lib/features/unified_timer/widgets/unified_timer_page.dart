@@ -1478,6 +1478,11 @@ class _UnifiedTimerPageState extends State<UnifiedTimerPage> {
 
     final accentColor =
         _isPracticeMode ? WsColors.accentGreen : WsColors.accentCyan;
+    final hideCheckbox =
+        !_isPracticeMode &&
+        !_controller.isRunning &&
+        !_controller.isCompleted &&
+        _controller.remaining == _controller.totalDuration;
 
     return MouseRegion(
       key: ValueKey(task.id),
@@ -1554,12 +1559,14 @@ class _UnifiedTimerPageState extends State<UnifiedTimerPage> {
                           ),
                         ],
                         const Spacer(),
-                        if (isDone)
-                          const Icon(Icons.check_circle,
-                              size: 16, color: WsColors.accentGreen)
-                        else if (!isCurrent)
-                          const Icon(Icons.radio_button_unchecked,
-                              size: 16, color: WsColors.textSecondary),
+                        if (!hideCheckbox) ...[
+                          if (isDone)
+                            const Icon(Icons.check_circle,
+                                size: 16, color: WsColors.accentGreen)
+                          else if (!isCurrent)
+                            const Icon(Icons.radio_button_unchecked,
+                                size: 16, color: WsColors.textSecondary),
+                        ],
                       ],
                     ),
                     const SizedBox(height: 6),
