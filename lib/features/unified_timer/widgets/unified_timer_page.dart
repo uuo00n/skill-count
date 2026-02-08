@@ -325,6 +325,15 @@ class _UnifiedTimerPageState extends State<UnifiedTimerPage> {
     });
   }
 
+  void _handleModuleComplete() {
+    setState(() {
+      _hasCompleted = true;
+      _confettiController.play();
+      _controller.pause();
+      UnifiedTimerPage.isTimerRunning.value = false;
+    });
+  }
+
   void _editTask(int index) {
     final task = _selectedModule.tasks[index];
     showDialog(
@@ -1118,43 +1127,44 @@ class _UnifiedTimerPageState extends State<UnifiedTimerPage> {
                   onTap: _confirmReset,
                 ),
               if (_controller.isRunning) ...[
-                if (_hasPendingTasks)
-                  Material(
-                    color: Colors.transparent,
-                    child: InkWell(
-                      borderRadius: BorderRadius.circular(24),
-                      onTap: _completeCurrentTask,
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 20,
-                          vertical: 12,
-                        ),
-                        decoration: BoxDecoration(
-                          color: WsColors.accentGreen,
-                          borderRadius: BorderRadius.circular(24),
-                        ),
-                        child: Row(
-                          children: [
-                            const Icon(
-                              Icons.check,
+                Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(24),
+                    onTap: _hasPendingTasks
+                        ? _completeCurrentTask
+                        : _handleModuleComplete,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 20,
+                        vertical: 12,
+                      ),
+                      decoration: BoxDecoration(
+                        color: WsColors.accentGreen,
+                        borderRadius: BorderRadius.circular(24),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(
+                            _hasPendingTasks ? Icons.check : Icons.celebration,
+                            color: WsColors.white,
+                            size: 20,
+                          ),
+                          const SizedBox(width: 6),
+                          Text(
+                            _hasPendingTasks ? s.done.toUpperCase() : '模块完成',
+                            style: const TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w700,
                               color: WsColors.white,
-                              size: 20,
+                              letterSpacing: 1,
                             ),
-                            const SizedBox(width: 6),
-                            Text(
-                              s.done.toUpperCase(),
-                              style: const TextStyle(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w700,
-                                color: WsColors.white,
-                                letterSpacing: 1,
-                              ),
-                            ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
                     ),
                   ),
+                ),
                 const SizedBox(width: 12),
                 Material(
                   color: Colors.transparent,
