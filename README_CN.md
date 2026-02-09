@@ -71,30 +71,84 @@ flutter run -d macos
 flutter run -d linux
 ```
 
+## 技术栈与依赖
+
+### 核心框架
+| 包名 | 版本 | 用途 |
+| :--- | :--- | :--- |
+| **Flutter** | 3.x | 跨平台 UI 框架 |
+| **Dart** | 3.9.2+ | 编程语言 |
+| **flutter_riverpod** | ^2.6.1 | 响应式状态管理 |
+
+### UI 组件与动效
+| 包名 | 版本 | 用途 |
+| :--- | :--- | :--- |
+| **percent_indicator** | ^4.2.5 | 倒计时与进度圆环展示 |
+| **fl_chart** | ^0.68.0 | 练习历史数据统计图表 |
+| **flutter_svg** | ^2.2.3 | SVG 矢量资源渲染 |
+| **confetti** | ^0.8.0 | 庆祝撒花动效 |
+| **cupertino_icons** | ^1.0.8 | iOS 风格图标集 |
+
+### 功能模块
+| 包名 | 版本 | 用途 |
+| :--- | :--- | :--- |
+| **timezone** | ^0.10.0 | IANA 时区数据库，用于世界时钟 |
+| **just_audio** | ^0.10.5 | 音频播放，用于白噪音功能 |
+| **shared_preferences** | ^2.2.2 | 本地数据持久化（配置、里程碑） |
+| **http** | ^1.2.0 | 网络请求，用于 AI 复盘服务 |
+| **flutter_dotenv** | ^5.1.0 | 环境变量管理（API 密钥配置） |
+
+### 平台适配
+| 包名 | 版本 | 用途 |
+| :--- | :--- | :--- |
+| **window_size** | ^0.1.0 | 桌面端窗口尺寸控制 |
+| **universal_html** | ^2.2.4 | Web 端全屏与 DOM 操作兼容 |
+
+### 开发工具
+| 包名 | 版本 | 用途 |
+| :--- | :--- | :--- |
+| **flutter_lints** | ^5.0.0 | 代码规范静态分析 |
+| **riverpod_generator** | ^2.6.1 | Riverpod 代码生成 |
+
 ## 项目结构
 ```
 skillcount/
 ├── lib/
 │   ├── core/
-│   │   ├── constants/
-│   │   ├── i18n/
-│   │   ├── ai/
-│   │   ├── theme/
-│   │   └── utils/
+│   │   ├── constants/               # 全局常量（配色、时间等）
+│   │   │   ├── ws_colors.dart       # WorldSkills 配色体系
+│   │   │   └── ws_times.dart        # 竞赛时间常量（倒计时目标等）
+│   │   ├── i18n/                    # 国际化与多语言
+│   │   │   ├── locale_provider.dart # 语言管理
+│   │   │   ├── strings.dart         # 文案接口定义
+│   │   │   ├── zh.dart              # 简体中文
+│   │   │   ├── zh_tw.dart           # 繁体中文
+│   │   │   ├── en.dart              # English
+│   │   │   ├── ja.dart              # 日本語
+│   │   │   ├── de.dart              # Deutsch
+│   │   │   ├── fr.dart              # Français
+│   │   │   └── ko.dart              # 한국어
+│   │   ├── ai/                      # AI 复盘能力（可选）
+│   │   ├── theme/                   # 主题与样式
+│   │   │   └── app_theme.dart       # Material 主题配置
+│   │   └── utils/                   # 通用工具
 │   ├── features/
-│   │   ├── countdown/
-│   │   ├── unified_timer/
-│   │   ├── practice_history/
-│   │   ├── timezone/
-│   │   ├── white_noise/
-│   │   └── settings/
-│   ├── layout/
-│   ├── widgets/
-│   ├── app.dart
-│   └── main.dart
-├── test/
-├── pubspec.yaml
-└── README.md
+│   │   ├── countdown/               # 主倒计时页面
+│   │   ├── unified_timer/           # 竞赛/训练统一计时面板
+│   │   ├── practice_history/        # 练习记录、统计图表、AI 复盘
+│   │   ├── milestones/              # 里程碑（关键节点）
+│   │   ├── module_timer/            # 模块计时能力
+│   │   ├── timezone/                # 时区转换与世界时钟
+│   │   ├── white_noise/             # 白噪音播放
+│   │   └── settings/                # 设置页（缓存清理等）
+│   ├── layout/                      # 横屏布局骨架（桌面/平板）
+│   ├── widgets/                     # 通用组件（背景、玻璃面板等）
+│   ├── app.dart                     # App 入口与路由/主题装配
+│   └── main.dart                    # 程序启动与平台初始化
+├── test/                            # 单元测试与 Widget 测试
+│   └── widget_test.dart
+├── pubspec.yaml                     # 依赖、资源与应用元信息
+└── README.md                        # 项目说明文档
 ```
 
 ## 语言配置

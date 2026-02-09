@@ -216,47 +216,52 @@ skillcount/
 │   │   ├── ws_timer_text.dart         # Timer text display widget
 │   │   ├── grid_background.dart      # Background grid decoration
 │   │   └── competition_timeline.dart  # Competition timeline widget
-│   ├── app.dart
-│   └── main.dart
+│   ├── app.dart                       # App composition (theme/routes/providers)
+│   └── main.dart                      # Application entrypoint
 ├── test/
 │   └── widget_test.dart
-├── pubspec.yaml
-└── README.md
+├── pubspec.yaml                       # Dependencies and assets
+└── README.md                          # Project documentation
 ```
 
-## Technology Stack
+## Technology Stack & Dependencies
 
-### Core Technologies
-- **Flutter 3.x** - Cross-platform UI framework
-- **Dart 3.9.2+** - Programming language
-- **Material Design 3** - Design system
+### Core Framework
+| Package | Version | Purpose |
+| :--- | :--- | :--- |
+| **Flutter** | 3.x | Cross-platform UI Framework |
+| **Dart** | 3.9.2+ | Programming Language |
+| **flutter_riverpod** | ^2.6.1 | Reactive State Management |
 
-### Key Dependencies
-- `cupertino_icons: ^1.0.8` - iOS-style icons
-- `flutter_svg: ^2.2.3` - SVG image support
-- `percent_indicator: ^4.2.5` - Animated progress indicators
-- `confetti: ^0.8.0` - Celebration effects
-- `window_size: ^0.1.0` - Desktop window sizing
-- `universal_html: ^2.2.4` - Web fullscreen
-- `flutter_riverpod: ^2.6.1` - State management
-- `shared_preferences: ^2.2.2` - Local persistence
-- `just_audio: ^0.10.5` - Audio playback
-- `timezone: ^0.10.0` - IANA timezone database
-- `fl_chart: ^0.68.0` - Charts
-- `flutter_dotenv: ^5.1.0` - Environment variables
-- `http: ^1.2.0` - HTTP client
+### UI & Animations
+| Package | Version | Purpose |
+| :--- | :--- | :--- |
+| **percent_indicator** | ^4.2.5 | Circular/Linear progress indicators |
+| **fl_chart** | ^0.68.0 | Data visualization charts |
+| **flutter_svg** | ^2.2.3 | SVG rendering |
+| **confetti** | ^0.8.0 | Celebration particle effects |
+| **cupertino_icons** | ^1.0.8 | iOS style icons |
 
-### Development Tools
-- `flutter_lints: ^5.0.0` - Code quality lints
-- `flutter_test` - Widget and integration testing
+### Functionality
+| Package | Version | Purpose |
+| :--- | :--- | :--- |
+| **timezone** | ^0.10.0 | IANA timezone database |
+| **just_audio** | ^0.10.5 | Audio playback (White Noise) |
+| **shared_preferences** | ^2.2.2 | Local persistence (Settings, Milestones) |
+| **http** | ^1.2.0 | HTTP client (AI Review) |
+| **flutter_dotenv** | ^5.1.0 | Environment configuration (.env) |
 
 ### Platform Support
-- iOS (iPhone/iPad)
-- Android (phones and tablets)
-- Web (Chrome, Edge, Firefox, Safari)
-- Windows 10+
-- macOS 10.14+
-- Linux (Ubuntu, Fedora, etc.)
+| Package | Version | Purpose |
+| :--- | :--- | :--- |
+| **window_size** | ^0.1.0 | Desktop window size control |
+| **universal_html** | ^2.2.4 | Web compatibility & fullscreen |
+
+### Development Tools
+| Package | Version | Purpose |
+| :--- | :--- | :--- |
+| **flutter_lints** | ^5.0.0 | Static analysis & lints |
+| **riverpod_generator** | ^2.6.1 | Riverpod code generation |
 
 ## Color System
 
