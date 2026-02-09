@@ -17,7 +17,7 @@ class VolcengineConfig {
     this.apiKey = '',
     this.endpoint = 'https://ark.cn-beijing.volces.com/api/v3',
     this.model = 'ep-2024xxxx',
-    this.timeout = 30,
+    this.timeout = 60,
   });
 
   factory VolcengineConfig.fromEnv() {
@@ -27,7 +27,7 @@ class VolcengineConfig {
           'https://ark.cn-beijing.volces.com/api/v3',
       model: dotenv.env['VOLCENGINE_MODEL'] ?? 'ep-2024xxxx',
       timeout:
-          int.tryParse(dotenv.env['VOLCENGINE_TIMEOUT'] ?? '30') ?? 30,
+          int.tryParse(dotenv.env['VOLCENGINE_TIMEOUT'] ?? '60') ?? 60,
     );
   }
 }

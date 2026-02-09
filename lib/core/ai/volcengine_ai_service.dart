@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:http/http.dart' as http;
 
@@ -58,18 +59,18 @@ class VolcengineAIService implements AIService {
       'max_tokens': 2000,
       'functions': TrainingAnalysisPrompt.functions,
       'function_call': {'name': 'generate_analysis'},
+      'tools': _buildTools(TrainingAnalysisPrompt.functions),
+      'tool_choice': {
+        'type': 'function',
+        'function': {'name': 'generate_analysis'},
+      },
     };
 
-    final response = await _client
-        .post(
-          Uri.parse('${_config.endpoint}/chat/completions'),
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': 'Bearer ${_config.apiKey}',
-          },
-          body: jsonEncode(requestBody),
-        )
-        .timeout(Duration(seconds: _config.timeout));
+    final response = await _postJson(
+      path: '/chat/completions',
+      body: requestBody,
+      timeoutSeconds: _config.timeout,
+    );
 
     if (response.statusCode != 200) {
       throw Exception('API请求失败: ${response.statusCode}');
@@ -82,19 +83,20 @@ class VolcengineAIService implements AIService {
       throw Exception('API返回空结果');
     }
 
-    final message =
-        choices[0]['message'] as Map<String, dynamic>;
-    final functionCall =
-        message['function_call'] as Map<String, dynamic>?;
+    final message = choices[0]['message'] as Map<String, dynamic>;
 
-    if (functionCall == null) {
-      throw Exception('API未返回function_call结果');
+    final toolArgs = _extractToolOrFunctionArgs(message);
+    if (toolArgs != null) {
+      return AIAnalysisResult.fromJson(toolArgs);
     }
 
-    final functionArgs = jsonDecode(functionCall['arguments'] as String)
-        as Map<String, dynamic>;
+    final content = message['content'] as String?;
+    final contentArgs = _tryParseJsonObject(content);
+    if (contentArgs != null) {
+      return AIAnalysisResult.fromJson(contentArgs);
+    }
 
-    return AIAnalysisResult.fromJson(functionArgs);
+    throw Exception('API未返回结构化结果（function_call/tool_calls/JSON content）');
   }
 
   @override
@@ -180,9 +182,18 @@ class VolcengineAIService implements AIService {
     });
     request.body = jsonEncode(requestBody);
 
-    final streamedResponse = await _client.send(request);
+    final streamedResponse = await _client
+        .send(request)
+        .timeout(Duration(seconds: _config.timeout));
 
-    await for (final chunk in streamedResponse.stream) {
+    if (streamedResponse.statusCode != 200) {
+      final bodyBytes = await streamedResponse.stream.toBytes();
+      final bodyText = utf8.decode(bodyBytes);
+      throw Exception('API请求失败: ${streamedResponse.statusCode}\n$bodyText');
+    }
+
+    await for (final chunk
+        in streamedResponse.stream.timeout(Duration(seconds: _config.timeout))) {
       final lines = utf8.decode(chunk).split('\n');
       for (final line in lines) {
         if (line.startsWith('data: ')) {
@@ -210,30 +221,25 @@ class VolcengineAIService implements AIService {
   }
 
   Future<String> _chatWithAI(String prompt) async {
-    final response = await _client
-        .post(
-          Uri.parse('${_config.endpoint}/chat/completions'),
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': 'Bearer ${_config.apiKey}',
+    final response = await _postJson(
+      path: '/chat/completions',
+      body: {
+        'model': _config.model,
+        'messages': [
+          {
+            'role': 'system',
+            'content': TrainingAnalysisPrompt.systemPrompt,
           },
-          body: jsonEncode({
-            'model': _config.model,
-            'messages': [
-              {
-                'role': 'system',
-                'content': TrainingAnalysisPrompt.systemPrompt,
-              },
-              {
-                'role': 'user',
-                'content': prompt,
-              },
-            ],
-            'temperature': 0.7,
-            'max_tokens': 1000,
-          }),
-        )
-        .timeout(Duration(seconds: _config.timeout));
+          {
+            'role': 'user',
+            'content': prompt,
+          },
+        ],
+        'temperature': 0.7,
+        'max_tokens': 1000,
+      },
+      timeoutSeconds: _config.timeout,
+    );
 
     if (response.statusCode != 200) {
       throw Exception('API请求失败: ${response.statusCode}');
@@ -249,6 +255,102 @@ class VolcengineAIService implements AIService {
     final message =
         choices[0]['message'] as Map<String, dynamic>;
     return message['content'] as String? ?? '';
+  }
+
+  List<Map<String, dynamic>> _buildTools(List<Map<String, dynamic>> functions) {
+    return functions
+        .map(
+          (fn) => {
+            'type': 'function',
+            'function': {
+              'name': fn['name'],
+              'description': fn['description'],
+              'parameters': fn['parameters'],
+            },
+          },
+        )
+        .toList();
+  }
+
+  Map<String, dynamic>? _extractToolOrFunctionArgs(
+    Map<String, dynamic> message,
+  ) {
+    final toolCalls = message['tool_calls'];
+    if (toolCalls is List && toolCalls.isNotEmpty) {
+      final first = toolCalls.first;
+      if (first is Map<String, dynamic>) {
+        final fn = first['function'];
+        if (fn is Map<String, dynamic>) {
+          final args = fn['arguments'];
+          if (args is String && args.trim().isNotEmpty) {
+            final decoded = jsonDecode(args);
+            if (decoded is Map<String, dynamic>) return decoded;
+          }
+        }
+      }
+    }
+
+    final functionCall = message['function_call'];
+    if (functionCall is Map<String, dynamic>) {
+      final args = functionCall['arguments'];
+      if (args is String && args.trim().isNotEmpty) {
+        final decoded = jsonDecode(args);
+        if (decoded is Map<String, dynamic>) return decoded;
+      }
+    }
+
+    return null;
+  }
+
+  Map<String, dynamic>? _tryParseJsonObject(String? content) {
+    if (content == null) return null;
+    final text = content.trim();
+    if (text.isEmpty) return null;
+
+    try {
+      final decoded = jsonDecode(text);
+      if (decoded is Map<String, dynamic>) return decoded;
+    } catch (_) {}
+
+    final start = text.indexOf('{');
+    final end = text.lastIndexOf('}');
+    if (start >= 0 && end > start) {
+      final maybeJson = text.substring(start, end + 1);
+      try {
+        final decoded = jsonDecode(maybeJson);
+        if (decoded is Map<String, dynamic>) return decoded;
+      } catch (_) {}
+    }
+
+    return null;
+  }
+
+  Future<http.Response> _postJson({
+    required String path,
+    required Map<String, dynamic> body,
+    required int timeoutSeconds,
+  }) async {
+    try {
+      final response = await _client
+          .post(
+            Uri.parse('${_config.endpoint}$path'),
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer ${_config.apiKey}',
+            },
+            body: jsonEncode(body),
+          )
+          .timeout(Duration(seconds: timeoutSeconds));
+      return response;
+    } on TimeoutException {
+      throw TimeoutException(
+        'Timeout after 0:00:${timeoutSeconds.toString().padLeft(2, '0')}.000000: Future not completed',
+      );
+    } on SocketException catch (e) {
+      throw Exception('网络连接失败: ${e.message}');
+    } on HandshakeException catch (e) {
+      throw Exception('TLS握手失败: ${e.message}');
+    }
   }
 
   Duration _extractPredictedTime(String response) {

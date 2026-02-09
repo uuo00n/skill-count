@@ -1,3 +1,6 @@
+import 'dart:async';
+import 'dart:io';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../features/practice_history/models/practice_record_model.dart';
@@ -103,10 +106,40 @@ class AIAnalysisNotifier extends StateNotifier<AIAnalysisState> {
     } catch (e) {
       state = AIAnalysisState(
         status: AIAnalysisStatus.error,
-        errorMessage: e.toString(),
+        errorMessage: _formatAIError(e),
       );
     }
   }
+}
+
+String _formatAIError(Object error) {
+  if (error is TimeoutException) {
+    return '请求超时：AI服务在规定时间内未响应\n\n'
+        '可能原因：网络不可达/代理未配置、服务端响应较慢、或模型配置不正确\n\n'
+        '建议：检查网络后重试；如仍超时，可在 .env 中设置 VOLCENGINE_TIMEOUT=90 或更大';
+  }
+
+  if (error is SocketException) {
+    return '网络连接失败：${error.message}\n\n'
+        '建议：检查网络、代理/VPN、防火墙设置后重试';
+  }
+
+  final message = error.toString();
+  if (message.contains('AI服务未配置')) {
+    return 'AI服务未配置：请在 .env 中设置 VOLCENGINE_API_KEY（以及 VOLCENGINE_MODEL）';
+  }
+
+  if (message.contains('API请求失败')) {
+    return '$message\n\n建议：确认 VOLCENGINE_ENDPOINT / VOLCENGINE_MODEL 配置正确';
+  }
+
+  if (message.contains('API未返回结构化结果')) {
+    return 'AI返回结果格式不符合预期（未包含 function_call/tool_calls，也未输出 JSON）\n\n'
+        '常见原因：VOLCENGINE_MODEL 不支持工具/函数调用，或服务端忽略了 function_call\n\n'
+        '建议：检查 .env 中 VOLCENGINE_MODEL 是否为支持 function/tool 的模型，并重试';
+  }
+
+  return message;
 }
 
 /// AI分析 Provider
@@ -194,7 +227,7 @@ class AIChatNotifier extends StateNotifier<AIChatState> {
     } catch (e) {
       final errorMessage = ChatMessage(
         role: 'assistant',
-        content: '分析失败: $e',
+        content: _formatAIError(e),
         timestamp: DateTime.now(),
       );
       state = state.copyWith(
