@@ -6,6 +6,7 @@ class WsTimes {
   WsTimes._();
 
   /// 比赛开幕式时间 (UTC)
+  /// 北京时间 2026-09-22 00:00:00 = UTC 2026-09-21 16:00:00
   static final DateTime competitionOpenTime =
-      DateTime.utc(2026, 9, 22, 11, 0, 0);
+      DateTime.utc(2026, 9, 21, 16, 0, 0);
 }

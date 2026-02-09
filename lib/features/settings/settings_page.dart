@@ -8,6 +8,7 @@ import '../../core/i18n/locale_provider.dart';
 import '../../core/i18n/strings.dart';
 import '../../core/providers/practice_history_provider.dart';
 import '../../core/providers/time_providers.dart';
+import '../../widgets/animated_cube_logo.dart';
 import '../practice_history/practice_history_service.dart';
 import '../timezone/timezone_converter.dart';
 import '../timezone/timezone_model.dart';
@@ -39,18 +40,29 @@ class SettingsPage extends ConsumerWidget {
     return Center(
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 480),
-        child: Padding(
+        child: SingleChildScrollView(
           padding: const EdgeInsets.all(32),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                s.settings.toUpperCase(),
-                style: const TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                  color: WsColors.textSecondary,
-                  letterSpacing: 3,
+              const SizedBox(height: 24),
+              // Animated Cube Logo
+              const Center(
+                child: AnimatedCubeLogo(
+                  size: 120,
+                  duration: Duration(seconds: 4),
+                ),
+              ),
+              const SizedBox(height: 16),
+              Center(
+                child: Text(
+                  s.settings.toUpperCase(),
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: WsColors.textSecondary,
+                    letterSpacing: 3,
+                  ),
                 ),
               ),
               const SizedBox(height: 24),
@@ -115,6 +127,17 @@ class SettingsPage extends ConsumerWidget {
                   ),
                 ),
               ),
+              const SizedBox(height: 24),
+              // Cache section title
+              Text(
+                'CACHE',
+                style: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: WsColors.textSecondary,
+                  letterSpacing: 3,
+                ),
+              ),
               const SizedBox(height: 12),
               _buildSettingTile(
                 icon: Icons.delete_outline,
@@ -131,6 +154,26 @@ class SettingsPage extends ConsumerWidget {
                 onTap: () => _confirmClearAIHistory(context, ref, s),
                 iconColor: WsColors.accentRed,
               ),
+              const SizedBox(height: 32),
+              // Copyright
+              const Center(
+                child: Text(
+                  '© dnui HuangJunBo',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: WsColors.textSecondary,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              Center(
+                child: Image.asset(
+                  'assets/images/WS_Logo_DarkBlue_RGB.png',
+                  width: 120,
+                  fit: BoxFit.contain,
+                ),
+              ),
+              const SizedBox(height: 24),
             ],
           ),
         ),
