@@ -287,4 +287,8 @@ class DeStrings implements AppStrings {
   String get practiceCompleted => 'Übung abgeschlossen';
   @override
   String get loadFailed => 'Laden fehlgeschlagen';
+  @override
+  String get displayTimezone => 'Angezeigte Zeitzone';
+  @override
+  String get selectTimezone => 'Zeitzone auswählen';
 }

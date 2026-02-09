@@ -8,6 +8,7 @@ import '../core/providers/time_providers.dart';
 import '../features/countdown/countdown_page.dart';
 import '../features/settings/settings_page.dart';
 import '../features/timezone/timezone_converter.dart';
+import '../features/timezone/timezone_model.dart';
 import '../features/timezone/timezone_page.dart';
 import '../features/unified_timer/widgets/unified_timer_page.dart';
 import '../features/white_noise/white_noise_page.dart';
@@ -62,13 +63,21 @@ class _LandscapeScaffoldState extends ConsumerState<LandscapeScaffold> {
     final s = LocaleScope.of(context);
     final provider = LocaleScope.providerOf(context);
 
-    // 使用统一时间源 + IANA 时区
+    // 使用统一时间源 + 用户选择的时区
     final utcNow = ref.watch(unifiedTimeProvider);
-    final shanghaiTime =
-        TimezoneConverter.convert(utcNow, 'Asia/Shanghai');
-    final hours = shanghaiTime.hour.toString().padLeft(2, '0');
-    final minutes = shanghaiTime.minute.toString().padLeft(2, '0');
-    final seconds = shanghaiTime.second.toString().padLeft(2, '0');
+    final selectedTz = ref.watch(appTimezoneProvider);
+    final displayTime = TimezoneConverter.convert(utcNow, selectedTz);
+    final hours = displayTime.hour.toString().padLeft(2, '0');
+    final minutes = displayTime.minute.toString().padLeft(2, '0');
+    final seconds = displayTime.second.toString().padLeft(2, '0');
+
+    // 从 cities 列表中找到对应城市信息
+    final city = TimeZoneCity.cities.firstWhere(
+      (c) => c.timezoneId == selectedTz,
+      orElse: () => TimeZoneCity.cities.first,
+    );
+    final offsetSign = city.utcOffset >= 0 ? '+' : '';
+    final tzLabel = '${city.name} (UTC$offsetSign${city.utcOffset})';
 
     String subtitle;
     switch (_selectedIndex) {
@@ -176,7 +185,7 @@ class _LandscapeScaffoldState extends ConsumerState<LandscapeScaffold> {
           ),
           const SizedBox(width: 12),
           Text(
-            'Shanghai (UTC+8)',
+            tzLabel,
             style: TextStyle(
               fontSize: 12,
               color: WsColors.textSecondary.withAlpha(180),

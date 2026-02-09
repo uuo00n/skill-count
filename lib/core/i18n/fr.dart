@@ -287,4 +287,8 @@ class FrStrings implements AppStrings {
   String get practiceCompleted => 'Pratique complétée';
   @override
   String get loadFailed => 'Échec du chargement';
+  @override
+  String get displayTimezone => 'Fuseau horaire affiché';
+  @override
+  String get selectTimezone => 'Sélectionner le fuseau horaire';
 }

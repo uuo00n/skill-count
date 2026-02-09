@@ -287,4 +287,8 @@ class KoStrings implements AppStrings {
   String get practiceCompleted => '연습 완료';
   @override
   String get loadFailed => '불러오기 실패';
+  @override
+  String get displayTimezone => '표시 시간대';
+  @override
+  String get selectTimezone => '시간대 선택';
 }

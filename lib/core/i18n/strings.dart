@@ -163,4 +163,8 @@ abstract class AppStrings {
   String get noRecords;
   String get practiceCompleted;
   String get loadFailed;
+
+  // Timezone Settings
+  String get displayTimezone;
+  String get selectTimezone;
 }

@@ -5,6 +5,7 @@ import '../../core/constants/ws_colors.dart';
 import '../../core/i18n/locale_provider.dart';
 import '../../core/i18n/strings.dart';
 import '../../core/providers/time_providers.dart';
+import '../timezone/timezone_model.dart';
 
 class SettingsPage extends ConsumerWidget {
   const SettingsPage({super.key});
@@ -14,6 +15,14 @@ class SettingsPage extends ConsumerWidget {
     final s = LocaleScope.of(context);
     final provider = LocaleScope.providerOf(context);
     final targetTime = ref.watch(competitionCountdownProvider).toLocal();
+    final selectedTz = ref.watch(appTimezoneProvider);
+    final selectedCity = TimeZoneCity.cities.firstWhere(
+      (c) => c.timezoneId == selectedTz,
+      orElse: () => TimeZoneCity.cities.first,
+    );
+    final offsetSign = selectedCity.utcOffset >= 0 ? '+' : '';
+    final tzDisplay =
+        '${selectedCity.name} (UTC$offsetSign${selectedCity.utcOffset})';
 
     return Center(
       child: ConstrainedBox(
@@ -64,6 +73,13 @@ class SettingsPage extends ConsumerWidget {
                   provider.locales,
                   (locale) => provider.setLocale(locale),
                 ),
+              ),
+              const SizedBox(height: 12),
+              _buildSettingTile(
+                icon: Icons.public_outlined,
+                title: s.displayTimezone,
+                subtitle: tzDisplay,
+                onTap: () => _showTimezoneDialog(context, ref, s, selectedTz),
               ),
               const SizedBox(height: 12),
               _buildSettingTile(
@@ -337,5 +353,121 @@ class SettingsPage extends ConsumerWidget {
   String _formatDateTime(DateTime dateTime) {
     return '${dateTime.year}-${dateTime.month.toString().padLeft(2, '0')}-${dateTime.day.toString().padLeft(2, '0')} '
         '${dateTime.hour.toString().padLeft(2, '0')}:${dateTime.minute.toString().padLeft(2, '0')}';
+  }
+
+  Future<void> _showTimezoneDialog(
+    BuildContext context,
+    WidgetRef ref,
+    AppStrings s,
+    String currentTz,
+  ) async {
+    await showDialog<void>(
+      context: context,
+      builder: (context) {
+        return Dialog(
+          backgroundColor: WsColors.surface,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Container(
+            width: 360,
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: WsColors.accentCyan.withAlpha(20),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: const Icon(
+                        Icons.public_outlined,
+                        size: 20,
+                        color: WsColors.accentCyan,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Text(
+                      s.selectTimezone,
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w700,
+                        color: WsColors.textPrimary,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 20),
+                ...TimeZoneCity.cities.map(
+                  (city) {
+                    final isSelected = city.timezoneId == currentTz;
+                    final sign = city.utcOffset >= 0 ? '+' : '';
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 8),
+                      child: Material(
+                        color: Colors.transparent,
+                        child: InkWell(
+                          borderRadius: BorderRadius.circular(10),
+                          onTap: () {
+                            ref.read(appTimezoneProvider.notifier).state =
+                                city.timezoneId;
+                            Navigator.of(context).pop();
+                          },
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 12,
+                            ),
+                            decoration: BoxDecoration(
+                              color: isSelected
+                                  ? WsColors.accentCyan.withAlpha(15)
+                                  : Colors.transparent,
+                              borderRadius: BorderRadius.circular(10),
+                              border: Border.all(
+                                color: isSelected
+                                    ? WsColors.accentCyan
+                                    : WsColors.border,
+                              ),
+                            ),
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  child: Text(
+                                    '${city.name}  (UTC$sign${city.utcOffset})',
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: isSelected
+                                          ? FontWeight.w700
+                                          : FontWeight.w500,
+                                      color: isSelected
+                                          ? WsColors.accentCyan
+                                          : WsColors.textPrimary,
+                                    ),
+                                  ),
+                                ),
+                                if (isSelected)
+                                  const Icon(
+                                    Icons.check_circle,
+                                    size: 20,
+                                    color: WsColors.accentCyan,
+                                  ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
   }
 }

@@ -301,4 +301,8 @@ class EnStrings implements AppStrings {
   String get practiceCompleted => 'Practice Completed';
   @override
   String get loadFailed => 'Failed to load';
+  @override
+  String get displayTimezone => 'Display Timezone';
+  @override
+  String get selectTimezone => 'Select Timezone';
 }

@@ -41,6 +41,11 @@ final unifiedTimeProvider =
   (ref) => UnifiedTimeService(),
 );
 
+/// 用户选择的显示时区（IANA 时区 ID）
+final appTimezoneProvider = StateProvider<String>(
+  (ref) => 'Asia/Shanghai',
+);
+
 final competitionCountdownProvider = StateProvider<DateTime>(
   (ref) => WsTimes.competitionOpenTime,
 );

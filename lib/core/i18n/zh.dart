@@ -301,4 +301,8 @@ class ZhStrings implements AppStrings {
   String get practiceCompleted => '练习完成';
   @override
   String get loadFailed => '加载失败';
+  @override
+  String get displayTimezone => '显示时区';
+  @override
+  String get selectTimezone => '选择时区';
 }

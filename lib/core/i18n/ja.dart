@@ -287,4 +287,8 @@ class JaStrings implements AppStrings {
   String get practiceCompleted => '練習完了';
   @override
   String get loadFailed => '読み込みに失敗しました';
+  @override
+  String get displayTimezone => '表示タイムゾーン';
+  @override
+  String get selectTimezone => 'タイムゾーンを選択';
 }
