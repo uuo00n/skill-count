@@ -5,6 +5,7 @@ import 'package:percent_indicator/circular_percent_indicator.dart';
 import '../../../core/constants/ws_colors.dart';
 import '../../../core/i18n/locale_provider.dart';
 import '../../../core/providers/practice_history_provider.dart';
+import '../../../core/providers/time_providers.dart';
 import '../../practice_history/models/practice_record_model.dart' as ph;
 import '../controllers/unified_timer_controller.dart';
 import '../models/unified_timer_model.dart';
@@ -16,8 +17,6 @@ import 'task_edit_dialog.dart';
 
 class UnifiedTimerPage extends ConsumerStatefulWidget {
   const UnifiedTimerPage({super.key});
-
-  static final ValueNotifier<bool> isTimerRunning = ValueNotifier(false);
 
   @override
   ConsumerState<UnifiedTimerPage> createState() => _UnifiedTimerPageState();
@@ -240,7 +239,7 @@ class _UnifiedTimerPageState extends ConsumerState<UnifiedTimerPage> {
       totalDuration: _competitionModules[_selectedModuleIndex].defaultDuration,
       onTick: () {
         setState(() {});
-        UnifiedTimerPage.isTimerRunning.value = _controller.isRunning;
+        ref.read(isTimerRunningProvider.notifier).state = _controller.isRunning;
         if (_controller.remaining.inSeconds == 0 &&
             !_hasCompleted &&
             _controller.totalDuration.inSeconds > 0) {
@@ -286,8 +285,10 @@ class _UnifiedTimerPageState extends ConsumerState<UnifiedTimerPage> {
     setState(() {
       final task = _selectedModule.tasks[index];
       if (task.status == TaskStatus.done) {
-        task.status = TaskStatus.upcoming;
-        task.completedAt = null;
+        _selectedModule.tasks[index] = task.copyWith(
+          status: TaskStatus.upcoming,
+          clearCompletedAt: true,
+        );
       } else {
         if (_controller.currentTask == task) {
           _controller.completeTask();
@@ -295,8 +296,10 @@ class _UnifiedTimerPageState extends ConsumerState<UnifiedTimerPage> {
             _controller.nextTask();
           }
         } else {
-          task.status = TaskStatus.done;
-          task.completedAt = DateTime.now().toUtc();
+          _selectedModule.tasks[index] = task.copyWith(
+            status: TaskStatus.done,
+            completedAt: DateTime.now().toUtc(),
+          );
         }
       }
     });
@@ -347,7 +350,7 @@ class _UnifiedTimerPageState extends ConsumerState<UnifiedTimerPage> {
       _hasCompleted = true;
       _confettiController.play();
       _controller.pause();
-      UnifiedTimerPage.isTimerRunning.value = false;
+      ref.read(isTimerRunningProvider.notifier).state = false;
     });
     _savePracticeRecord(
       recordType: allTasksDone
@@ -357,11 +360,15 @@ class _UnifiedTimerPageState extends ConsumerState<UnifiedTimerPage> {
   }
 
   void _resetAllTasks() {
-    for (final task in _selectedModule.tasks) {
-      task.status = TaskStatus.upcoming;
-      task.actualSpent = Duration.zero;
-      task.completedAt = null;
-    }
+    final newTasks = _selectedModule.tasks
+        .map((task) => task.copyWith(
+              status: TaskStatus.upcoming,
+              actualSpent: Duration.zero,
+              clearCompletedAt: true,
+            ))
+        .toList();
+    _currentModules[_selectedModuleIndex] =
+        _selectedModule.copyWith(tasks: newTasks);
     _controller.currentTask = null;
   }
 
@@ -415,6 +422,7 @@ class _UnifiedTimerPageState extends ConsumerState<UnifiedTimerPage> {
     try {
       final service = await ref.read(practiceHistoryServiceProvider.future);
       await service.addRecord(record);
+      if (!mounted) return;
       ref.read(recordsRefreshTriggerProvider.notifier).state++;
       _hasSavedRecord = true;
     } catch (_) {
@@ -429,7 +437,9 @@ class _UnifiedTimerPageState extends ConsumerState<UnifiedTimerPage> {
         );
       }
     } finally {
-      _isSavingRecord = false;
+      if (mounted) {
+        _isSavingRecord = false;
+      }
     }
   }
 
@@ -456,7 +466,12 @@ class _UnifiedTimerPageState extends ConsumerState<UnifiedTimerPage> {
         taskTitle: task.title,
         onConfirm: () {
           setState(() {
-            _selectedModule.tasks.removeAt(index);
+            final newTasks = [
+              ..._selectedModule.tasks.sublist(0, index),
+              ..._selectedModule.tasks.sublist(index + 1),
+            ];
+            _currentModules[_selectedModuleIndex] =
+                _selectedModule.copyWith(tasks: newTasks);
             _hoveredTaskIndex = null;
           });
         },
@@ -485,7 +500,9 @@ class _UnifiedTimerPageState extends ConsumerState<UnifiedTimerPage> {
       builder: (ctx) => TaskEditDialog(
         onSave: (newTask) {
           setState(() {
-            _selectedModule.tasks.add(newTask);
+            _currentModules[_selectedModuleIndex] =
+                _selectedModule.copyWith(
+                    tasks: [..._selectedModule.tasks, newTask]);
           });
         },
       ),
@@ -500,7 +517,11 @@ class _UnifiedTimerPageState extends ConsumerState<UnifiedTimerPage> {
             _isPracticeMode ? ModuleType.practice : ModuleType.competition,
         onSave: (newModule) {
           setState(() {
-            _currentModules.add(newModule);
+            if (_isPracticeMode) {
+              _practiceModules = [..._practiceModules, newModule];
+            } else {
+              _competitionModules = [..._competitionModules, newModule];
+            }
             _selectedModuleIndex = _currentModules.length - 1;
             _controller.startModule(newModule);
             _resetSessionState();
@@ -546,7 +567,15 @@ class _UnifiedTimerPageState extends ConsumerState<UnifiedTimerPage> {
         taskCount: module.tasks.length,
         onConfirm: () {
           setState(() {
-            _currentModules.removeAt(index);
+            final newList = [
+              ..._currentModules.sublist(0, index),
+              ..._currentModules.sublist(index + 1),
+            ];
+            if (_isPracticeMode) {
+              _practiceModules = newList;
+            } else {
+              _competitionModules = newList;
+            }
             _hoveredModuleIndex = null;
             if (_selectedModuleIndex >= _currentModules.length) {
               _selectedModuleIndex = _currentModules.length - 1;
@@ -565,9 +594,12 @@ class _UnifiedTimerPageState extends ConsumerState<UnifiedTimerPage> {
 
   void _onReorder(int oldIndex, int newIndex) {
     setState(() {
+      final tasks = List<TaskItem>.from(_selectedModule.tasks);
       if (newIndex > oldIndex) newIndex -= 1;
-      final task = _selectedModule.tasks.removeAt(oldIndex);
-      _selectedModule.tasks.insert(newIndex, task);
+      final task = tasks.removeAt(oldIndex);
+      tasks.insert(newIndex, task);
+      _currentModules[_selectedModuleIndex] =
+          _selectedModule.copyWith(tasks: tasks);
     });
   }
 
@@ -636,7 +668,7 @@ class _UnifiedTimerPageState extends ConsumerState<UnifiedTimerPage> {
                 _controller.reset();
                 _resetSessionState();
               });
-              UnifiedTimerPage.isTimerRunning.value = false;
+              ref.read(isTimerRunningProvider.notifier).state = false;
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: WsColors.errorRed,
@@ -759,7 +791,7 @@ class _UnifiedTimerPageState extends ConsumerState<UnifiedTimerPage> {
       _controller.start();
       _addKeyEvent(ph.KeyEventType.timerStart);
       _hasStartedSession = true;
-      UnifiedTimerPage.isTimerRunning.value = _controller.isRunning;
+      ref.read(isTimerRunningProvider.notifier).state = _controller.isRunning;
     });
   }
 
@@ -1342,7 +1374,7 @@ class _UnifiedTimerPageState extends ConsumerState<UnifiedTimerPage> {
                       setState(() {
                         _controller.pause();
                         _addKeyEvent(ph.KeyEventType.timerPause);
-                        UnifiedTimerPage.isTimerRunning.value =
+                        ref.read(isTimerRunningProvider.notifier).state =
                             _controller.isRunning;
                       });
                       return;
@@ -1363,7 +1395,7 @@ class _UnifiedTimerPageState extends ConsumerState<UnifiedTimerPage> {
                         _addKeyEvent(ph.KeyEventType.timerStart);
                         _hasStartedSession = true;
                       }
-                      UnifiedTimerPage.isTimerRunning.value =
+                      ref.read(isTimerRunningProvider.notifier).state =
                           _controller.isRunning;
                     });
                   },

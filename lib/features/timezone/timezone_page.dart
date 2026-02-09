@@ -52,7 +52,7 @@ class TimezonePage extends ConsumerWidget {
             ...TimeZoneCity.cities.map((city) {
               final localTime =
                   TimezoneConverter.convert(utcNow, city.timezoneId);
-              final isShanghai = city.timezoneId == 'Asia/Shanghai';
+              final isBeijing = city.timezoneId == 'Asia/Shanghai';
               return Padding(
                 padding: const EdgeInsets.only(bottom: 10),
                 child: GlassPanel(
@@ -67,7 +67,7 @@ class TimezonePage extends ConsumerWidget {
                         width: 4,
                         height: 36,
                         decoration: BoxDecoration(
-                          color: isShanghai
+                          color: isBeijing
                               ? WsColors.accentCyan
                               : WsColors.secondaryMint,
                           borderRadius: BorderRadius.circular(2),
@@ -82,14 +82,14 @@ class TimezonePage extends ConsumerWidget {
                               city.name,
                               style: TextStyle(
                                 fontSize: 16,
-                                fontWeight: isShanghai
+                                fontWeight: isBeijing
                                     ? FontWeight.bold
                                     : FontWeight.w500,
                                 color: WsColors.textPrimary,
                               ),
                             ),
                             Text(
-                              'UTC${city.utcOffset >= 0 ? '+' : ''}${city.utcOffset}',
+                              TimezoneConverter.getOffsetDisplay(city.timezoneId, utcNow),
                               style: const TextStyle(
                                 fontSize: 12,
                                 color: WsColors.textSecondary,
@@ -106,7 +106,7 @@ class TimezonePage extends ConsumerWidget {
                           fontFamily: 'JetBrainsMono',
                           fontSize: 24,
                           fontWeight: FontWeight.bold,
-                          color: isShanghai
+                          color: isBeijing
                               ? WsColors.accentCyan
                               : WsColors.textPrimary,
                         ),

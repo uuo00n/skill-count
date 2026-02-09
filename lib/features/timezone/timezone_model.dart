@@ -1,39 +1,45 @@
 class TimeZoneCity {
   final String name;
-  final int utcOffset;
   final String timezoneId;
 
   const TimeZoneCity({
     required this.name,
-    required this.utcOffset,
     required this.timezoneId,
   });
 
+  /// 按语言顺序排列: zh, zhTw, zhHk/zhMo, en, ja, de, fr, ko
   static const cities = [
     TimeZoneCity(
-      name: '上海',
-      utcOffset: 8,
+      name: '北京',
       timezoneId: 'Asia/Shanghai',
     ),
     TimeZoneCity(
-      name: 'Lyon',
-      utcOffset: 1,
-      timezoneId: 'Europe/Paris',
+      name: '台北',
+      timezoneId: 'Asia/Taipei',
     ),
     TimeZoneCity(
-      name: 'Tokyo',
-      utcOffset: 9,
-      timezoneId: 'Asia/Tokyo',
+      name: '香港',
+      timezoneId: 'Asia/Hong_Kong',
     ),
     TimeZoneCity(
       name: 'New York',
-      utcOffset: -5,
       timezoneId: 'America/New_York',
     ),
     TimeZoneCity(
-      name: 'London',
-      utcOffset: 0,
-      timezoneId: 'Europe/London',
+      name: 'Tokyo',
+      timezoneId: 'Asia/Tokyo',
+    ),
+    TimeZoneCity(
+      name: 'Berlin',
+      timezoneId: 'Europe/Berlin',
+    ),
+    TimeZoneCity(
+      name: 'Paris',
+      timezoneId: 'Europe/Paris',
+    ),
+    TimeZoneCity(
+      name: 'Seoul',
+      timezoneId: 'Asia/Seoul',
     ),
   ];
 }

@@ -15,7 +15,6 @@ import '../features/white_noise/white_noise_page.dart';
 import '../features/practice_history/practice_history_page.dart';
 import '../widgets/fade_indexed_stack.dart';
 import '../widgets/grid_background.dart';
-
 class LandscapeScaffold extends ConsumerStatefulWidget {
   const LandscapeScaffold({super.key});
 
@@ -76,8 +75,8 @@ class _LandscapeScaffoldState extends ConsumerState<LandscapeScaffold> {
       (c) => c.timezoneId == selectedTz,
       orElse: () => TimeZoneCity.cities.first,
     );
-    final offsetSign = city.utcOffset >= 0 ? '+' : '';
-    final tzLabel = '${city.name} (UTC$offsetSign${city.utcOffset})';
+    final offsetDisplay = TimezoneConverter.getOffsetDisplay(city.timezoneId, utcNow);
+    final tzLabel = '${city.name} ($offsetDisplay)';
 
     String subtitle;
     switch (_selectedIndex) {
@@ -150,7 +149,7 @@ class _LandscapeScaffoldState extends ConsumerState<LandscapeScaffold> {
             ],
           ),
           const Spacer(),
-          // Real-time clock (Shanghai)
+          // Real-time clock
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
             decoration: BoxDecoration(
@@ -242,9 +241,9 @@ class _LandscapeScaffoldState extends ConsumerState<LandscapeScaffold> {
         children: [
           _buildNavTab(0, Icons.dashboard_outlined, s.dashboard),
           const SizedBox(width: 8),
-          ValueListenableBuilder<bool>(
-            valueListenable: UnifiedTimerPage.isTimerRunning,
-            builder: (context, isRunning, child) {
+          Consumer(
+            builder: (context, ref, child) {
+              final isRunning = ref.watch(isTimerRunningProvider);
               return _buildNavTab(
                 1,
                 Icons.timer_outlined,

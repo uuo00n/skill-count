@@ -7,12 +7,12 @@ enum TaskStatus { current, done, upcoming }
 class TaskItem {
   final String id;
   final String title;
-  TaskStatus status;
+  final TaskStatus status;
   final Duration? estimatedDuration;
-  Duration actualSpent;
-  DateTime? completedAt;
+  final Duration actualSpent;
+  final DateTime? completedAt;
 
-  TaskItem({
+  const TaskItem({
     required this.id,
     required this.title,
     this.status = TaskStatus.upcoming,
@@ -20,6 +20,25 @@ class TaskItem {
     this.actualSpent = Duration.zero,
     this.completedAt,
   });
+
+  TaskItem copyWith({
+    String? id,
+    String? title,
+    TaskStatus? status,
+    Duration? estimatedDuration,
+    Duration? actualSpent,
+    DateTime? completedAt,
+    bool clearCompletedAt = false,
+  }) {
+    return TaskItem(
+      id: id ?? this.id,
+      title: title ?? this.title,
+      status: status ?? this.status,
+      estimatedDuration: estimatedDuration ?? this.estimatedDuration,
+      actualSpent: actualSpent ?? this.actualSpent,
+      completedAt: clearCompletedAt ? null : (completedAt ?? this.completedAt),
+    );
+  }
 }
 
 class ModuleModel {

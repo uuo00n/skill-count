@@ -81,11 +81,24 @@ class LocaleScope extends InheritedNotifier<LocaleProvider> {
 
   static AppStrings of(BuildContext context) {
     final scope = context.dependOnInheritedWidgetOfExactType<LocaleScope>();
+    if (scope?.notifier == null) {
+      throw FlutterError(
+        'LocaleScope not found in widget tree.\n'
+        'Make sure LocaleScope is an ancestor of the widget calling LocaleScope.of().\n'
+        'Check that your App widget is wrapped with LocaleScope.',
+      );
+    }
     return scope!.notifier!.strings;
   }
 
   static LocaleProvider providerOf(BuildContext context) {
     final scope = context.dependOnInheritedWidgetOfExactType<LocaleScope>();
+    if (scope?.notifier == null) {
+      throw FlutterError(
+        'LocaleScope not found in widget tree.\n'
+        'Make sure LocaleScope is an ancestor of the widget calling LocaleScope.providerOf().',
+      );
+    }
     return scope!.notifier!;
   }
 }

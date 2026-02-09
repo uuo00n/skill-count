@@ -1,15 +1,20 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'models/practice_record_model.dart';
 
 class PracticeHistoryService {
   static const String _storageKey = 'practice_records';
-  late final SharedPreferences _prefs;
+  SharedPreferences? _prefs;
 
   PracticeHistoryService();
 
+  Future<SharedPreferences> _getPrefs() async {
+    return _prefs ??= await SharedPreferences.getInstance();
+  }
+
   Future<void> initialize() async {
-    _prefs = await SharedPreferences.getInstance();
+    _prefs ??= await SharedPreferences.getInstance();
   }
 
   /// 添加新的练习记录
@@ -21,7 +26,8 @@ class PracticeHistoryService {
 
   /// 获取所有练习记录
   Future<List<PracticeRecord>> getRecords() async {
-    final jsonString = _prefs.getString(_storageKey);
+    final prefs = await _getPrefs();
+    final jsonString = prefs.getString(_storageKey);
     if (jsonString == null) return [];
 
     try {
@@ -30,8 +36,7 @@ class PracticeHistoryService {
           .map((json) => PracticeRecord.fromJson(json as Map<String, dynamic>))
           .toList();
     } catch (e) {
-      // ignore: avoid_print
-      print('Error loading records: $e');
+      debugPrint('Error loading records: $e');
       return [];
     }
   }
@@ -51,7 +56,8 @@ class PracticeHistoryService {
 
   /// 清空所有记录
   Future<void> clearAllRecords() async {
-    await _prefs.remove(_storageKey);
+    final prefs = await _getPrefs();
+    await prefs.remove(_storageKey);
   }
 
   /// 获取统计数据
@@ -120,8 +126,9 @@ class PracticeHistoryService {
   }
 
   Future<void> _saveRecords(List<PracticeRecord> records) async {
+    final prefs = await _getPrefs();
     final jsonList = records.map((r) => r.toJson()).toList();
     final jsonString = jsonEncode(jsonList);
-    await _prefs.setString(_storageKey, jsonString);
+    await prefs.setString(_storageKey, jsonString);
   }
 }

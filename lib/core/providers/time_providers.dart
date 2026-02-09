@@ -49,3 +49,6 @@ final appTimezoneProvider = StateProvider<String>(
 final competitionCountdownProvider = StateProvider<DateTime>(
   (ref) => WsTimes.competitionOpenTime,
 );
+
+/// 计时器运行状态 Provider（在底部导航栏显示指示点）
+final isTimerRunningProvider = StateProvider<bool>((ref) => false);

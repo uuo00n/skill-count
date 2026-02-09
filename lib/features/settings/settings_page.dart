@@ -9,6 +9,7 @@ import '../../core/i18n/strings.dart';
 import '../../core/providers/practice_history_provider.dart';
 import '../../core/providers/time_providers.dart';
 import '../practice_history/practice_history_service.dart';
+import '../timezone/timezone_converter.dart';
 import '../timezone/timezone_model.dart';
 
 class SettingsPage extends ConsumerWidget {
@@ -18,15 +19,22 @@ class SettingsPage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final s = LocaleScope.of(context);
     final provider = LocaleScope.providerOf(context);
-    final targetTime = ref.watch(competitionCountdownProvider).toLocal();
+    final targetUtc = ref.watch(competitionCountdownProvider);
+    final targetTime = TimezoneConverter.convert(
+      targetUtc,
+      ref.watch(appTimezoneProvider),
+    );
+    final utcNow = ref.watch(unifiedTimeProvider);
     final selectedTz = ref.watch(appTimezoneProvider);
     final selectedCity = TimeZoneCity.cities.firstWhere(
       (c) => c.timezoneId == selectedTz,
       orElse: () => TimeZoneCity.cities.first,
     );
-    final offsetSign = selectedCity.utcOffset >= 0 ? '+' : '';
-    final tzDisplay =
-        '${selectedCity.name} (UTC$offsetSign${selectedCity.utcOffset})';
+    final offsetDisplay = TimezoneConverter.getOffsetDisplay(
+      selectedCity.timezoneId,
+      utcNow,
+    );
+    final tzDisplay = '${selectedCity.name} ($offsetDisplay)';
 
     return Center(
       child: ConstrainedBox(
@@ -49,7 +57,8 @@ class SettingsPage extends ConsumerWidget {
               _buildSettingTile(
                 icon: Icons.timer_outlined,
                 title: s.competitionCountdown,
-                subtitle: '${s.countdownTarget}  ${_formatDateTime(targetTime)}',
+                subtitle:
+                    '${s.countdownTarget}  ${_formatDateTime(targetTime)}',
                 trailing: TextButton(
                   onPressed: () => _selectCountdownTarget(
                     context,
@@ -83,7 +92,8 @@ class SettingsPage extends ConsumerWidget {
                 icon: Icons.public_outlined,
                 title: s.displayTimezone,
                 subtitle: tzDisplay,
-                onTap: () => _showTimezoneDialog(context, ref, s, selectedTz),
+                onTap: () =>
+                    _showTimezoneDialog(context, ref, s, selectedTz, utcNow),
               ),
               const SizedBox(height: 12),
               _buildSettingTile(
@@ -300,9 +310,7 @@ class SettingsPage extends ConsumerWidget {
       decoration: BoxDecoration(
         color: WsColors.bgDeep.withAlpha(80),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(
-          color: WsColors.textSecondary.withAlpha(40),
-        ),
+        border: Border.all(color: WsColors.textSecondary.withAlpha(40)),
       ),
       child: DropdownButtonHideUnderline(
         child: DropdownButton<AppLocale>(
@@ -367,8 +375,8 @@ class SettingsPage extends ConsumerWidget {
       pickedTime.minute,
     );
 
-    ref.read(competitionCountdownProvider.notifier).state =
-        localDateTime.toUtc();
+    ref.read(competitionCountdownProvider.notifier).state = localDateTime
+        .toUtc();
   }
 
   String _formatDateTime(DateTime dateTime) {
@@ -381,6 +389,7 @@ class SettingsPage extends ConsumerWidget {
     WidgetRef ref,
     AppStrings s,
     String currentTz,
+    DateTime utcNow,
   ) async {
     await showDialog<void>(
       context: context,
@@ -423,67 +432,68 @@ class SettingsPage extends ConsumerWidget {
                   ],
                 ),
                 const SizedBox(height: 20),
-                ...TimeZoneCity.cities.map(
-                  (city) {
-                    final isSelected = city.timezoneId == currentTz;
-                    final sign = city.utcOffset >= 0 ? '+' : '';
-                    return Padding(
-                      padding: const EdgeInsets.only(bottom: 8),
-                      child: Material(
-                        color: Colors.transparent,
-                        child: InkWell(
-                          borderRadius: BorderRadius.circular(10),
-                          onTap: () {
-                            ref.read(appTimezoneProvider.notifier).state =
-                                city.timezoneId;
-                            Navigator.of(context).pop();
-                          },
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 16,
-                              vertical: 12,
-                            ),
-                            decoration: BoxDecoration(
+                ...TimeZoneCity.cities.map((city) {
+                  final isSelected = city.timezoneId == currentTz;
+                  final cityOffset = TimezoneConverter.getOffsetDisplay(
+                    city.timezoneId,
+                    utcNow,
+                  );
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 8),
+                    child: Material(
+                      color: Colors.transparent,
+                      child: InkWell(
+                        borderRadius: BorderRadius.circular(10),
+                        onTap: () {
+                          ref.read(appTimezoneProvider.notifier).state =
+                              city.timezoneId;
+                          Navigator.of(context).pop();
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 12,
+                          ),
+                          decoration: BoxDecoration(
+                            color: isSelected
+                                ? WsColors.accentCyan.withAlpha(15)
+                                : Colors.transparent,
+                            borderRadius: BorderRadius.circular(10),
+                            border: Border.all(
                               color: isSelected
-                                  ? WsColors.accentCyan.withAlpha(15)
-                                  : Colors.transparent,
-                              borderRadius: BorderRadius.circular(10),
-                              border: Border.all(
-                                color: isSelected
-                                    ? WsColors.accentCyan
-                                    : WsColors.border,
-                              ),
+                                  ? WsColors.accentCyan
+                                  : WsColors.border,
                             ),
-                            child: Row(
-                              children: [
-                                Expanded(
-                                  child: Text(
-                                    '${city.name}  (UTC$sign${city.utcOffset})',
-                                    style: TextStyle(
-                                      fontSize: 14,
-                                      fontWeight: isSelected
-                                          ? FontWeight.w700
-                                          : FontWeight.w500,
-                                      color: isSelected
-                                          ? WsColors.accentCyan
-                                          : WsColors.textPrimary,
-                                    ),
+                          ),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  '${city.name}  ($cityOffset)',
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: isSelected
+                                        ? FontWeight.w700
+                                        : FontWeight.w500,
+                                    color: isSelected
+                                        ? WsColors.accentCyan
+                                        : WsColors.textPrimary,
                                   ),
                                 ),
-                                if (isSelected)
-                                  const Icon(
-                                    Icons.check_circle,
-                                    size: 20,
-                                    color: WsColors.accentCyan,
-                                  ),
-                              ],
-                            ),
+                              ),
+                              if (isSelected)
+                                const Icon(
+                                  Icons.check_circle,
+                                  size: 20,
+                                  color: WsColors.accentCyan,
+                                ),
+                            ],
                           ),
                         ),
                       ),
-                    );
-                  },
-                ),
+                    ),
+                  );
+                }),
               ],
             ),
           ),
@@ -517,9 +527,7 @@ class SettingsPage extends ConsumerWidget {
           content: Text(s.dataCleared),
           behavior: SnackBarBehavior.floating,
           backgroundColor: WsColors.darkBlue,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
-          ),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
         ),
       );
     }
@@ -550,9 +558,7 @@ class SettingsPage extends ConsumerWidget {
           content: Text(s.dataCleared),
           behavior: SnackBarBehavior.floating,
           backgroundColor: WsColors.darkBlue,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
-          ),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
         ),
       );
     }
@@ -569,9 +575,7 @@ class SettingsPage extends ConsumerWidget {
       context: context,
       builder: (ctx) => Dialog(
         backgroundColor: WsColors.surface,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         child: Container(
           width: 380,
           padding: const EdgeInsets.all(24),

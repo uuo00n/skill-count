@@ -66,16 +66,28 @@ class UnifiedTimerController {
 
   void selectTask(TaskItem task) {
     currentTask = task;
-    if (task.status == TaskStatus.upcoming) {
-      task.status = TaskStatus.current;
+    if (task.status == TaskStatus.upcoming && currentModule != null) {
+      final tasks = currentModule!.tasks;
+      final idx = tasks.indexOf(task);
+      if (idx != -1) {
+        currentModule!.tasks[idx] = task.copyWith(status: TaskStatus.current);
+        currentTask = currentModule!.tasks[idx];
+      }
     }
     onTick();
   }
 
   void completeTask() {
-    if (currentTask != null) {
-      currentTask!.status = TaskStatus.done;
-      currentTask!.completedAt = DateTime.now().toUtc();
+    if (currentTask != null && currentModule != null) {
+      final tasks = currentModule!.tasks;
+      final idx = tasks.indexOf(currentTask!);
+      if (idx != -1) {
+        final updated = currentTask!.copyWith(
+          status: TaskStatus.done,
+          completedAt: DateTime.now().toUtc(),
+        );
+        currentModule!.tasks[idx] = updated;
+      }
       currentTask = null;
       onTick();
     }
@@ -113,8 +125,17 @@ class UnifiedTimerController {
     _lastElapsed = Duration.zero;
     _subscription = _timer.timeUpdates.listen((_) {
       final elapsed = _timer.elapsed;
-      if (currentTask != null && elapsed > _lastElapsed) {
-        currentTask!.actualSpent += elapsed - _lastElapsed;
+      if (currentTask != null && elapsed > _lastElapsed && currentModule != null) {
+        final delta = elapsed - _lastElapsed;
+        final tasks = currentModule!.tasks;
+        final idx = tasks.indexOf(currentTask!);
+        if (idx != -1) {
+          final updated = currentTask!.copyWith(
+            actualSpent: currentTask!.actualSpent + delta,
+          );
+          tasks[idx] = updated;
+          currentTask = updated;
+        }
       }
       _lastElapsed = elapsed;
       onTick();
