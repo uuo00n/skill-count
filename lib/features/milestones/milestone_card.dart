@@ -171,16 +171,35 @@ class MilestoneCard extends StatelessWidget {
                 ],
               ),
             ),
+            const SizedBox(width: 16),
             // Right days count
-            Text(
-              isPast ? '--' : days.toString().padLeft(2, '0'),
-              style: TextStyle(
-                fontFamily: 'JetBrainsMono',
-                fontSize: 28,
-                fontWeight: FontWeight.bold,
-                color:
-                    isPast ? WsColors.textSecondary : WsColors.textPrimary,
-              ),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.baseline,
+              textBaseline: TextBaseline.alphabetic,
+              children: [
+                Text(
+                  isPast ? '--' : days.toString().padLeft(2, '0'),
+                  style: TextStyle(
+                    fontFamily: 'JetBrainsMono',
+                    fontSize: 28,
+                    fontWeight: FontWeight.bold,
+                    color: isPast
+                        ? WsColors.textSecondary
+                        : WsColors.textPrimary,
+                  ),
+                ),
+                const SizedBox(width: 4),
+                Text(
+                  s.days,
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: isPast
+                        ? WsColors.textSecondary
+                        : WsColors.textPrimary,
+                  ),
+                ),
+              ],
             ),
           ],
         ),
