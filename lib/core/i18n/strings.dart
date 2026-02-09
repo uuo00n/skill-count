@@ -141,10 +141,23 @@ abstract class AppStrings {
   String get practiceHistory;
   String get recordsList;
   String get analyticsCharts;
+  String get moduleComparison;
   String get moduleEfficiency;
   String get timeTrend;
+  String get efficiencyDistribution;
+  String get totalSessions;
+  String get totalDuration;
   String get completionRate;
   String get averageDuration;
+  String get averageEfficiency;
+  String get durationLabel;
+  String get completionLabel;
+  String get averageLabel;
+  String get excellent;
+  String get good;
+  String get fair;
+  String get needsImprovement;
   String get noRecords;
   String get practiceCompleted;
+  String get loadFailed;
 }

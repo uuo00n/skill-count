@@ -244,15 +244,41 @@ class KoStrings implements AppStrings {
   @override
   String get analyticsCharts => '분석';
   @override
+  String get moduleComparison => '모듈 비교';
+  @override
   String get moduleEfficiency => '모듈 효율';
   @override
   String get timeTrend => '시간 추세';
+  @override
+  String get efficiencyDistribution => '효율 분포';
+  @override
+  String get totalSessions => '총 세션 수';
+  @override
+  String get totalDuration => '총 소요 시간';
   @override
   String get completionRate => '완료율';
   @override
   String get averageDuration => '평균 기간';
   @override
+  String get averageEfficiency => '평균 효율';
+  @override
+  String get durationLabel => '소요 시간';
+  @override
+  String get completionLabel => '완료도';
+  @override
+  String get averageLabel => '평균';
+  @override
+  String get excellent => '우수';
+  @override
+  String get good => '양호';
+  @override
+  String get fair => '보통';
+  @override
+  String get needsImprovement => '개선 필요';
+  @override
   String get noRecords => '연습 기록 없음';
   @override
   String get practiceCompleted => '연습 완료';
+  @override
+  String get loadFailed => '불러오기 실패';
 }

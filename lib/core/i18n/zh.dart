@@ -258,15 +258,41 @@ class ZhStrings implements AppStrings {
   @override
   String get analyticsCharts => '数据分析';
   @override
+  String get moduleComparison => '模块对比';
+  @override
   String get moduleEfficiency => '模块效率';
   @override
   String get timeTrend => '时间趋势';
+  @override
+  String get efficiencyDistribution => '效率分布';
+  @override
+  String get totalSessions => '总计划数';
+  @override
+  String get totalDuration => '总耗时';
   @override
   String get completionRate => '完成率';
   @override
   String get averageDuration => '平均耗时';
   @override
+  String get averageEfficiency => '平均效率';
+  @override
+  String get durationLabel => '耗时';
+  @override
+  String get completionLabel => '完成度';
+  @override
+  String get averageLabel => '平均';
+  @override
+  String get excellent => '优秀';
+  @override
+  String get good => '良好';
+  @override
+  String get fair => '一般';
+  @override
+  String get needsImprovement => '需改进';
+  @override
   String get noRecords => '暂无练习记录';
   @override
   String get practiceCompleted => '练习完成';
+  @override
+  String get loadFailed => '加载失败';
 }

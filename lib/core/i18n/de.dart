@@ -244,15 +244,41 @@ class DeStrings implements AppStrings {
   @override
   String get analyticsCharts => 'Analytik';
   @override
+  String get moduleComparison => 'Modulvergleich';
+  @override
   String get moduleEfficiency => 'Moduleffizienz';
   @override
   String get timeTrend => 'Zeittest';
+  @override
+  String get efficiencyDistribution => 'Effizienzverteilung';
+  @override
+  String get totalSessions => 'Gesamtanzahl Sitzungen';
+  @override
+  String get totalDuration => 'Gesamtdauer';
   @override
   String get completionRate => 'Fertigstellungsrate';
   @override
   String get averageDuration => 'Durchschnittliche Dauer';
   @override
+  String get averageEfficiency => 'Durchschnittliche Effizienz';
+  @override
+  String get durationLabel => 'Dauer';
+  @override
+  String get completionLabel => 'Abschlussgrad';
+  @override
+  String get averageLabel => 'Durchschnitt';
+  @override
+  String get excellent => 'Hervorragend';
+  @override
+  String get good => 'Gut';
+  @override
+  String get fair => 'Mittel';
+  @override
+  String get needsImprovement => 'Verbesserungsbedarf';
+  @override
   String get noRecords => 'Keine Übungsdatensätze';
   @override
   String get practiceCompleted => 'Übung abgeschlossen';
+  @override
+  String get loadFailed => 'Laden fehlgeschlagen';
 }

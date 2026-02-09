@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import '../../../core/constants/ws_colors.dart';
+import '../../../core/i18n/locale_provider.dart';
+import '../../../core/i18n/strings.dart';
 import '../models/practice_record_model.dart';
 
 class AnalyticsChartsView extends StatelessWidget {
@@ -13,6 +15,7 @@ class AnalyticsChartsView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final s = LocaleScope.of(context);
     // Group records by module
     final Map<String, List<PracticeRecord>> recordsByModule = {};
     for (final record in records) {
@@ -25,12 +28,12 @@ class AnalyticsChartsView extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Overall statistics
-          _buildStatisticsCards(),
+          _buildStatisticsCards(s),
           const SizedBox(height: 24),
 
           // Module comparison chart (only if multiple modules)
           if (recordsByModule.length > 1) ...[
-            _buildSectionTitle('模块对比', Icons.compare_arrows),
+            _buildSectionTitle(s.moduleComparison, Icons.compare_arrows),
             const SizedBox(height: 12),
             _buildModuleComparisonChart(recordsByModule),
             const SizedBox(height: 24),
@@ -38,14 +41,12 @@ class AnalyticsChartsView extends StatelessWidget {
 
           // Time trend chart
           if (records.length > 1) ...[
-            _buildSectionTitle('时间趋势', Icons.trending_up),
-            const SizedBox(height: 12),
-            _buildTimeTrendChart(records),
+            _buildTimeTrendChart(records, s),
             const SizedBox(height: 24),
           ],
 
           // Efficiency distribution
-          _buildEfficiencyChart(records),
+          _buildEfficiencyChart(records, s),
         ],
       ),
     );
@@ -77,22 +78,50 @@ class AnalyticsChartsView extends StatelessWidget {
     );
   }
 
-  Widget _buildStatisticsCards() {
+  Widget _buildStatisticsCards(AppStrings s) {
     final totalTime = records.fold<Duration>(Duration.zero, (sum, r) => sum + r.totalDuration);
     final avgTime = Duration(seconds: (totalTime.inSeconds / records.length).toInt());
     final avgEfficiency = records.fold<double>(0, (sum, r) => sum + r.efficiency) / records.length;
 
     return Row(
       children: [
-        _buildStatCard('总计划数', '${records.length}', WsColors.accentCyan, Icons.list_alt),
+        _buildStatCard(s.totalSessions, '${records.length}', WsColors.accentCyan, Icons.list_alt),
         const SizedBox(width: 12),
-        _buildStatCard('总耗时', '${totalTime.inHours}h', WsColors.accentGreen, Icons.timer),
+        _buildStatCard(s.totalDuration, _formatDurationLabel(totalTime), WsColors.accentGreen, Icons.timer),
         const SizedBox(width: 12),
-        _buildStatCard('平均耗时', '${avgTime.inMinutes}m', WsColors.accentYellow, Icons.schedule),
+        _buildStatCard(s.averageDuration, _formatDurationLabel(avgTime), WsColors.accentYellow, Icons.schedule),
         const SizedBox(width: 12),
-        _buildStatCard('平均效率', '${(avgEfficiency * 100).toInt()}%', WsColors.accentBlue, Icons.speed),
+        _buildStatCard(
+          s.averageEfficiency,
+          '${(avgEfficiency * 100).toInt()}%',
+          WsColors.accentBlue,
+          Icons.speed,
+        ),
       ],
     );
+  }
+
+  String _formatDurationLabel(Duration duration) {
+    if (duration.inHours > 0) {
+      final hours = duration.inHours;
+      final minutes = duration.inMinutes % 60;
+      return minutes > 0 ? '${hours}h ${minutes}m' : '${hours}h';
+    }
+    if (duration.inMinutes > 0) {
+      return '${duration.inMinutes}m';
+    }
+    return '${duration.inSeconds}s';
+  }
+
+  String _formatAxisDuration(double secondsValue) {
+    final seconds = secondsValue.round().clamp(0, 1000000000);
+    if (seconds >= 3600) {
+      return '${(seconds / 3600).round()}h';
+    }
+    if (seconds >= 60) {
+      return '${(seconds / 60).round()}m';
+    }
+    return '${seconds}s';
   }
 
   Widget _buildStatCard(String label, String value, Color color, IconData icon) {
@@ -101,11 +130,11 @@ class AnalyticsChartsView extends StatelessWidget {
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: color.withOpacity(0.2)),
-          color: Color.alphaBlend(color.withOpacity(0.05), WsColors.surface),
+          border: Border.all(color: color.withValues(alpha: 0.2)),
+          color: Color.alphaBlend(color.withValues(alpha: 0.05), WsColors.surface),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.05),
+              color: Colors.black.withValues(alpha: 0.05),
               blurRadius: 4,
               offset: const Offset(0, 2),
             ),
@@ -152,15 +181,15 @@ class AnalyticsChartsView extends StatelessWidget {
     final modules = recordsByModule.entries.toList();
     final data = modules.map((entry) {
       final avgDuration = entry.value.fold<Duration>(
-        Duration.zero,
-        (sum, r) => sum + r.totalDuration,
-      ).inMinutes ~/
+            Duration.zero,
+            (sum, r) => sum + r.totalDuration,
+          ).inSeconds /
           entry.value.length;
       return BarChartGroupData(
         x: modules.indexOf(entry),
         barRods: [
           BarChartRodData(
-            toY: avgDuration.toDouble(),
+            toY: avgDuration,
             color: WsColors.accentCyan,
             width: 20,
             borderRadius: const BorderRadius.vertical(top: Radius.circular(8)),
@@ -178,7 +207,7 @@ class AnalyticsChartsView extends StatelessWidget {
         border: Border.all(color: WsColors.border),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 4,
             offset: const Offset(0, 2),
           ),
@@ -196,7 +225,7 @@ class AnalyticsChartsView extends StatelessWidget {
                 reservedSize: 40,
                 getTitlesWidget: (value, meta) {
                   return Text(
-                    '${value.toInt()}m',
+                    _formatAxisDuration(value),
                     style: const TextStyle(fontSize: 10, color: WsColors.textSecondary),
                   );
                 },
@@ -226,85 +255,167 @@ class AnalyticsChartsView extends StatelessWidget {
     );
   }
 
-  Widget _buildTimeTrendChart(List<PracticeRecord> records) {
+  Widget _buildTimeTrendChart(List<PracticeRecord> records, AppStrings s) {
     final sortedRecords = List<PracticeRecord>.from(records)
       ..sort((a, b) => a.completedAt.compareTo(b.completedAt));
 
     final spots = sortedRecords.asMap().entries.map((entry) {
       return FlSpot(
         entry.key.toDouble(),
-        entry.value.totalDuration.inMinutes.toDouble(),
+        entry.value.totalDuration.inSeconds.toDouble(),
       );
     }).toList();
 
+    // Determine interval to avoid crowding (target max ~6 labels)
+    final double interval = (sortedRecords.length / 6).ceilToDouble();
+    // Determine if we should show dots based on data density
+    final showDots = sortedRecords.length < 20;
+
     return Container(
-      height: 280,
-      padding: const EdgeInsets.symmetric(vertical: 12),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: WsColors.surface,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: WsColors.border),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 4,
             offset: const Offset(0, 2),
           ),
         ],
       ),
-      child: LineChart(
-        LineChartData(
-          gridData: const FlGridData(show: false),
-          borderData: FlBorderData(show: false),
-          lineBarsData: [
-            LineChartBarData(
-              spots: spots,
-              isCurved: true,
-              color: WsColors.accentCyan,
-              barWidth: 3,
-              dotData: const FlDotData(show: true),
-              belowBarData: BarAreaData(
-                show: true,
-                color: WsColors.accentCyan.withAlpha(30),
-              ),
-            ),
-          ],
-          titlesData: FlTitlesData(
-            leftTitles: AxisTitles(
-              sideTitles: SideTitles(
-                showTitles: true,
-                reservedSize: 40,
-                getTitlesWidget: (value, meta) {
-                  return Text(
-                    '${value.toInt()}m',
-                    style: const TextStyle(fontSize: 10, color: WsColors.textSecondary),
-                  );
-                },
-              ),
-            ),
-            bottomTitles: AxisTitles(
-              sideTitles: SideTitles(
-                showTitles: true,
-                getTitlesWidget: (value, meta) {
-                  final idx = value.toInt();
-                  if (idx >= 0 && idx < sortedRecords.length) {
-                    final date = sortedRecords[idx].completedAt;
-                    return Text(
-                      '${date.month}/${date.day}',
-                      style: const TextStyle(fontSize: 9, color: WsColors.textSecondary),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildSectionTitle(s.timeTrend, Icons.trending_up),
+          const SizedBox(height: 24),
+          SizedBox(
+            height: 240,
+            child: LineChart(
+              LineChartData(
+                gridData: FlGridData(
+                  show: true,
+                  drawVerticalLine: false,
+                  getDrawingHorizontalLine: (value) {
+                    return FlLine(
+                      color: WsColors.border.withValues(alpha: 0.5),
+                      strokeWidth: 1,
+                      dashArray: [5, 5],
                     );
-                  }
-                  return const SizedBox();
-                },
+                  },
+                ),
+                borderData: FlBorderData(show: false),
+                lineBarsData: [
+                  LineChartBarData(
+                    spots: spots,
+                    isCurved: true,
+                    color: WsColors.accentCyan,
+                    barWidth: 3,
+                    isStrokeCapRound: true,
+                    dotData: FlDotData(
+                      show: showDots,
+                      getDotPainter: (spot, percent, barData, index) {
+                        return FlDotCirclePainter(
+                          radius: 4,
+                          color: WsColors.surface,
+                          strokeWidth: 2,
+                          strokeColor: WsColors.accentCyan,
+                        );
+                      },
+                    ),
+                    belowBarData: BarAreaData(
+                      show: true,
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [
+                          WsColors.accentCyan.withValues(alpha: 0.2),
+                          WsColors.accentCyan.withValues(alpha: 0.0),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+                titlesData: FlTitlesData(
+                  rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                  topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                  leftTitles: AxisTitles(
+                    sideTitles: SideTitles(
+                      showTitles: true,
+                      reservedSize: 40,
+                      getTitlesWidget: (value, meta) {
+                        if (value == meta.min || value == meta.max) return const SizedBox();
+                        return Text(
+                          _formatAxisDuration(value),
+                          style: const TextStyle(fontSize: 10, color: WsColors.textSecondary),
+                        );
+                      },
+                    ),
+                  ),
+                  bottomTitles: AxisTitles(
+                    sideTitles: SideTitles(
+                      showTitles: true,
+                      interval: interval,
+                      reservedSize: 30,
+                      getTitlesWidget: (value, meta) {
+                        final idx = value.toInt();
+                        if (idx >= 0 && idx < sortedRecords.length) {
+                          final date = sortedRecords[idx].completedAt;
+                          return Padding(
+                            padding: const EdgeInsets.only(top: 8.0),
+                            child: Text(
+                              '${date.month}/${date.day}',
+                              style: const TextStyle(fontSize: 10, color: WsColors.textSecondary),
+                            ),
+                          );
+                        }
+                        return const SizedBox();
+                      },
+                    ),
+                  ),
+                ),
+                lineTouchData: LineTouchData(
+                  touchTooltipData: LineTouchTooltipData(
+                    getTooltipColor: (touchedSpot) => WsColors.surface,
+                    tooltipBorder: const BorderSide(color: WsColors.border),
+                    tooltipRoundedRadius: 8,
+                    getTooltipItems: (touchedSpots) {
+                      return touchedSpots.map((spot) {
+                        final idx = spot.x.toInt();
+                        final date = sortedRecords[idx].completedAt;
+                        final durationStr = _formatDurationLabel(Duration(seconds: spot.y.toInt()));
+                        return LineTooltipItem(
+                          '${date.month}/${date.day}\n',
+                          const TextStyle(
+                            color: WsColors.textSecondary,
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          children: [
+                            TextSpan(
+                              text: durationStr,
+                              style: const TextStyle(
+                                color: WsColors.accentCyan,
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        );
+                      }).toList();
+                    },
+                  ),
+                ),
               ),
             ),
           ),
-        ),
+        ],
       ),
     );
   }
 
-  Widget _buildEfficiencyChart(List<PracticeRecord> records) {
+  Widget _buildEfficiencyChart(List<PracticeRecord> records, AppStrings s) {
     // Group by efficiency ranges
     final veryGood = records.where((r) => r.efficiency >= 1.2).length;
     final good = records.where((r) => r.efficiency >= 1.0 && r.efficiency < 1.2).length;
@@ -354,7 +465,7 @@ class AnalyticsChartsView extends StatelessWidget {
         border: Border.all(color: WsColors.border),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 4,
             offset: const Offset(0, 2),
           ),
@@ -363,7 +474,7 @@ class AnalyticsChartsView extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildSectionTitle('效率分布', Icons.pie_chart),
+          _buildSectionTitle(s.efficiencyDistribution, Icons.pie_chart),
           const SizedBox(height: 16),
           Center(
             child: SizedBox(
@@ -379,10 +490,10 @@ class AnalyticsChartsView extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              _buildLegend('优秀', WsColors.accentGreen),
-              _buildLegend('良好', WsColors.accentCyan),
-              _buildLegend('一般', WsColors.accentYellow),
-              _buildLegend('需改进', WsColors.accentRed),
+              _buildLegend(s.excellent, WsColors.accentGreen),
+              _buildLegend(s.good, WsColors.accentCyan),
+              _buildLegend(s.fair, WsColors.accentYellow),
+              _buildLegend(s.needsImprovement, WsColors.accentRed),
             ],
           ),
         ],

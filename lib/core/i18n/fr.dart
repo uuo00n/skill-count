@@ -244,15 +244,41 @@ class FrStrings implements AppStrings {
   @override
   String get analyticsCharts => 'Analyses';
   @override
+  String get moduleComparison => 'Comparaison des modules';
+  @override
   String get moduleEfficiency => 'Efficacité du module';
   @override
   String get timeTrend => 'Tendance temporelle';
+  @override
+  String get efficiencyDistribution => 'Répartition de l’efficacité';
+  @override
+  String get totalSessions => 'Total des sessions';
+  @override
+  String get totalDuration => 'Durée totale';
   @override
   String get completionRate => 'Taux de réussite';
   @override
   String get averageDuration => 'Durée moyenne';
   @override
+  String get averageEfficiency => 'Efficacité moyenne';
+  @override
+  String get durationLabel => 'Durée';
+  @override
+  String get completionLabel => 'Avancement';
+  @override
+  String get averageLabel => 'Moyenne';
+  @override
+  String get excellent => 'Excellent';
+  @override
+  String get good => 'Bon';
+  @override
+  String get fair => 'Moyen';
+  @override
+  String get needsImprovement => 'À améliorer';
+  @override
   String get noRecords => 'Aucun enregistrement de pratique';
   @override
   String get practiceCompleted => 'Pratique complétée';
+  @override
+  String get loadFailed => 'Échec du chargement';
 }

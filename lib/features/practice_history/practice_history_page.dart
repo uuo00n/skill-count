@@ -104,7 +104,7 @@ class _PracticeHistoryPageState extends ConsumerState<PracticeHistoryPage>
                   child: CircularProgressIndicator(),
                 ),
                 error: (err, stack) => Center(
-                  child: Text('Error: $err'),
+                  child: Text('${s.loadFailed}: $err'),
                 ),
               ),
               // Analytics Tab
@@ -138,7 +138,7 @@ class _PracticeHistoryPageState extends ConsumerState<PracticeHistoryPage>
                   child: CircularProgressIndicator(),
                 ),
                 error: (err, stack) => Center(
-                  child: Text('Error: $err'),
+                  child: Text('${s.loadFailed}: $err'),
                 ),
               ),
             ],

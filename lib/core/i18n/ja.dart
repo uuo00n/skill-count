@@ -244,15 +244,41 @@ class JaStrings implements AppStrings {
   @override
   String get analyticsCharts => '分析';
   @override
+  String get moduleComparison => 'モジュール比較';
+  @override
   String get moduleEfficiency => 'モジュール効率';
   @override
   String get timeTrend => '時間トレンド';
+  @override
+  String get efficiencyDistribution => '効率分布';
+  @override
+  String get totalSessions => '総セッション数';
+  @override
+  String get totalDuration => '合計時間';
   @override
   String get completionRate => '完了率';
   @override
   String get averageDuration => '平均期間';
   @override
+  String get averageEfficiency => '平均効率';
+  @override
+  String get durationLabel => '所要時間';
+  @override
+  String get completionLabel => '完了度';
+  @override
+  String get averageLabel => '平均';
+  @override
+  String get excellent => '優秀';
+  @override
+  String get good => '良好';
+  @override
+  String get fair => '普通';
+  @override
+  String get needsImprovement => '改善が必要';
+  @override
   String get noRecords => '練習記録がありません';
   @override
   String get practiceCompleted => '練習完了';
+  @override
+  String get loadFailed => '読み込みに失敗しました';
 }

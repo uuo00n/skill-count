@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../core/constants/ws_colors.dart';
+import '../../../core/i18n/locale_provider.dart';
+import '../../../core/i18n/strings.dart';
 import '../models/practice_record_model.dart';
 
 class RecordsListView extends StatelessWidget {
@@ -12,6 +14,7 @@ class RecordsListView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final s = LocaleScope.of(context);
     // Sort records by date, newest first
     final sortedRecords = List<PracticeRecord>.from(records)
       ..sort((a, b) => b.completedAt.compareTo(a.completedAt));
@@ -21,12 +24,12 @@ class RecordsListView extends StatelessWidget {
       itemCount: sortedRecords.length,
       itemBuilder: (context, index) {
         final record = sortedRecords[index];
-        return _buildRecordCard(record);
+        return _buildRecordCard(record, s);
       },
     );
   }
 
-  Widget _buildRecordCard(PracticeRecord record) {
+  Widget _buildRecordCard(PracticeRecord record, AppStrings s) {
     final hours = record.totalDuration.inHours;
     final minutes = (record.totalDuration.inMinutes % 60);
     final seconds = (record.totalDuration.inSeconds % 60);
@@ -139,17 +142,17 @@ class RecordsListView extends StatelessWidget {
             // Stats row
             Row(
               children: [
-                _statItem(Icons.timer_outlined, '耗时', durationStr),
+                _statItem(Icons.timer_outlined, s.durationLabel, durationStr),
                 _verticalDivider(),
                 _statItem(
                   Icons.check_circle_outline,
-                  '完成度',
+                  s.completionLabel,
                   '${record.completedTasks}/${record.totalTasks}',
                 ),
                 _verticalDivider(),
                 _statItem(
                   Icons.schedule,
-                  '平均',
+                  s.averageLabel,
                   _formatDuration(record.averageTaskDuration),
                 ),
               ],

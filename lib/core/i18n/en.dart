@@ -258,15 +258,41 @@ class EnStrings implements AppStrings {
   @override
   String get analyticsCharts => 'Analytics';
   @override
+  String get moduleComparison => 'Module Comparison';
+  @override
   String get moduleEfficiency => 'Module Efficiency';
   @override
   String get timeTrend => 'Time Trend';
+  @override
+  String get efficiencyDistribution => 'Efficiency Distribution';
+  @override
+  String get totalSessions => 'Total Sessions';
+  @override
+  String get totalDuration => 'Total Duration';
   @override
   String get completionRate => 'Completion Rate';
   @override
   String get averageDuration => 'Avg Duration';
   @override
+  String get averageEfficiency => 'Average Efficiency';
+  @override
+  String get durationLabel => 'Duration';
+  @override
+  String get completionLabel => 'Completion';
+  @override
+  String get averageLabel => 'Average';
+  @override
+  String get excellent => 'Excellent';
+  @override
+  String get good => 'Good';
+  @override
+  String get fair => 'Fair';
+  @override
+  String get needsImprovement => 'Needs Improvement';
+  @override
   String get noRecords => 'No practice records yet';
   @override
   String get practiceCompleted => 'Practice Completed';
+  @override
+  String get loadFailed => 'Failed to load';
 }
