@@ -134,36 +134,41 @@ class _PatternPainter extends CustomPainter {
     final double imgH = image.height.toDouble() / displayScale;
 
     // Use a small negative spacing (overlap) to hide seams
-    // Or positive spacing if a gap is explicitly desired
-    // User requested "0.1 gap", but also complained about "obvious line"
-    // Using a very slight overlap usually fixes the "obvious line" (seam) better than a gap
-    // However, if the user specifically asked for a gap, we can try -0.5 overlap first as it's the standard fix
     const double overlap = 0.5; // Overlap by 0.5 logical pixels
 
     // Calculate effective tile size
     final double tileW = imgW - overlap;
     final double tileH = imgH - overlap;
 
-    // Calculate offset based on scroll progress
-    // Move by full image dimensions
+    // Calculate offset based on scroll progress (0 to -tileW)
     final double dx = -(scrollProgress * tileW);
     final double dy = -(scrollProgress * tileH);
 
-    // Calculate starting position to ensure we cover the screen
-    // We need to start before 0,0 because of the scrolling
-    final int startCol = (dx / tileW).floor() - 1;
-    final int startRow = (dy / tileH).floor() - 1;
-
-    // Calculate how many tiles we need
+    // Calculate number of columns/rows needed to cover the screen
+    // We add extra columns/rows to ensure coverage when shifting
+    // (size.width / tileW) gives visible tiles. 
+    // We add +2 to cover partial tiles on both edges.
     final int cols = (size.width / tileW).ceil() + 2;
     final int rows = (size.height / tileH).ceil() + 2;
 
     final Paint paint = Paint();
 
-    for (int col = 0; col < cols; col++) {
-      for (int row = 0; row < rows; row++) {
-        final double x = dx + (startCol + col) * tileW;
-        final double y = dy + (startRow + row) * tileH;
+    // Loop through grid. 
+    // We start from -1 to ensure we cover the left/top edge when shifting.
+    // dx/dy shifts everything left/up by up to 1 tile width/height.
+    // So tile at index 0 will move from 0 to -tileW.
+    // Tile at index -1 will move from -tileW to -2*tileW.
+    // We need to ensure right/bottom edges are covered.
+    for (int col = -1; col < cols; col++) {
+      for (int row = -1; row < rows; row++) {
+        final double x = dx + col * tileW;
+        final double y = dy + row * tileH;
+
+        // Skip drawing if completely off-screen (optimization)
+        if (x + tileW < 0 || x > size.width || 
+            y + tileH < 0 || y > size.height) {
+          continue;
+        }
 
         // Reset matrix for each tile
         canvas.save();
