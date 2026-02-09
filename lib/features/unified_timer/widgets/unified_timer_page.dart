@@ -1267,11 +1267,12 @@ class _UnifiedTimerPageState extends ConsumerState<UnifiedTimerPage> {
                 : s.start;
 
     return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          // Module name
-          Text(
+      child: SingleChildScrollView(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            // Module name
+            Text(
             _selectedModule.name,
             style: const TextStyle(
               fontSize: 18,
@@ -1533,6 +1534,7 @@ class _UnifiedTimerPageState extends ConsumerState<UnifiedTimerPage> {
             ),
           ),
         ],
+      ),
       ),
     );
   }
