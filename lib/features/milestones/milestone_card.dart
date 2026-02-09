@@ -188,11 +188,11 @@ class MilestoneCard extends StatelessWidget {
                         : WsColors.textPrimary,
                   ),
                 ),
-                const SizedBox(width: 4),
+                const SizedBox(width: 6),
                 Text(
                   s.days,
                   style: TextStyle(
-                    fontSize: 12,
+                    fontSize: 14,
                     fontWeight: FontWeight.w600,
                     color: isPast
                         ? WsColors.textSecondary

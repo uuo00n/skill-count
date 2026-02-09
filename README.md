@@ -1,26 +1,36 @@
-# SkillCount - WorldSkills Pomodoro Timer
+# SkillCount - WorldSkills Training Timer
 
 [![Dart](https://img.shields.io/badge/Dart-0175C2?style=for-the-badge&logo=dart&logoColor=white)](https://dart.dev/)
 [![Flutter](https://img.shields.io/badge/Flutter-02569B?style=for-the-badge&logo=flutter&logoColor=white)](https://flutter.dev/)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[![Version](https://img.shields.io/badge/Version-1.0.0%2B1-blue.svg)](pubspec.yaml)
 [![Platform](https://img.shields.io/badge/Platform-iOS%20%7C%20Android%20%7C%20Web%20%7C%20Windows%20%7C%20macOS%20%7C%20Linux-lightgrey.svg)](https://flutter.dev/multi-platform)
 
-A professional Pomodoro timer application themed around the WorldSkills Competition, designed to help participants and teams prepare effectively for international skill competitions. The application features a modern, clean UI optimized for landscape usage on desktop and tablet devices.
+A WorldSkills-themed training companion focused on competition countdown, module-based timers, practice analytics, and timezone coordination.
+Optimized for landscape use on desktop and tablets.
 
 Chinese version: [README_CN.md](README_CN.md)
 
 ## Features
 
 ### Core Timer Functionality
-- **Competition Countdown** - Real-time countdown to WorldSkills 2026 opening ceremony
-- **Pomodoro Timer** - Module-based timer with customizable duration options (45, 60, 90, 120, 180 minutes)
-- **Task Management** - Integrated task list with status tracking (current, done, upcoming)
-- **Timer Controls** - Intuitive start, pause, and reset functionality
+- **Competition Countdown** - Default target: 2026-09-22 00:00:00 Beijing time (stored as UTC internally)
+- **Unified Module Timer** - Competition modules (A-E) and practice modules, countdown with ring progress
+- **Task Management** - Status tracking (current, done, upcoming), estimated duration, edit and reorder
+- **Timer Controls** - Start, pause, reset, and resume
 
 ### WorldSkills Competition Features
 - **Competition Timeline** - Visual timeline showing competition phases (Arrival, Familiarization, Competition C1, Competition C2, Closing)
-- **Milestone Tracking** - Key competition milestones with countdown timers
+- **Milestone Tracking** - Key milestones with countdown cards (supports localized day unit)
 - **Timezone Converter** - Multi-city timezone display for international participants
+
+### Practice & Review
+- **Practice History** - Records list and analytics charts
+- **AI Review (Optional)** - Summarize practice data and suggestions (requires .env)
+
+### Focus Tools
+- **White Noise** - Built-in audio playback for focus
+- **Cache Cleaning** - Clear practice records and AI analysis history from Settings
 
 ### User Experience
 - **Landscape Optimization** - Professional landscape layout designed for desktop and tablet use
@@ -44,7 +54,7 @@ Chinese version: [README_CN.md](README_CN.md)
 - Module selection panel with duration options
 - Task management interface with status tracking
 
-### Pomodoro Timer
+### Module Timer
 - Circular progress indicator with animated transitions
 - Timer controls (start, pause, reset)
 - Task list with completion status
@@ -100,7 +110,8 @@ Chinese version: [README_CN.md](README_CN.md)
 
 ### Competition Countdown
 
-The main screen displays a real-time countdown to WorldSkills 2026 competition opening ceremony (September 22, 2026). The countdown shows:
+The main screen displays a real-time countdown to the configured competition opening time (default: 2026-09-22 00:00:00 Beijing time).
+The countdown shows:
 - Days remaining
 - Hours, minutes, seconds breakdown
 - Current competition phase status
@@ -137,13 +148,9 @@ View the progression through competition phases:
 
 ### Milestone Tracking
 
-Monitor key competition milestones:
-- Registration deadline
-- Technical description release
-- Competition opening
-- Competition closing
+Monitor and manage key milestones (editable in-app and persisted locally).
 
-Each milestone displays remaining time (days and hours) and status indicators.
+Each milestone displays remaining days and status indicators.
 
 ### Timezone Converter
 
@@ -161,10 +168,12 @@ skillcount/
 │   │   ├── constants/
 │   │   │   ├── ws_colors.dart      # WorldSkills color palette
 │   │   │   └── ws_times.dart       # Competition time constants
+│   │   ├── ai/                      # Optional AI review services
 │   │   ├── i18n/
 │   │   │   ├── locale_provider.dart  # Language management
 │   │   │   ├── strings.dart        # String interface
 │   │   │   ├── zh.dart            # Chinese translations
+│   │   │   ├── zh_tw.dart          # Traditional Chinese translations
 │   │   │   ├── en.dart            # English translations
 │   │   │   ├── ja.dart            # Japanese translations
 │   │   │   ├── de.dart            # German translations
@@ -180,6 +189,8 @@ skillcount/
 │   ├── features/
 │   │   ├── countdown/
 │   │   │   └── countdown_page.dart     # Main countdown page
+│   │   ├── unified_timer/              # Competition & practice module timer
+│   │   ├── practice_history/           # Records, analytics, AI review
 │   │   ├── milestones/
 │   │   │   ├── milestone_model.dart      # Milestone data model
 │   │   │   ├── milestone_card.dart      # Milestone card widget
@@ -195,6 +206,7 @@ skillcount/
 │   │   │   ├── timezone_model.dart     # Timezone data model
 │   │   │   ├── timezone_converter.dart # Timezone conversion logic
 │   │   │   └── timezone_page.dart     # Timezone interface
+│   │   ├── white_noise/                # White noise player
 │   │   └── settings/
 │   │       └── settings_page.dart      # Settings configuration
 │   ├── layout/
@@ -226,6 +238,13 @@ skillcount/
 - `confetti: ^0.8.0` - Celebration effects
 - `window_size: ^0.1.0` - Desktop window sizing
 - `universal_html: ^2.2.4` - Web fullscreen
+- `flutter_riverpod: ^2.6.1` - State management
+- `shared_preferences: ^2.2.2` - Local persistence
+- `just_audio: ^0.10.5` - Audio playback
+- `timezone: ^0.10.0` - IANA timezone database
+- `fl_chart: ^0.68.0` - Charts
+- `flutter_dotenv: ^5.1.0` - Environment variables
+- `http: ^1.2.0` - HTTP client
 
 ### Development Tools
 - `flutter_lints: ^5.0.0` - Code quality lints
@@ -265,7 +284,8 @@ SystemChrome.setPreferredOrientations([
 
 ### Language
 Default language is Chinese (zh). Available languages:
-- Chinese (zh)
+- Chinese (Simplified, zh)
+- Chinese (Traditional, zh-TW / zh-HK / zh-MO)
 - English (en)
 - Japanese (ja)
 - German (de)
@@ -285,8 +305,27 @@ MaterialApp(
 The competition opening time is configured in `lib/core/constants/ws_times.dart`:
 
 ```dart
-static const DateTime competitionOpenTime =
-    DateTime.utc(2026, 9, 22, 19, 0); // 2026-09-22 19:00 UTC
+static final DateTime competitionOpenTime =
+    DateTime.utc(2026, 9, 21, 16, 0, 0); // 2026-09-22 00:00:00 UTC+8
+```
+
+## Optional: AI Review Setup
+
+AI services are configured via `.env` (do not commit real keys):
+
+```bash
+AI_ENGINE=volcengine
+
+# Volcengine
+VOLCENGINE_API_KEY=your_api_key
+VOLCENGINE_ENDPOINT=https://ark.cn-beijing.volces.com/api/v3
+VOLCENGINE_MODEL=ep-2024xxxx
+VOLCENGINE_TIMEOUT=60
+
+# Dify (optional)
+DIFY_API_KEY=your_api_key
+DIFY_BASE_URL=https://api.dify.ai/v1
+DIFY_APP_ID=your_app_id
 ```
 
 ## Development
