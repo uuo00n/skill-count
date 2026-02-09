@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'strings.dart';
 import 'zh.dart';
+import 'zh_tw.dart';
 import 'en.dart';
 import 'ja.dart';
 import 'de.dart';
 import 'fr.dart';
 import 'ko.dart';
 
-enum AppLocale { zh, en, ja, de, fr, ko }
+enum AppLocale { zh, zhTw, zhHk, zhMo, en, ja, de, fr, ko }
 
 class LocaleOption {
   final AppLocale locale;
@@ -18,12 +19,15 @@ class LocaleOption {
 }
 
 const supportedLocales = [
-  LocaleOption(AppLocale.zh, 'CN 中文', 'CN'),
-  LocaleOption(AppLocale.en, 'EN English', 'EN'),
-  LocaleOption(AppLocale.ja, 'JA 日本語', 'JA'),
-  LocaleOption(AppLocale.de, 'DE Deutsch', 'DE'),
-  LocaleOption(AppLocale.fr, 'FR Français', 'FR'),
-  LocaleOption(AppLocale.ko, 'KR 한국어', 'KR'),
+  LocaleOption(AppLocale.zh, '🇨🇳 中文（简体）', 'CN'),
+  LocaleOption(AppLocale.zhTw, '🇨🇳 繁體中文（台灣）', 'TW'),
+  LocaleOption(AppLocale.zhHk, '🇭🇰 繁體中文（香港）', 'HK'),
+  LocaleOption(AppLocale.zhMo, '🇲🇴 繁體中文（澳门）', 'MO'),
+  LocaleOption(AppLocale.en, '🇺🇸 English', 'EN'),
+  LocaleOption(AppLocale.ja, '🇯🇵 日本語', 'JA'),
+  LocaleOption(AppLocale.de, '🇩🇪 Deutsch', 'DE'),
+  LocaleOption(AppLocale.fr, '🇫🇷 Français', 'FR'),
+  LocaleOption(AppLocale.ko, '🇰🇷 한국어', 'KR'),
 ];
 
 /// Global locale notifier for language switching
@@ -47,6 +51,12 @@ class LocaleProvider extends ChangeNotifier {
     switch (locale) {
       case AppLocale.zh:
         return const ZhStrings();
+      case AppLocale.zhTw:
+        return const ZhTwStrings();
+      case AppLocale.zhHk:
+        return const ZhTwStrings();
+      case AppLocale.zhMo:
+        return const ZhTwStrings();
       case AppLocale.en:
         return const EnStrings();
       case AppLocale.ja:

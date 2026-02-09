@@ -305,4 +305,42 @@ class ZhStrings implements AppStrings {
   String get displayTimezone => '显示时区';
   @override
   String get selectTimezone => '选择时区';
+  @override
+  String get aiAnalysis => 'AI智能分析';
+  @override
+  String get aiAnalysisDesc => '基于训练数据的个性化分析和建议';
+  @override
+  String get aiInsights => 'AI洞察';
+  @override
+  String get aiRecommendations => '智能建议';
+  @override
+  String get aiPrediction => '性能预测';
+  @override
+  String get overallRating => '综合评分';
+  @override
+  String get confidence => '信心度';
+  @override
+  String get strengths => '优势';
+  @override
+  String get weaknessesLabel => '待改进';
+  @override
+  String get talkToAI => '与AI对话';
+  @override
+  String get askAI => '向AI提问';
+  @override
+  String get generatingAnalysis => 'AI正在分析...';
+  @override
+  String get analysisComplete => '分析完成';
+  @override
+  String get noAnalysisData => '暂无分析数据';
+  @override
+  String get startAnalysis => '开始分析';
+  @override
+  String get aiServiceNotConfigured => 'AI服务未配置，请在.env中设置API密钥';
+  @override
+  String get retry => '重试';
+  @override
+  String get send => '发送';
+  @override
+  String get typeYourQuestion => '输入你的问题...';
 }

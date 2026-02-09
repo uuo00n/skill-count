@@ -291,4 +291,42 @@ class DeStrings implements AppStrings {
   String get displayTimezone => 'Angezeigte Zeitzone';
   @override
   String get selectTimezone => 'Zeitzone auswählen';
+  @override
+  String get aiAnalysis => 'KI-Analyse';
+  @override
+  String get aiAnalysisDesc => 'Personalisierte Analyse und Empfehlungen basierend auf Trainingsdaten';
+  @override
+  String get aiInsights => 'KI-Einblicke';
+  @override
+  String get aiRecommendations => 'Smarte Empfehlungen';
+  @override
+  String get aiPrediction => 'Leistungsvorhersage';
+  @override
+  String get overallRating => 'Gesamtbewertung';
+  @override
+  String get confidence => 'Vertrauen';
+  @override
+  String get strengths => 'Stärken';
+  @override
+  String get weaknessesLabel => 'Schwächen';
+  @override
+  String get talkToAI => 'Mit KI chatten';
+  @override
+  String get askAI => 'KI fragen';
+  @override
+  String get generatingAnalysis => 'KI analysiert...';
+  @override
+  String get analysisComplete => 'Analyse abgeschlossen';
+  @override
+  String get noAnalysisData => 'Keine Analysedaten';
+  @override
+  String get startAnalysis => 'Analyse starten';
+  @override
+  String get aiServiceNotConfigured => 'KI-Dienst nicht konfiguriert. API-Schlüssel in .env setzen';
+  @override
+  String get retry => 'Wiederholen';
+  @override
+  String get send => 'Senden';
+  @override
+  String get typeYourQuestion => 'Frage eingeben...';
 }

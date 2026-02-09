@@ -291,4 +291,42 @@ class KoStrings implements AppStrings {
   String get displayTimezone => '표시 시간대';
   @override
   String get selectTimezone => '시간대 선택';
+  @override
+  String get aiAnalysis => 'AI 분석';
+  @override
+  String get aiAnalysisDesc => '훈련 데이터 기반 맞춤형 분석 및 추천';
+  @override
+  String get aiInsights => 'AI 인사이트';
+  @override
+  String get aiRecommendations => '스마트 추천';
+  @override
+  String get aiPrediction => '성능 예측';
+  @override
+  String get overallRating => '종합 평가';
+  @override
+  String get confidence => '신뢰도';
+  @override
+  String get strengths => '강점';
+  @override
+  String get weaknessesLabel => '개선점';
+  @override
+  String get talkToAI => 'AI와 대화';
+  @override
+  String get askAI => 'AI에게 질문';
+  @override
+  String get generatingAnalysis => 'AI 분석 중...';
+  @override
+  String get analysisComplete => '분석 완료';
+  @override
+  String get noAnalysisData => '분석 데이터 없음';
+  @override
+  String get startAnalysis => '분석 시작';
+  @override
+  String get aiServiceNotConfigured => 'AI 서비스 미설정. .env 파일에서 API 키를 설정하세요';
+  @override
+  String get retry => '재시도';
+  @override
+  String get send => '보내기';
+  @override
+  String get typeYourQuestion => '질문을 입력하세요...';
 }

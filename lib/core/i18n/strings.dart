@@ -167,4 +167,25 @@ abstract class AppStrings {
   // Timezone Settings
   String get displayTimezone;
   String get selectTimezone;
+
+  // AI Analysis
+  String get aiAnalysis;
+  String get aiAnalysisDesc;
+  String get aiInsights;
+  String get aiRecommendations;
+  String get aiPrediction;
+  String get overallRating;
+  String get confidence;
+  String get strengths;
+  String get weaknessesLabel;
+  String get talkToAI;
+  String get askAI;
+  String get generatingAnalysis;
+  String get analysisComplete;
+  String get noAnalysisData;
+  String get startAnalysis;
+  String get aiServiceNotConfigured;
+  String get retry;
+  String get send;
+  String get typeYourQuestion;
 }

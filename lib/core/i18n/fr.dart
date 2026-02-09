@@ -291,4 +291,42 @@ class FrStrings implements AppStrings {
   String get displayTimezone => 'Fuseau horaire affiché';
   @override
   String get selectTimezone => 'Sélectionner le fuseau horaire';
+  @override
+  String get aiAnalysis => 'Analyse IA';
+  @override
+  String get aiAnalysisDesc => 'Analyse personnalisée et recommandations basées sur les données d\'entraînement';
+  @override
+  String get aiInsights => 'Aperçus IA';
+  @override
+  String get aiRecommendations => 'Recommandations intelligentes';
+  @override
+  String get aiPrediction => 'Prédiction de performance';
+  @override
+  String get overallRating => 'Note globale';
+  @override
+  String get confidence => 'Confiance';
+  @override
+  String get strengths => 'Points forts';
+  @override
+  String get weaknessesLabel => 'Points à améliorer';
+  @override
+  String get talkToAI => 'Discuter avec l\'IA';
+  @override
+  String get askAI => 'Demander à l\'IA';
+  @override
+  String get generatingAnalysis => 'L\'IA analyse...';
+  @override
+  String get analysisComplete => 'Analyse terminée';
+  @override
+  String get noAnalysisData => 'Aucune donnée d\'analyse';
+  @override
+  String get startAnalysis => 'Lancer l\'analyse';
+  @override
+  String get aiServiceNotConfigured => 'Service IA non configuré. Définir la clé API dans .env';
+  @override
+  String get retry => 'Réessayer';
+  @override
+  String get send => 'Envoyer';
+  @override
+  String get typeYourQuestion => 'Tapez votre question...';
 }

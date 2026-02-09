@@ -305,4 +305,42 @@ class EnStrings implements AppStrings {
   String get displayTimezone => 'Display Timezone';
   @override
   String get selectTimezone => 'Select Timezone';
+  @override
+  String get aiAnalysis => 'AI Analysis';
+  @override
+  String get aiAnalysisDesc => 'Personalized analysis and recommendations based on training data';
+  @override
+  String get aiInsights => 'AI Insights';
+  @override
+  String get aiRecommendations => 'Smart Recommendations';
+  @override
+  String get aiPrediction => 'Performance Prediction';
+  @override
+  String get overallRating => 'Overall Rating';
+  @override
+  String get confidence => 'Confidence';
+  @override
+  String get strengths => 'Strengths';
+  @override
+  String get weaknessesLabel => 'Weaknesses';
+  @override
+  String get talkToAI => 'Chat with AI';
+  @override
+  String get askAI => 'Ask AI';
+  @override
+  String get generatingAnalysis => 'AI is analyzing...';
+  @override
+  String get analysisComplete => 'Analysis Complete';
+  @override
+  String get noAnalysisData => 'No analysis data';
+  @override
+  String get startAnalysis => 'Start Analysis';
+  @override
+  String get aiServiceNotConfigured => 'AI service not configured. Set API key in .env file';
+  @override
+  String get retry => 'Retry';
+  @override
+  String get send => 'Send';
+  @override
+  String get typeYourQuestion => 'Type your question...';
 }

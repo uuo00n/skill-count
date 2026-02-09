@@ -5,6 +5,7 @@ import '../../core/i18n/locale_provider.dart';
 import '../../core/providers/practice_history_provider.dart';
 import 'widgets/records_list_view.dart';
 import 'widgets/analytics_charts_view.dart';
+import 'widgets/ai_analysis_panel.dart';
 
 class PracticeHistoryPage extends ConsumerStatefulWidget {
   const PracticeHistoryPage({super.key});
@@ -20,7 +21,7 @@ class _PracticeHistoryPageState extends ConsumerState<PracticeHistoryPage>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 2, vsync: this);
+    _tabController = TabController(length: 3, vsync: this);
   }
 
   @override
@@ -65,6 +66,7 @@ class _PracticeHistoryPageState extends ConsumerState<PracticeHistoryPage>
             tabs: [
               Tab(text: s.recordsList),
               Tab(text: s.analyticsCharts),
+              Tab(text: s.aiAnalysis),
             ],
           ),
         ),
@@ -141,6 +143,8 @@ class _PracticeHistoryPageState extends ConsumerState<PracticeHistoryPage>
                   child: Text('${s.loadFailed}: $err'),
                 ),
               ),
+              // AI Analysis Tab
+              const AIAnalysisPanel(),
             ],
           ),
         ),

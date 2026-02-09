@@ -291,4 +291,42 @@ class JaStrings implements AppStrings {
   String get displayTimezone => '表示タイムゾーン';
   @override
   String get selectTimezone => 'タイムゾーンを選択';
+  @override
+  String get aiAnalysis => 'AI分析';
+  @override
+  String get aiAnalysisDesc => 'トレーニングデータに基づくパーソナライズ分析と提案';
+  @override
+  String get aiInsights => 'AIインサイト';
+  @override
+  String get aiRecommendations => 'スマート提案';
+  @override
+  String get aiPrediction => 'パフォーマンス予測';
+  @override
+  String get overallRating => '総合評価';
+  @override
+  String get confidence => '信頼度';
+  @override
+  String get strengths => '強み';
+  @override
+  String get weaknessesLabel => '改善点';
+  @override
+  String get talkToAI => 'AIとチャット';
+  @override
+  String get askAI => 'AIに質問';
+  @override
+  String get generatingAnalysis => 'AI分析中...';
+  @override
+  String get analysisComplete => '分析完了';
+  @override
+  String get noAnalysisData => '分析データなし';
+  @override
+  String get startAnalysis => '分析開始';
+  @override
+  String get aiServiceNotConfigured => 'AIサービス未設定。.envファイルでAPIキーを設定してください';
+  @override
+  String get retry => '再試行';
+  @override
+  String get send => '送信';
+  @override
+  String get typeYourQuestion => '質問を入力...';
 }
