@@ -322,6 +322,8 @@ class FrStrings implements AppStrings {
   @override
   String get startAnalysis => 'Lancer l\'analyse';
   @override
+  String get reanalyze => 'Réanalyser';
+  @override
   String get aiServiceNotConfigured => 'Service IA non configuré. Définir la clé API dans .env';
   @override
   String get retry => 'Réessayer';
@@ -329,4 +331,34 @@ class FrStrings implements AppStrings {
   String get send => 'Envoyer';
   @override
   String get typeYourQuestion => 'Tapez votre question...';
+
+  // AI Analysis History
+  @override
+  String get analysisHistory => 'Historique des analyses';
+  @override
+  String get noHistoryRecords => 'Aucun historique d\'analyse';
+  @override
+  String get clearHistory => 'Effacer l\'historique';
+
+  // Record Detail
+  @override
+  String get recordDetail => 'Détail de l\'enregistrement';
+  @override
+  String get keyEvents => 'Événements clés';
+
+  // Data Management
+  @override
+  String get clearRecords => 'Effacer les enregistrements';
+  @override
+  String get clearRecordsDesc => 'Supprimer tout l\'historique des pratiques';
+  @override
+  String get clearRecordsWarning => 'Tous les enregistrements seront supprimés de manière irréversible. Continuer ?';
+  @override
+  String get clearAIHistory => 'Effacer l\'historique IA';
+  @override
+  String get clearAIHistoryDesc => 'Supprimer tous les enregistrements d\'analyse IA';
+  @override
+  String get clearAIHistoryWarning => 'Tout l\'historique d\'analyse IA sera supprimé de manière irréversible. Continuer ?';
+  @override
+  String get dataCleared => 'Effacé';
 }

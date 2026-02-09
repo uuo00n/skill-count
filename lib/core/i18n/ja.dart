@@ -322,6 +322,8 @@ class JaStrings implements AppStrings {
   @override
   String get startAnalysis => '分析開始';
   @override
+  String get reanalyze => '再分析';
+  @override
   String get aiServiceNotConfigured => 'AIサービス未設定。.envファイルでAPIキーを設定してください';
   @override
   String get retry => '再試行';
@@ -329,4 +331,34 @@ class JaStrings implements AppStrings {
   String get send => '送信';
   @override
   String get typeYourQuestion => '質問を入力...';
+
+  // AI Analysis History
+  @override
+  String get analysisHistory => '分析履歴';
+  @override
+  String get noHistoryRecords => '分析履歴がありません';
+  @override
+  String get clearHistory => '履歴を消去';
+
+  // Record Detail
+  @override
+  String get recordDetail => '記録の詳細';
+  @override
+  String get keyEvents => 'イベント';
+
+  // Data Management
+  @override
+  String get clearRecords => '練習記録を消去';
+  @override
+  String get clearRecordsDesc => 'すべての練習履歴を削除';
+  @override
+  String get clearRecordsWarning => 'すべての練習記録が削除され、元に戻せません。消去しますか？';
+  @override
+  String get clearAIHistory => 'AI分析履歴を消去';
+  @override
+  String get clearAIHistoryDesc => 'すべてのAI分析記録を削除';
+  @override
+  String get clearAIHistoryWarning => 'すべてのAI分析履歴が削除され、元に戻せません。消去しますか？';
+  @override
+  String get dataCleared => '消去しました';
 }

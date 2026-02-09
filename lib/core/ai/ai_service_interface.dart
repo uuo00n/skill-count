@@ -7,6 +7,7 @@ abstract class AIService {
   Future<AIAnalysisResult> analyzeTrainingData({
     required List<PracticeRecord> records,
     AnalysisType type = AnalysisType.comprehensive,
+    String? languageName,
   });
 
   /// 生成个性化建议

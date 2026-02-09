@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/ai/ai_analysis_history_service.dart';
+import '../../core/ai/ai_providers.dart';
 import '../../core/constants/ws_colors.dart';
 import '../../core/i18n/locale_provider.dart';
 import '../../core/i18n/strings.dart';
+import '../../core/providers/practice_history_provider.dart';
 import '../../core/providers/time_providers.dart';
+import '../practice_history/practice_history_service.dart';
 import '../timezone/timezone_model.dart';
 
 class SettingsPage extends ConsumerWidget {
@@ -101,6 +105,22 @@ class SettingsPage extends ConsumerWidget {
                   ),
                 ),
               ),
+              const SizedBox(height: 12),
+              _buildSettingTile(
+                icon: Icons.delete_outline,
+                title: s.clearRecords,
+                subtitle: s.clearRecordsDesc,
+                onTap: () => _confirmClearRecords(context, ref, s),
+                iconColor: WsColors.accentRed,
+              ),
+              const SizedBox(height: 12),
+              _buildSettingTile(
+                icon: Icons.auto_delete_outlined,
+                title: s.clearAIHistory,
+                subtitle: s.clearAIHistoryDesc,
+                onTap: () => _confirmClearAIHistory(context, ref, s),
+                iconColor: WsColors.accentRed,
+              ),
             ],
           ),
         ),
@@ -115,6 +135,7 @@ class SettingsPage extends ConsumerWidget {
     Widget? body,
     Widget? trailing,
     VoidCallback? onTap,
+    Color? iconColor,
   }) {
     return Material(
       color: Colors.transparent,
@@ -130,7 +151,7 @@ class SettingsPage extends ConsumerWidget {
           ),
           child: Row(
             children: [
-              Icon(icon, size: 20, color: WsColors.accentCyan),
+              Icon(icon, size: 20, color: iconColor ?? WsColors.accentCyan),
               const SizedBox(width: 16),
               Expanded(
                 child: Column(
@@ -468,6 +489,163 @@ class SettingsPage extends ConsumerWidget {
           ),
         );
       },
+    );
+  }
+
+  Future<void> _confirmClearRecords(
+    BuildContext context,
+    WidgetRef ref,
+    AppStrings s,
+  ) async {
+    final confirmed = await _showConfirmDialog(
+      context,
+      s,
+      icon: Icons.delete_outline,
+      title: s.clearRecords,
+      message: s.clearRecordsWarning,
+    );
+    if (confirmed != true || !context.mounted) return;
+
+    final service = PracticeHistoryService();
+    await service.initialize();
+    await service.clearAllRecords();
+    ref.invalidate(practiceRecordsProvider);
+
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(s.dataCleared),
+          behavior: SnackBarBehavior.floating,
+          backgroundColor: WsColors.darkBlue,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8),
+          ),
+        ),
+      );
+    }
+  }
+
+  Future<void> _confirmClearAIHistory(
+    BuildContext context,
+    WidgetRef ref,
+    AppStrings s,
+  ) async {
+    final confirmed = await _showConfirmDialog(
+      context,
+      s,
+      icon: Icons.auto_delete_outlined,
+      title: s.clearAIHistory,
+      message: s.clearAIHistoryWarning,
+    );
+    if (confirmed != true || !context.mounted) return;
+
+    final historyService = AIAnalysisHistoryService();
+    await historyService.initialize();
+    await historyService.clearAll();
+    ref.invalidate(aiAnalysisHistoryProvider);
+
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(s.dataCleared),
+          behavior: SnackBarBehavior.floating,
+          backgroundColor: WsColors.darkBlue,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8),
+          ),
+        ),
+      );
+    }
+  }
+
+  Future<bool?> _showConfirmDialog(
+    BuildContext context,
+    AppStrings s, {
+    required IconData icon,
+    required String title,
+    required String message,
+  }) {
+    return showDialog<bool>(
+      context: context,
+      builder: (ctx) => Dialog(
+        backgroundColor: WsColors.surface,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Container(
+          width: 380,
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: WsColors.accentRed.withAlpha(20),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Icon(icon, size: 20, color: WsColors.accentRed),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      title,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                        color: WsColors.textPrimary,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              Text(
+                message,
+                style: const TextStyle(
+                  fontSize: 13,
+                  color: WsColors.textSecondary,
+                  height: 1.5,
+                ),
+              ),
+              const SizedBox(height: 24),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  TextButton(
+                    onPressed: () => Navigator.of(ctx).pop(false),
+                    style: TextButton.styleFrom(
+                      foregroundColor: WsColors.textSecondary,
+                    ),
+                    child: Text(
+                      s.cancel,
+                      style: const TextStyle(fontWeight: FontWeight.w600),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  ElevatedButton(
+                    onPressed: () => Navigator.of(ctx).pop(true),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: WsColors.accentRed,
+                      foregroundColor: WsColors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                    child: Text(
+                      s.confirmDelete,
+                      style: const TextStyle(fontWeight: FontWeight.w700),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

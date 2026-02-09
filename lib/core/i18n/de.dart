@@ -322,6 +322,8 @@ class DeStrings implements AppStrings {
   @override
   String get startAnalysis => 'Analyse starten';
   @override
+  String get reanalyze => 'Neu analysieren';
+  @override
   String get aiServiceNotConfigured => 'KI-Dienst nicht konfiguriert. API-Schlüssel in .env setzen';
   @override
   String get retry => 'Wiederholen';
@@ -329,4 +331,34 @@ class DeStrings implements AppStrings {
   String get send => 'Senden';
   @override
   String get typeYourQuestion => 'Frage eingeben...';
+
+  // AI Analysis History
+  @override
+  String get analysisHistory => 'Analyseverlauf';
+  @override
+  String get noHistoryRecords => 'Kein Analyseverlauf';
+  @override
+  String get clearHistory => 'Verlauf löschen';
+
+  // Record Detail
+  @override
+  String get recordDetail => 'Aufzeichnungsdetails';
+  @override
+  String get keyEvents => 'Ereignisse';
+
+  // Data Management
+  @override
+  String get clearRecords => 'Übungsdaten löschen';
+  @override
+  String get clearRecordsDesc => 'Alle Übungsaufzeichnungen löschen';
+  @override
+  String get clearRecordsWarning => 'Alle Übungsdaten werden gelöscht und können nicht wiederhergestellt werden. Fortfahren?';
+  @override
+  String get clearAIHistory => 'KI-Analyseverlauf löschen';
+  @override
+  String get clearAIHistoryDesc => 'Alle KI-Analyseaufzeichnungen löschen';
+  @override
+  String get clearAIHistoryWarning => 'Der gesamte KI-Analyseverlauf wird gelöscht und kann nicht wiederhergestellt werden. Fortfahren?';
+  @override
+  String get dataCleared => 'Gelöscht';
 }

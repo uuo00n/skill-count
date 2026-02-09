@@ -10,7 +10,7 @@ import 'ai_models.dart';
 import 'ai_service_interface.dart';
 import 'prompts/training_analysis_prompt.dart';
 
-/// 火山云AI服务实现
+/// AI服务实现
 class VolcengineAIService implements AIService {
   final VolcengineConfig _config;
   final http.Client _client;
@@ -22,7 +22,7 @@ class VolcengineAIService implements AIService {
         _client = client ?? http.Client();
 
   @override
-  String get serviceName => '火山云AI';
+  String get serviceName => 'AI';
 
   @override
   bool get isAvailable => _config.apiKey.isNotEmpty;
@@ -31,9 +31,10 @@ class VolcengineAIService implements AIService {
   Future<AIAnalysisResult> analyzeTrainingData({
     required List<PracticeRecord> records,
     AnalysisType type = AnalysisType.comprehensive,
+    String? languageName,
   }) async {
     if (!isAvailable) {
-      throw Exception('火山云AI服务未配置');
+      throw Exception('AI服务未配置');
     }
 
     if (records.isEmpty) {
@@ -48,7 +49,7 @@ class VolcengineAIService implements AIService {
       'messages': [
         {
           'role': 'system',
-          'content': TrainingAnalysisPrompt.systemPrompt,
+          'content': TrainingAnalysisPrompt.buildSystemPrompt(languageName),
         },
         {
           'role': 'user',
@@ -124,7 +125,7 @@ class VolcengineAIService implements AIService {
     Duration? targetDuration,
   }) async {
     if (!isAvailable) {
-      throw Exception('火山云AI服务未配置');
+      throw Exception('AI服务未配置');
     }
 
     final prompt = TrainingAnalysisPrompt.buildPredictionPrompt(

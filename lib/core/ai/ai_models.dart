@@ -52,6 +52,14 @@ class TrainingRecommendation {
       relatedModule: json['related_module'] as String?,
     );
   }
+
+  Map<String, dynamic> toJson() => {
+        'title': title,
+        'description': description,
+        'priority': priority.name,
+        'action_steps': actionSteps,
+        if (relatedModule != null) 'related_module': relatedModule,
+      };
 }
 
 /// 模块效率分析
@@ -85,6 +93,14 @@ class ModuleEfficiencyAnalysis {
           [],
     );
   }
+
+  Map<String, dynamic> toJson() => {
+        'module_id': moduleId,
+        'module_name': moduleName,
+        'efficiency': efficiency,
+        'insights': insights,
+        'tips': tips,
+      };
 }
 
 /// 时间趋势分析
@@ -110,10 +126,17 @@ class TimeTrendAnalysis {
       summary: json['summary'] as String? ?? '',
     );
   }
+
+  Map<String, dynamic> toJson() => {
+        'trend': trend.name,
+        'improvement_rate': improvementRate,
+        'summary': summary,
+      };
 }
 
 /// AI分析结果
 class AIAnalysisResult {
+  final String id;
   final double overallRating;
   final List<String> strengths;
   final List<String> weaknesses;
@@ -125,6 +148,7 @@ class AIAnalysisResult {
   final double confidence;
 
   const AIAnalysisResult({
+    required this.id,
     required this.overallRating,
     required this.strengths,
     required this.weaknesses,
@@ -137,7 +161,10 @@ class AIAnalysisResult {
   });
 
   factory AIAnalysisResult.fromJson(Map<String, dynamic> json) {
+    final now = DateTime.now();
     return AIAnalysisResult(
+      id: json['id'] as String? ??
+          now.millisecondsSinceEpoch.toString(),
       overallRating:
           (json['overall_rating'] as num?)?.toDouble() ?? 0.0,
       strengths: (json['strengths'] as List<dynamic>?)
@@ -171,10 +198,26 @@ class AIAnalysisResult {
       predictedBestTime: Duration(
         seconds: (json['predicted_best_time'] as num?)?.toInt() ?? 0,
       ),
-      analyzedAt: DateTime.now(),
+      analyzedAt: json['analyzed_at'] != null
+          ? DateTime.parse(json['analyzed_at'] as String)
+          : now,
       confidence: (json['confidence'] as num?)?.toDouble() ?? 0.0,
     );
   }
+
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'overall_rating': overallRating,
+        'strengths': strengths,
+        'weaknesses': weaknesses,
+        'recommendations': recommendations.map((r) => r.toJson()).toList(),
+        'module_efficiencies': moduleEfficiencies
+            .map((key, value) => MapEntry(key, value.toJson())),
+        'time_trend': timeTrend.toJson(),
+        'predicted_best_time': predictedBestTime.inSeconds,
+        'analyzed_at': analyzedAt.toIso8601String(),
+        'confidence': confidence,
+      };
 }
 
 /// 预测结果

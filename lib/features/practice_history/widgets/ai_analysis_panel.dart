@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/ai/ai_models.dart';
 import '../../../core/ai/ai_providers.dart';
+import '../../../core/ai/prompts/training_analysis_prompt.dart';
 import '../../../core/constants/ws_colors.dart';
 import '../../../core/i18n/locale_provider.dart';
 
@@ -15,25 +16,32 @@ class AIAnalysisPanel extends ConsumerStatefulWidget {
 }
 
 class _AIAnalysisPanelState extends ConsumerState<AIAnalysisPanel> {
-  final _chatController = TextEditingController();
+  // final _chatController = TextEditingController();
 
   @override
   void dispose() {
-    _chatController.dispose();
+    // _chatController.dispose();
     super.dispose();
+  }
+
+  void _startAnalysis() {
+    final locale = LocaleScope.providerOf(context).locale;
+    final langName = TrainingAnalysisPrompt.languageNameForLocale(locale);
+    ref.read(aiAnalysisProvider.notifier).analyze(languageName: langName);
   }
 
   @override
   Widget build(BuildContext context) {
     final s = LocaleScope.of(context);
     final analysisState = ref.watch(aiAnalysisProvider);
+    final historyAsync = ref.watch(aiAnalysisHistoryProvider);
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildHeader(s),
+          _buildHeader(s, analysisState.status),
           const SizedBox(height: 16),
           switch (analysisState.status) {
             AIAnalysisStatus.idle => _buildIdleState(s),
@@ -44,13 +52,13 @@ class _AIAnalysisPanelState extends ConsumerState<AIAnalysisPanel> {
               _buildErrorState(s, analysisState.errorMessage ?? ''),
           },
           const SizedBox(height: 24),
-          _buildChatSection(s),
+          _buildHistorySection(s, historyAsync),
         ],
       ),
     );
   }
 
-  Widget _buildHeader(dynamic s) {
+  Widget _buildHeader(dynamic s, AIAnalysisStatus status) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -96,33 +104,28 @@ class _AIAnalysisPanelState extends ConsumerState<AIAnalysisPanel> {
               ],
             ),
           ),
-          // AI引擎标识
-          Container(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 12,
-              vertical: 6,
-            ),
-            decoration: BoxDecoration(
-              color: WsColors.bgDeep.withAlpha(120),
-              borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: WsColors.border),
-            ),
-            child: const Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(Icons.memory, size: 14, color: WsColors.accentCyan),
-                SizedBox(width: 6),
-                Text(
-                  '火山云AI',
-                  style: TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w600,
-                    color: WsColors.textPrimary,
+          if (status != AIAnalysisStatus.idle)
+            TextButton.icon(
+              onPressed: status == AIAnalysisStatus.loading
+                  ? null
+                  : _startAnalysis,
+              icon: const Icon(Icons.refresh, size: 18),
+              label: Text(s.reanalyze),
+              style: TextButton.styleFrom(
+                foregroundColor: WsColors.accentCyan,
+                backgroundColor: WsColors.accentCyan.withAlpha(12),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 10,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                  side: BorderSide(
+                    color: WsColors.accentCyan.withAlpha(40),
                   ),
                 ),
-              ],
+              ),
             ),
-          ),
         ],
       ),
     );
@@ -154,9 +157,7 @@ class _AIAnalysisPanelState extends ConsumerState<AIAnalysisPanel> {
             ),
             const SizedBox(height: 20),
             ElevatedButton.icon(
-              onPressed: () {
-                ref.read(aiAnalysisProvider.notifier).analyze();
-              },
+              onPressed: _startAnalysis,
               icon: const Icon(Icons.auto_awesome, size: 18),
               label: Text(s.startAnalysis),
               style: ElevatedButton.styleFrom(
@@ -238,9 +239,7 @@ class _AIAnalysisPanelState extends ConsumerState<AIAnalysisPanel> {
             ),
             const SizedBox(height: 20),
             ElevatedButton.icon(
-              onPressed: () {
-                ref.read(aiAnalysisProvider.notifier).analyze();
-              },
+              onPressed: _startAnalysis,
               icon: const Icon(Icons.refresh, size: 18),
               label: Text(s.retry),
               style: ElevatedButton.styleFrom(
@@ -644,6 +643,7 @@ class _AIAnalysisPanelState extends ConsumerState<AIAnalysisPanel> {
     );
   }
 
+  /*
   Widget _buildChatSection(dynamic s) {
     final chatState = ref.watch(aiChatProvider);
 
@@ -676,7 +676,6 @@ class _AIAnalysisPanelState extends ConsumerState<AIAnalysisPanel> {
             ],
           ),
           const SizedBox(height: 12),
-          // 聊天历史
           if (chatState.messages.isNotEmpty)
             Container(
               constraints: const BoxConstraints(maxHeight: 200),
@@ -736,7 +735,6 @@ class _AIAnalysisPanelState extends ConsumerState<AIAnalysisPanel> {
                 },
               ),
             ),
-          // 流式响应
           if (chatState.isLoading && chatState.currentResponse.isNotEmpty)
             Padding(
               padding: const EdgeInsets.only(bottom: 12),
@@ -773,7 +771,6 @@ class _AIAnalysisPanelState extends ConsumerState<AIAnalysisPanel> {
                 ],
               ),
             ),
-          // 输入栏
           Row(
             children: [
               Expanded(
@@ -848,6 +845,255 @@ class _AIAnalysisPanelState extends ConsumerState<AIAnalysisPanel> {
     if (text.isEmpty) return;
     _chatController.clear();
     ref.read(aiChatProvider.notifier).sendMessage(text);
+  }
+  */
+
+  Widget _buildHistorySection(
+    dynamic s,
+    AsyncValue<List<AIAnalysisResult>> historyAsync,
+  ) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: WsColors.surface,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: WsColors.border),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(
+                Icons.history,
+                size: 18,
+                color: WsColors.accentCyan,
+              ),
+              const SizedBox(width: 8),
+              Text(
+                s.analysisHistory,
+                style: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w700,
+                  color: WsColors.textPrimary,
+                ),
+              ),
+              const Spacer(),
+              if (historyAsync.valueOrNull?.isNotEmpty ?? false)
+                TextButton(
+                  onPressed: () async {
+                    final service =
+                        ref.read(aiAnalysisHistoryServiceProvider);
+                    await service.initialize();
+                    await service.clearAll();
+                    ref.invalidate(aiAnalysisHistoryProvider);
+                  },
+                  style: TextButton.styleFrom(
+                    foregroundColor: WsColors.textSecondary,
+                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                  ),
+                  child: Text(
+                    s.clearHistory,
+                    style: const TextStyle(fontSize: 12),
+                  ),
+                ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          historyAsync.when(
+            data: (history) {
+              if (history.isEmpty) {
+                return Center(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    child: Text(
+                      s.noHistoryRecords,
+                      style: const TextStyle(
+                        fontSize: 13,
+                        color: WsColors.textSecondary,
+                      ),
+                    ),
+                  ),
+                );
+              }
+              return Column(
+                children: history.map((result) {
+                  return _buildHistoryCard(result);
+                }).toList(),
+              );
+            },
+            loading: () => const Center(
+              child: Padding(
+                padding: EdgeInsets.symmetric(vertical: 16),
+                child: SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: WsColors.accentCyan,
+                  ),
+                ),
+              ),
+            ),
+            error: (_, __) => const SizedBox.shrink(),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildHistoryCard(AIAnalysisResult result) {
+    final ratingColor = result.overallRating >= 80
+        ? WsColors.accentGreen
+        : result.overallRating >= 60
+            ? WsColors.accentYellow
+            : WsColors.accentRed;
+
+    final trendIcon = result.timeTrend.trend == TrendType.improving
+        ? Icons.trending_up
+        : result.timeTrend.trend == TrendType.declining
+            ? Icons.trending_down
+            : Icons.trending_flat;
+
+    final trendColor = result.timeTrend.trend == TrendType.improving
+        ? WsColors.accentGreen
+        : result.timeTrend.trend == TrendType.declining
+            ? WsColors.accentRed
+            : WsColors.accentYellow;
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Material(
+        color: WsColors.bgPrimary,
+        borderRadius: BorderRadius.circular(8),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(8),
+          onTap: () => _showHistoryDetail(result),
+          child: Padding(
+            padding: const EdgeInsets.all(12),
+            child: Row(
+              children: [
+                Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.all(color: ratingColor, width: 2),
+                  ),
+                  child: Center(
+                    child: Text(
+                      '${result.overallRating.toInt()}',
+                      style: TextStyle(
+                        fontFamily: 'JetBrainsMono',
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                        color: ratingColor,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        _formatDateTime(result.analyzedAt),
+                        style: const TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                          color: WsColors.textPrimary,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      if (result.timeTrend.summary.isNotEmpty)
+                        Text(
+                          result.timeTrend.summary,
+                          style: const TextStyle(
+                            fontSize: 11,
+                            color: WsColors.textSecondary,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                    ],
+                  ),
+                ),
+                Icon(trendIcon, size: 18, color: trendColor),
+                const SizedBox(width: 4),
+                const Icon(
+                  Icons.chevron_right,
+                  size: 18,
+                  color: WsColors.textSecondary,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showHistoryDetail(AIAnalysisResult result) {
+    final s = LocaleScope.of(context);
+    showDialog(
+      context: context,
+      builder: (ctx) => Dialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 600, maxHeight: 500),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 16, 8, 0),
+                child: Row(
+                  children: [
+                    const Icon(
+                      Icons.history,
+                      size: 18,
+                      color: WsColors.accentCyan,
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      _formatDateTime(result.analyzedAt),
+                      style: const TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w700,
+                        color: WsColors.textPrimary,
+                      ),
+                    ),
+                    const Spacer(),
+                    IconButton(
+                      onPressed: () => Navigator.of(ctx).pop(),
+                      icon: const Icon(Icons.close, size: 20),
+                    ),
+                  ],
+                ),
+              ),
+              const Divider(),
+              Flexible(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.all(16),
+                  child: _buildAnalysisContent(s, result),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  String _formatDateTime(DateTime dt) {
+    final y = dt.year;
+    final m = dt.month.toString().padLeft(2, '0');
+    final d = dt.day.toString().padLeft(2, '0');
+    final h = dt.hour.toString().padLeft(2, '0');
+    final min = dt.minute.toString().padLeft(2, '0');
+    return '$y-$m-$d $h:$min';
   }
 
   String _formatDuration(Duration duration) {

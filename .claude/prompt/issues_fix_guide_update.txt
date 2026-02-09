@@ -8,63 +8,10 @@
 
 ### 1. 强制解包潜在空指针错误
 
-**错误信息：**
-```
-ERROR [145:51] The getter 'durationLabel' isn't defined for the type 'AppStrings'.
-ERROR [149:21] The getter 'completionLabel' isn't defined for the type 'AppStrings'.
-ERROR [155:21] The getter 'averageLabel' isn't defined for the type 'AppStrings'.
-```
-
-**问题代码：**
-```dart
-_statItem(Icons.timer_outlined, s.durationLabel, durationStr),  // ⚠️ LSP 错误
-_statItem(Icons.check_circle_outline, s.completionLabel, ...), // ⚠️ LSP 错误
-_statItem(Icons.schedule, s.averageLabel, ...),            // ⚠️ LSP 错误
-```
-
-**原因分析：**
-- 虽然 `durationLabel`, `completionLabel`, `averageLabel` 在 `strings.dart` 中定义
-- 但 LSP 可能缓存了旧版本，导致错误
-
-**验证：**
-```bash
-# 检查 strings.dart 定义
-grep -n "get durationLabel\|get completionLabel\|get averageLabel" lib/core/i18n/strings.dart
-# 输出：
-# 156:  String get durationLabel;
-# 157:  String get completionLabel;
-# 158:  String get averageLabel;
-
-# 检查所有语言实现
-grep -c "get durationLabel" lib/core/i18n/*.dart
-# 所有文件都有实现
-```
-
-**修复方案：**
-
-**方案1：清除 LSP 缓存（推荐）**
-```bash
-# 重启 LSP 或 IDE
-# 或运行 flutter clean
-flutter clean
-flutter pub get
-```
-
-**方案2：显式类型注解**
-```dart
-final AppStrings s = LocaleScope.of(context);
-```
-
-**影响：** 仅为 LSP 缓存问题，实际代码正确
-
----
-
-### 1. 强制解包潜在空指针错误
-
 **文件：** `lib/core/i18n/locale_provider.dart:74,79`
 
 **问题代码：**
-```dart
+\`\`\`dart
 static AppStrings of(BuildContext context) {
   final scope = context.dependOnInheritedWidgetOfExactType<LocaleScope>();
   return scope!.notifier!.strings;  // ⚠️ 如果 scope 为 null 会崩溃
@@ -74,7 +21,7 @@ static LocaleProvider providerOf(BuildContext context) {
   final scope = context.dependOnInheritedWidgetOfExactType<LocaleScope>();
   return scope!.notifier!;  // ⚠️ 如果 scope 为 null 会崩溃
 }
-```
+\`\`\`
 
 **风险分析：**
 - 如果 widget 树中不存在 `LocaleScope`，会导致运行时崩溃
@@ -82,13 +29,13 @@ static LocaleProvider providerOf(BuildContext context) {
 - 用户在错误配置时会看到不友好的错误信息
 
 **修复方案：**
-```dart
+\`\`\`dart
 static AppStrings of(BuildContext context) {
   final scope = context.dependOnInheritedWidgetOfExactType<LocaleScope>();
   if (scope == null) {
     throw FlutterError(
-      'LocaleScope not found in widget tree.\n'
-      'Make sure ProviderScope and LocaleScope are properly initialized.\n'
+      'LocaleScope not found in widget tree.\\n'
+      'Make sure ProviderScope and LocaleScope are properly initialized.\\n'
       'Check that your App widget is wrapped with ProviderScope(child: App()).'
     );
   }
@@ -99,13 +46,13 @@ static LocaleProvider providerOf(BuildContext context) {
   final scope = context.dependOnInheritedWidgetOfExactType<LocaleScope>();
   if (scope == null) {
     throw FlutterError(
-      'LocaleScope not found in widget tree.\n'
+      'LocaleScope not found in widget tree.\\n'
       'Make sure ProviderScope and LocaleScope are properly initialized.'
     );
   }
   return scope.notifier;
 }
-```
+\`\`\`
 
 **影响：** 无（仅增强错误处理）
 
@@ -116,7 +63,7 @@ static LocaleProvider providerOf(BuildContext context) {
 **文件：** `lib/features/practice_history/practice_history_service.dart:7`
 
 **问题代码：**
-```dart
+\`\`\`dart
 class PracticeHistoryService {
   static const String _storageKey = 'practice_records';
   late final SharedPreferences _prefs;  // ⚠️ 如果未调用 initialize() 会崩溃
@@ -127,7 +74,7 @@ class PracticeHistoryService {
     _prefs = await SharedPreferences.getInstance();
   }
 }
-```
+\`\`\`
 
 **风险分析：**
 - 如果忘记调用 `initialize()`，访问 `_prefs` 会抛出 `LateError`
@@ -135,17 +82,17 @@ class PracticeHistoryService {
 - 可能在重构或代码变更时引入问题
 
 **当前使用（正确）：**
-```dart
+\`\`\`dart
 // lib/core/providers/practice_history_provider.dart
 final practiceHistoryServiceProvider = FutureProvider<PracticeHistoryService>((ref) async {
   final service = PracticeHistoryService();
   await service.initialize();  // ✅ 正确初始化
   return service;
 });
-```
+\`\`\`
 
 **修复方案1：使用可空类型 + 抛出错误**
-```dart
+\`\`\`dart
 class PracticeHistoryService {
   static const String _storageKey = 'practice_records';
   SharedPreferences? _prefs;
@@ -166,10 +113,10 @@ class PracticeHistoryService {
     return _prefs!;
   }
 }
-```
+\`\`\`
 
 **修复方案2：使用工厂构造函数（推荐）**
-```dart
+\`\`\`dart
 class PracticeHistoryService {
   static const String _storageKey = 'practice_records';
   final SharedPreferences _prefs;
@@ -181,14 +128,14 @@ class PracticeHistoryService {
     return PracticeHistoryService._(prefs);
   }
 }
-```
+\`\`\`
 
 **Provider 修改：**
-```dart
+\`\`\`dart
 final practiceHistoryServiceProvider = FutureProvider<PracticeHistoryService>((ref) async {
   return await PracticeHistoryService.create();  // ✅ 更简洁
 });
-```
+\`\`\`
 
 **影响：** 需要同步更新 provider
 
@@ -201,7 +148,7 @@ final practiceHistoryServiceProvider = FutureProvider<PracticeHistoryService>((r
 **文件：** `lib/features/unified_timer/widgets/unified_timer_page.dart`
 
 **问题代码1：**
-```dart
+\`\`\`dart
 void _toggleTask(int index) {
   setState(() {
     final task = _selectedModule.tasks[index];
@@ -221,10 +168,10 @@ void _toggleTask(int index) {
     }
   });
 }
-```
+\`\`\`
 
 **问题代码2：**
-```dart
+\`\`\`dart
 void _resetAllTasks() {
   for (final task in _selectedModule.tasks) {
     task.status = TaskStatus.upcoming;     // ⚠️ 直接修改
@@ -233,7 +180,7 @@ void _resetAllTasks() {
   }
   _controller.currentTask = null;
 }
-```
+\`\`\`
 
 **风险分析：**
 - 违反 Flutter 的不可变原则
@@ -244,8 +191,8 @@ void _resetAllTasks() {
 
 **修复方案1：使用 copyWith（需要为 TaskItem 添加）**
 
-首先为 `TaskItem` 添加 `copyWith` 方法：
-```dart
+首先为 \`\`TaskItem\`\` 添加 \`\`copyWith\`\` 方法：
+\`\`\`dart
 class TaskItem {
   final String id;
   final String title;
@@ -281,10 +228,10 @@ class TaskItem {
     );
   }
 }
-```
+\`\`\`
 
-然后修改 `_toggleTask`：
-```dart
+然后修改 \`\`_toggleTask\`\`：
+\`\`\`dart
 void _toggleTask(int index) {
   setState(() {
     final task = _selectedModule.tasks[index];
@@ -312,10 +259,10 @@ void _toggleTask(int index) {
     _selectedModule.tasks[index] = updatedTask;
   });
 }
-```
+\`\`\`
 
-修改 `_resetAllTasks`：
-```dart
+修改 \`\`_resetAllTasks\`\`：
+\`\`\`dart
 void _resetAllTasks() {
   setState(() {
     _selectedModule.tasks = _selectedModule.tasks.map((task) {
@@ -328,11 +275,11 @@ void _resetAllTasks() {
   });
   _controller.currentTask = null;
 }
-```
+\`\`\`
 
 **修复方案2：创建新对象（如果不想添加 copyWith）**
 
-```dart
+\`\`\`dart
 void _toggleTask(int index) {
   setState(() {
     final task = _selectedModule.tasks[index];
@@ -347,34 +294,34 @@ void _toggleTask(int index) {
     _selectedModule.tasks[index] = updatedTask;
   });
 }
-```
+\`\`\`
 
-**影响：** 需要为 `TaskItem` 添加 `copyWith` 方法
+**影响：** 需要为 \`\`TaskItem\`\` 添加 \`\`copyWith\`\` 方法
 
 ---
 
 ### 4. 静态 ValueNotifier 生命周期问题
 
-**文件：** `lib/features/unified_timer/widgets/unified_timer_page.dart:20`
+**文件：** \`\`lib/features/unified_timer/widgets/unified_timer_page.dart:20\`\`
 
 **问题代码：**
-```dart
+\`\`\`dart
 class UnifiedTimerPage extends ConsumerStatefulWidget {
   const UnifiedTimerPage({super.key});
 
   static final ValueNotifier<bool> isTimerRunning = ValueNotifier(false);
   // ⚠️ 静态变量不会随 widget 销毁而销毁
 }
-```
+\`\`\`
 
 **风险分析：**
-- 静态 `ValueNotifier` 不会随 widget 销毁而销毁
+- 静态 \`\`ValueNotifier\`\` 不会随 widget 销毁而销毁
 - 可能导致内存泄漏
 - 可能跨 widget 实例共享状态（如果页面被重建）
 - 违反 Flutter 的生命周期管理
 
 **使用位置：**
-```dart
+\`\`\`dart
 // Line 243
 setState(() {
   UnifiedTimerPage.isTimerRunning.value = _controller.isRunning;
@@ -389,23 +336,18 @@ setState(() {
 
 // Line 639
 UnifiedTimerPage.isTimerRunning.value = false;
-```
+\`\`\`
 
 **修复方案1：移除静态，使用 Riverpod Provider（推荐）**
 
 **步骤1：创建 Provider**
-```dart
+\`\`\`dart
 // lib/core/providers/timer_state_provider.dart
-final isTimerRunningProvider = Provider<bool>((ref) => false);
-```
-
-**步骤2：使用 StateNotifier 或 StateProvider（如果需要修改）**
-```dart
 final isTimerRunningProvider = StateProvider<bool>((ref) => false);
-```
+\`\`\`
 
-**步骤3：修改使用位置**
-```dart
+**步骤2：修改使用位置**
+\`\`\`dart
 // unified_timer_page.dart
 @override
 Widget build(BuildContext context, WidgetRef ref) {
@@ -415,11 +357,10 @@ Widget build(BuildContext context, WidgetRef ref) {
   // 更新
   ref.read(isTimerRunningProvider.notifier).state = _controller.isRunning;
 }
-```
+\`\`\`
 
 **修复方案2：在 dispose 中清理（不推荐）**
-
-```dart
+\`\`\`dart
 @override
 void dispose() {
   // ⚠️ 这会影响所有 UnifiedTimerPage 实例
@@ -428,7 +369,7 @@ void dispose() {
   _confettiController.dispose();
   super.dispose();
 }
-```
+\`\`\`
 
 **影响：** 需要重构状态管理，推荐使用 Riverpod
 
@@ -436,10 +377,10 @@ void dispose() {
 
 ### 5. 时区混用问题
 
-**文件：** `lib/features/timezone/timezone_model.dart` + `timezone_page.dart`
+**文件：** \`\`lib/features/timezone/timezone_model.dart\`\` + \`\`timezone_page.dart\`\`
 
 **问题代码1：模型定义**
-```dart
+\`\`\`dart
 class TimeZoneCity {
   final String name;
   final int utcOffset;      // ⚠️ 固定偏移，不处理夏令时
@@ -454,7 +395,7 @@ class TimeZoneCity {
   static const cities = [
     TimeZoneCity(
       name: '巴黎',
-      utcOffset: 1,                      // UTC+1（不处理夏令时）
+      utcOffset:1,                      // UTC+1（不处理夏令时）
       timezoneId: 'Europe/Paris',       // 自动处理夏令时
     ),
     TimeZoneCity(
@@ -464,24 +405,24 @@ class TimeZoneCity {
     ),
   ];
 }
-```
+\`\`\`
 
 **问题代码2：显示使用**
-```dart
+\`\`\`dart
 // lib/features/timezone/timezone_page.dart:92
 Text(
-  'UTC${city.utcOffset >= 0 ? '+' : ''}${city.utcOffset}',
+  'UTC\${city.utcOffset >= 0 ? '+' : '}${city.utcOffset}',
   // ⚠️ 显示固定偏移，可能与实际时间不一致
   style: const TextStyle(...),
 ),
-```
+\`\`\`
 
 **问题代码3：转换使用**
-```dart
+\`\`\`dart
 // lib/features/timezone/timezone_page.dart:54
 final localTime = TimezoneConverter.convert(utcNow, city.timezoneId);
 // ✅ 使用 IANA ID，正确处理夏令时
-```
+\`\`\`
 
 **风险分析：**
 - 显示的 UTC 偏移与实际时间不一致
@@ -489,19 +430,19 @@ final localTime = TimezoneConverter.convert(utcNow, city.timezoneId);
 - 用户困惑（显示说 UTC+1，但实际时间可能是 UTC+2）
 
 **实际影响示例：**
-```
-假设现在是 2026年7月15日（夏季）：
+\`\`\`
+假惁现在是 2026年7月15日（夏季）：
 
 巴黎：
 - 显示的偏移：UTC+1 ❌ 错误！夏季应该是 UTC+2
 - 实际转换时间：使用 IANA ID 自动处理夏令时 ✅ 正确返回 UTC+2 时间
 - 结果：用户看到不一致的信息
-```
+\`\`\`
 
 **修复方案1：移除固定偏移，统一使用IANA ID（推荐）**
 
 **步骤1：修改模型**
-```dart
+\`\`\`dart
 class TimeZoneCity {
   final String name;
   final String timezoneId;
@@ -535,10 +476,10 @@ class TimeZoneCity {
     ),
   ];
 }
-```
+\`\`\`
 
 **步骤2：添加计算实际偏移的方法**
-```dart
+\`\`\`dart
 // lib/features/timezone/timezone_converter.dart
 import 'package:timezone/timezone.dart' as tz;
 
@@ -570,10 +511,10 @@ class TimezoneConverter {
     return 'UTC${offset >= 0 ? '+' : ''}$offset';
   }
 }
-```
+\`\`\`
 
 **步骤3：修改显示代码**
-```dart
+\`\`\`dart
 // lib/features/timezone/timezone_page.dart
 @override
 Widget build(BuildContext context, WidgetRef ref) {
@@ -616,20 +557,18 @@ Widget build(BuildContext context, WidgetRef ref) {
     );
   });
 }
-```
+\`\`\`
 
 **影响：** 需要修改模型和显示逻辑，确保时区显示准确
 
 ---
 
-## 🟡 中优先级问题 (P1)
-
 ### 6. TaskItem 缺少不可变方法
 
-**文件：** `lib/features/unified_timer/models/unified_timer_model.dart`
+**文件：** \`\`lib/features/unified_timer/models/unified_timer_model.dart\`\`
 
 **问题代码：**
-```dart
+\`\`\`dart
 class TaskItem {
   final String id;
   final String title;
@@ -648,10 +587,10 @@ class TaskItem {
   });
   // ⚠️ 缺少 copyWith 方法
 }
-```
+\`\`\`
 
 **对比：ModuleModel（正确）**
-```dart
+\`\`\`dart
 class ModuleModel {
   final String id;
   final String name;
@@ -665,17 +604,17 @@ class ModuleModel {
     return ModuleModel(...);
   }
 }
-```
+\`\`\`
 
 **风险分析：**
-- `TaskItem` 的部分属性不是 `final`，允许直接修改
-- 缺少 `copyWith` 方法，无法创建不可变副本
-- 与 `ModuleModel` 不一致（后者有 `copyWith`）
+- \`\`TaskItem\`\` 的部分属性不是 \`\`final\`\`，允许直接修改
+- 缺少 \`\`copyWith\`\` 方法，无法创建不可变副本
+- 与 \`\`ModuleModel\`\` 不一致（后者有 \`\`copyWith\`\`）
 - 违反不可变原则，难以追踪状态变化
 
 **修复方案：为 TaskItem 添加不可变方法**
 
-```dart
+\`\`\`dart
 class TaskItem {
   final String id;
   final String title;
@@ -711,10 +650,10 @@ class TaskItem {
     );
   }
 }
-```
+\`\`\`
 
 **修改使用位置（之前问题 #3）：**
-```dart
+\`\`\`dart
 void _toggleTask(int index) {
   setState(() {
     final task = _selectedModule.tasks[index];
@@ -729,20 +668,36 @@ void _toggleTask(int index) {
     _selectedModule.tasks[index] = updatedTask;  // ✅ 仍然直接修改列表
   });
 }
-```
+\`\`\`
+
+修改 \`\`_resetAllTasks\`\`：
+\`\`\`dart
+void _resetAllTasks() {
+  setState(() {
+    _selectedModule.tasks = _selectedModule.tasks.map((task) {
+      return task.copyWith(
+        status: TaskStatus.upcoming,
+        actualSpent: Duration.zero,
+        completedAt: null,
+      );
+    }).toList();
+  });
+  _controller.currentTask = null;
+}
+\`\`\`
 
 **注意：** 这个问题与问题 #3（直接修改对象）相关联
 
-**影响：** 需要为 `TaskItem` 添加不可变支持
+**影响：** 需要为 \`\`TaskItem\`\` 添加不可变支持
 
 ---
 
 ### 7. 直接修改 task 列表（违反集合不可变性）
 
-**文件：** `lib/features/unified_timer/widgets/unified_timer_page.dart`
+**文件：** \`\`lib/features/unified_timer/widgets/unified_timer_page.dart\`\`
 
 **问题代码1：删除任务**
-```dart
+\`\`\`dart
 void _deleteTask(int index) {
   final task = _selectedModule.tasks[index];
   showDialog(
@@ -758,10 +713,10 @@ void _deleteTask(int index) {
     ),
   );
 }
-```
+\`\`\`
 
 **问题代码2：添加任务**
-```dart
+\`\`\`dart
 void _showAddTaskDialog(BuildContext context, dynamic s) {
   showDialog(
     context: context,
@@ -774,10 +729,10 @@ void _showAddTaskDialog(BuildContext context, dynamic s) {
     ),
   );
 }
-```
+\`\`\`
 
 **问题代码3：重排任务**
-```dart
+\`\`\`dart
 void _onReorder(int oldIndex, int newIndex) {
   setState(() {
     if (newIndex > oldIndex) newIndex -= 1;
@@ -785,10 +740,10 @@ void _onReorder(int oldIndex, int newIndex) {
     _selectedModule.tasks.insert(newIndex, task);          // ⚠️ 直接修改
   });
 }
-```
+\`\`\`
 
 **问题代码4：修改任务状态（问题 #3 中已提及）**
-```dart
+\`\`\`dart
 void _toggleTask(int index) {
   setState(() {
     final task = _selectedModule.tasks[index];
@@ -796,7 +751,7 @@ void _toggleTask(int index) {
     _selectedModule.tasks[index] = task;  // ⚠️ 直接修改列表
   });
 }
-```
+\`\`\`
 
 **风险分析：**
 - 违反 Flutter 的集合不可变原则
@@ -807,7 +762,7 @@ void _toggleTask(int index) {
 **修复方案1：创建新列表（推荐）**
 
 **修改删除任务：**
-```dart
+\`\`\`dart
 void _deleteTask(int index) {
   final task = _selectedModule.tasks[index];
   showDialog(
@@ -826,10 +781,10 @@ void _deleteTask(int index) {
     ),
   );
 }
-```
+\`\`\`
 
 **修改添加任务：**
-```dart
+\`\`\`dart
 void _showAddTaskDialog(BuildContext context, dynamic s) {
   showDialog(
     context: context,
@@ -842,10 +797,10 @@ void _showAddTaskDialog(BuildContext context, dynamic s) {
     ),
   );
 }
-```
+\`\`\`
 
 **修改重排任务：**
-```dart
+\`\`\`dart
 void _onReorder(int oldIndex, int newIndex) {
   setState(() {
     final tasks = List<TaskItem>.from(_selectedModule.tasks);
@@ -855,11 +810,11 @@ void _onReorder(int oldIndex, int newIndex) {
     _selectedModule.tasks = tasks;
   });
 }
-```
+\`\`\`
 
 **修复方案2：使用 copyWith（如果 ModuleModel 支持）**
 
-```dart
+\`\`\`dart
 void _deleteTask(int index) {
   final task = _selectedModule.tasks[index];
   showDialog(
@@ -877,9 +832,136 @@ void _deleteTask(int index) {
     ),
   );
 }
-```
+\`\`\`
 
 **影响：** 需要修改所有任务列表操作
+
+---
+
+### 10. UnifiedTimerController 直接修改 currentTask
+
+**文件：** \`\`lib/features/unified_timer/controllers/unified_timer_controller.dart:77,78,117\`\`
+
+**问题代码1：**
+\`\`\`dart
+void completeTask() {
+  if (currentTask != null) {
+    currentTask!.status = TaskStatus.done;              // ⚠️ 直接修改
+    currentTask!.completedAt = DateTime.now().toUtc();  // ⚠️ 直接修改
+    currentTask = null;
+    onTick();
+  }
+}
+\`\`\`
+
+**问题代码2：**
+\`\`\`dart
+void _listenTimer() {
+  _subscription = _timer.timeUpdates.listen((_) {
+    final elapsed = _timer.elapsed;
+    if (currentTask != null && elapsed > _lastElapsed) {
+      currentTask!.actualSpent += elapsed - _lastElapsed;  // ⚠️ 直接修改
+    }
+    _lastElapsed = elapsed;
+    onTick();
+  });
+}
+\`\`\`
+
+**问题代码3：**
+\`\`\`dart
+void selectTask(TaskItem task) {
+  currentTask = task;                                // ⚠️ 直接赋值（非不可变）
+  if (task.status == TaskStatus.upcoming) {
+    task.status = TaskStatus.current;               // ⚠️ 直接修改
+  }
+  onTick();
+}
+\`\`\`
+
+**风险分析：**
+- \`\`currentTask\`\` 是可空的可变引用
+- 直接修改 \`\`currentTask\`\` 的属性违反不可变原则
+- \`\`completeTask()\`\` 直接修改 \`\`status\`\` 和 \`\`completedAt\`\`
+- \`\`_listenTimer()\`\` 直接修改 \`\`actualSpent\`\`
+- \`\`selectTask()\`\` 直接修改 \`\`task.status\`\`
+- 与 \`\`TaskItem\`\` 模型的不一致问题相关联（问题 #6）
+
+**修复方案：**
+
+**方案1：在 completeTask 中使用 copyWith（需要先修复 TaskItem）**
+\`\`\`dart
+void completeTask() {
+  if (currentTask != null) {
+    final updatedTask = currentTask!.copyWith(
+      status: TaskStatus.done,
+      completedAt: DateTime.now().toUtc(),
+    );
+    // 需要一种方式更新 TaskItem 在 ModuleModel 的 tasks 中
+    // 这里比较复杂，需要重新设计
+    currentTask = null;
+    onTick();
+  }
+}
+\`\`\`
+
+**方案2：通知上层更新（推荐）**
+\`\`\`dart
+void completeTask() {
+  if (currentTask != null) {
+    // 返回更新的任务，让上层处理
+    final completedTask = currentTask!;
+    currentTask = null;
+    onTick(); // 触发重建，上层需要处理更新
+    // 或者使用回调通知
+  }
+}
+\`\`\`
+
+**影响：** 需要重构任务状态管理逻辑
+
+---
+
+### 11. ref.watch(FutureProvider.future) 错误使用模式
+
+**文件：** \`\`lib/core/providers/practice_history_provider.dart\`\`
+
+**问题代码：**
+\`\`\`dart
+final service = await ref.watch(practiceHistoryServiceProvider.future);
+\`\`\`
+
+**风险分析：**
+- \`\`ref.watch()\`\` 会在每次 rebuild 时重新执行异步操作
+- 可能导致不必要的 FutureProvider 重新执行
+- 正确模式应该是 \`\`ref.read()\`\` + 在 widget 外层 watch provider
+
+**修复方案：**
+\`\`\`dart
+// 正确使用方式
+class SomeWidget extends ConsumerWidget {
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final serviceAsync = ref.watch(practiceHistoryServiceProvider);
+    return serviceAsync.when(
+      data: (service) => ...,
+      loading: () => ...,
+      error: (err, stack) => ...,
+    );
+  }
+}
+\`\`\`
+
+或者：
+\`\`\`dart
+// 在 provider 中缓存结果
+final practiceHistoryServiceProvider = Provider<PracticeHistoryService>((ref) {
+  ref.watch(...); // 监听依赖
+  return cachedService; // 返回已初始化的服务
+});
+\`\`\`
+
+**影响：** 需要重构 provider 使用模式
 
 ---
 
@@ -887,35 +969,13 @@ void _deleteTask(int index) {
 
 ### 8. 异步操作后缺少 mounted 检查
 
-**统计：** 全项目仅有 5 处检查了 `context.mounted`
+**统计：** 全项目仅有 5 处检查了 \`\`context.mounted\`\`
 
 **问题代码示例：**
-```dart
+\`\`\`dart
 Future<void> _savePracticeRecord({required ph.RecordType recordType}) async {
   if (_hasSavedRecord || _isSavingRecord) return;
   _isSavingRecord = true;
-  final module = _controller.currentModule ?? _selectedModule;
-  final actualDuration = _controller.totalDuration - _controller.remaining;
-  final safeActualDuration = actualDuration.isNegative ? Duration.zero : actualDuration;
-  final record = ph.PracticeRecord(
-    id: 'record_${DateTime.now().millisecondsSinceEpoch}',
-    moduleId: module.id,
-    moduleName: module.name,
-    recordType: recordType,
-    completedAt: DateTime.now().toUtc(),
-    totalDuration: safeActualDuration,
-    estimatedDuration: _controller.totalDuration,
-    taskRecords: module.tasks
-        .map((task) => ph.TaskRecord(
-              taskId: task.id,
-              taskTitle: task.title,
-              actualSpent: task.actualSpent,
-              estimatedDuration: task.estimatedDuration,
-              status: task.status.name,
-            ))
-        .toList(),
-    keyEvents: List<ph.KeyEvent>.from(_sessionKeyEvents),
-  );
 
   try {
     final service = await ref.read(practiceHistoryServiceProvider.future);
@@ -927,14 +987,14 @@ Future<void> _savePracticeRecord({required ph.RecordType recordType}) async {
     _isSavingRecord = false;
   }
 }
-```
+\`\`\`
 
 **风险分析：**
-- 如果 widget 在异步操作完成前被销毁，调用 `setState` 会导致异常
+- 如果 widget 在异步操作完成前被销毁，调用 \`\`setState\`\` 会导致异常
 - 虽然当前代码中问题不大，但属于最佳实践缺失
 
 **修复方案：**
-```dart
+\`\`\`dart
 Future<void> _savePracticeRecord({required ph.RecordType recordType}) async {
   if (_hasSavedRecord || _isSavingRecord) return;
   _isSavingRecord = true;
@@ -954,43 +1014,43 @@ Future<void> _savePracticeRecord({required ph.RecordType recordType}) async {
     }
   }
 }
-```
+\`\`\`
 
 **需要修复的位置：**
-1. `_savePracticeRecord` - unified_timer_page.dart:386
+1. \`\`_savePracticeRecord\`\` - unified_timer_page.dart:386
 2. 其他异步操作后的 setState 调用
 
 ---
 
 ### 9. Print 语句用于错误日志
 
-**文件：** `lib/features/practice_history/practice_history_service.dart:34`
+**文件：** \`\`lib/features/practice_history/practice_history_service.dart:34\`\`
 
 **问题代码：**
-```dart
+\`\`\`dart
 } catch (e) {
   // ignore: avoid_print
   print('Error loading records: $e');  // 用于错误日志
   return [];
 }
-```
+\`\`\`
 
 **风险分析：**
-- 在生产环境中，`print` 语句可能不可用
+- 在生产环境中，\`\`print\`\` 语句可能不可用
 - 不符合 Flutter 最佳实践
 - 难以控制日志级别
 
 **修复方案1：使用 logging 包（推荐）**
 
 **步骤1：添加依赖**
-```yaml
+\`\`\`yaml
 # pubspec.yaml
 dependencies:
   logging: ^1.2.0
-```
+\`\`\`
 
 **步骤2：配置 logger**
-```dart
+\`\`\`dart
 // lib/core/utils/logger.dart
 import 'package:logging/logging.dart';
 
@@ -999,40 +1059,39 @@ final logger = Logger('SkillCount');
 void initLogger() {
   Logger.root.level = Level.ALL;
   Logger.root.onRecord.listen((record) {
-    print('${record.level.name}: ${record.time}: ${record.message}');
+    print('\${record.level.name}: \${record.time}: \${record.message}');
   });
 }
-```
+\`\`\`
 
 **步骤3：在 main.dart 中初始化**
-```dart
+\`\`\`dart
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
   initLogger();  // ✅ 初始化日志系统
   ...
 }
-```
+\`\`\`
 
 **步骤4：替换 print**
-```dart
+\`\`\`dart
 import '../../core/utils/logger.dart';
 
 } catch (e) {
   logger.warning('Error loading records: $e');
   return [];
 }
-```
+\`\`\`
 
 **修复方案2：使用 debugPrint（简单方案）**
-
-```dart
+\`\`\`dart
 import 'package:flutter/foundation.dart';
 
 } catch (e) {
   debugPrint('Error loading records: $e');
   return [];
 }
-```
+\`\`\`
 
 **影响：** 建议使用 logging 包，提升日志管理能力
 
@@ -1048,10 +1107,7 @@ import 'package:flutter/foundation.dart';
 | 🟡 P1 | 4 | 静态 ValueNotifier 生命周期 | unified_timer_page.dart | 内存管理 |
 | 🟡 P1 | 5 | 时区混用问题 | timezone_model.dart + timezone_page.dart | 数据准确性 |
 | 🟡 P1 | 6 | TaskItem 缺少不可变方法 | unified_timer_model.dart | 状态管理 |
-| 🟡 P1 | 10 | UnifiedTimerController 直接修改 currentTask | unified_timer_controller.dart | 状态管理 |
-| 🟡 P1 | 11 | ref.watch(FutureProvider.future) 错误 | practice_history_provider.dart | 状态管理 |
-| 🟢 P2 | 8 | 异步操作后缺少 mounted 检查 | 多个文件 | 稳定性 |
-| 🟢 P2 | 9 | Print 语句用于错误日志 | practice_history_service.dart | 日志管理 |
+| 🟡 P1 | 7 | 直接修改 task 列表 | unified_timer_page.dart | 状态管理 |
 | 🟡 P1 | 10 | UnifiedTimerController 直接修改 currentTask | unified_timer_controller.dart | 状态管理 |
 | 🟡 P1 | 11 | ref.watch(FutureProvider.future) 错误 | practice_history_provider.dart | 状态管理 |
 | 🟢 P2 | 8 | 异步操作后缺少 mounted 检查 | 多个文件 | 稳定性 |
@@ -1120,11 +1176,21 @@ import 'package:flutter/foundation.dart';
 - [ ] 修复 P1-5: 移除 TimeZoneCity.utcOffset
 - [ ] 修复 P1-5: 添加 getUtcOffset 方法
 - [ ] 修复 P1-5: 更新时区显示
-- [ ] 修复 P2-6: 添加 mounted 检查（所有异步操作）
-- [ ] 修复 P2-7: 添加 logging 包
-- [ ] 修复 P2-7: 替换 print 语句
+- [ ] 修复 P1-6: TaskItem 改为 const 构造函数
+- [ ] 修复 P1-6: TaskItem 属性改为 final
+- [ ] 修复 P1-7: 重构 _deleteTask（创建新列表）
+- [ ] 修复 P1-7: 重构 _showAddTaskDialog（创建新列表）
+- [ ] 修复 P1-7: 重构 _onReorder（创建新列表）
+- [ ] 修复 P1-10: 重构 UnifiedTimerController.completeTask
+- [ ] 修复 P1-10: 重构 UnifiedTimerController.selectTask
+- [ ] 修复 P1-10: 重构 UnifiedTimerController._listenTimer
+- [ ] 修复 P1-11: 修复 practice_history_provider ref.watch 模式
+- [ ] 修复 P2-8: 添加 mounted 检查（所有异步操作）
+- [ ] 修复 P2-9: 添加 logging 包
+- [ ] 修复 P2-9: 替换 print 语句
 - [ ] 运行 flutter analyze 确认无问题
 - [ ] 运行测试确保功能正常
+- [ ] 运行 flutter clean 后重新构建
 
 ---
 

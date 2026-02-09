@@ -184,8 +184,27 @@ abstract class AppStrings {
   String get analysisComplete;
   String get noAnalysisData;
   String get startAnalysis;
+  String get reanalyze;
   String get aiServiceNotConfigured;
   String get retry;
   String get send;
   String get typeYourQuestion;
+
+  // AI Analysis History
+  String get analysisHistory;
+  String get noHistoryRecords;
+  String get clearHistory;
+
+  // Record Detail
+  String get recordDetail;
+  String get keyEvents;
+
+  // Data Management
+  String get clearRecords;
+  String get clearRecordsDesc;
+  String get clearRecordsWarning;
+  String get clearAIHistory;
+  String get clearAIHistoryDesc;
+  String get clearAIHistoryWarning;
+  String get dataCleared;
 }

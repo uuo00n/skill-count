@@ -24,6 +24,7 @@ class DifyAIService implements AIService {
   Future<AIAnalysisResult> analyzeTrainingData({
     required List<PracticeRecord> records,
     AnalysisType type = AnalysisType.comprehensive,
+    String? languageName,
   }) async {
     throw UnimplementedError('Dify integration pending');
   }

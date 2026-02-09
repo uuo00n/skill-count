@@ -338,6 +338,8 @@ class ZhTwStrings implements AppStrings {
   @override
   String get startAnalysis => '開始分析';
   @override
+  String get reanalyze => '重新分析';
+  @override
   String get aiServiceNotConfigured => 'AI服務未配置，請在.env中設定API金鑰';
   @override
   String get retry => '重試';
@@ -345,5 +347,34 @@ class ZhTwStrings implements AppStrings {
   String get send => '發送';
   @override
   String get typeYourQuestion => '輸入你的問題...';
-}
 
+  // AI Analysis History
+  @override
+  String get analysisHistory => '分析歷史';
+  @override
+  String get noHistoryRecords => '暫無分析歷史';
+  @override
+  String get clearHistory => '清空歷史';
+
+  // Record Detail
+  @override
+  String get recordDetail => '記錄詳情';
+  @override
+  String get keyEvents => '關鍵事件';
+
+  // Data Management
+  @override
+  String get clearRecords => '清空練習記錄';
+  @override
+  String get clearRecordsDesc => '刪除所有練習歷史記錄';
+  @override
+  String get clearRecordsWarning => '此操作將刪除所有練習記錄，且無法恢復。確定要清空嗎？';
+  @override
+  String get clearAIHistory => '清空AI分析歷史';
+  @override
+  String get clearAIHistoryDesc => '刪除所有AI智能分析記錄';
+  @override
+  String get clearAIHistoryWarning => '此操作將刪除所有AI分析歷史，且無法恢復。確定要清空嗎？';
+  @override
+  String get dataCleared => '已清空';
+}

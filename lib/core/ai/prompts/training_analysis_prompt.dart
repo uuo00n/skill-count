@@ -1,10 +1,19 @@
+import '../../../core/i18n/locale_provider.dart';
 import '../../../features/practice_history/models/practice_record_model.dart';
 import '../ai_models.dart';
 
 /// 训练分析Prompt模板
 class TrainingAnalysisPrompt {
-  /// 系统Prompt
-  static const String systemPrompt = '''
+  /// 保留旧接口兼容（默认中文）
+  static String get systemPrompt => buildSystemPrompt(null);
+
+  /// 根据语言构建系统Prompt
+  static String buildSystemPrompt(String? languageName) {
+    final langInstruction = languageName != null
+        ? '\n\n重要：请用$languageName语言回复所有分析内容。所有字段值（strengths、weaknesses、recommendations 等）都必须使用$languageName。'
+        : '';
+
+    return '''
 你是WorldSkills 2026竞赛训练分析专家，专精于技能训练数据分析。
 
 你的任务是：
@@ -23,8 +32,30 @@ class TrainingAnalysisPrompt {
 - 数据驱动：基于实际数据给出分析
 - 具体化：避免空泛的建议
 - 建设性：指出问题的同时给出解决方案
-- 量化指标：使用具体数字支撑分析
-''';
+- 量化指标：使用具体数字支撑分析$langInstruction''';
+  }
+
+  /// AppLocale 转语言名称
+  static String languageNameForLocale(AppLocale locale) {
+    switch (locale) {
+      case AppLocale.zh:
+        return '简体中文';
+      case AppLocale.zhTw:
+      case AppLocale.zhHk:
+      case AppLocale.zhMo:
+        return '繁體中文';
+      case AppLocale.en:
+        return 'English';
+      case AppLocale.ja:
+        return '日本語';
+      case AppLocale.de:
+        return 'Deutsch';
+      case AppLocale.fr:
+        return 'Français';
+      case AppLocale.ko:
+        return '한국어';
+    }
+  }
 
   /// Function Calling定义
   static const List<Map<String, dynamic>> functions = [

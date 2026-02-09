@@ -6,7 +6,9 @@
 
 ## 🔴 高优先级问题 (P0)
 
-### 1. 强制解包潜在空指针错误
+### 0. LSP 诊断错误（编译错误）
+
+**文件：** `lib/features/practice_history/widgets/records_list_view.dart:145,149,155`
 
 **错误信息：**
 ```
@@ -1047,16 +1049,8 @@ import 'package:flutter/foundation.dart';
 | 🟡 P1 | 3 | 直接修改对象属性 | unified_timer_page.dart | 状态管理 |
 | 🟡 P1 | 4 | 静态 ValueNotifier 生命周期 | unified_timer_page.dart | 内存管理 |
 | 🟡 P1 | 5 | 时区混用问题 | timezone_model.dart + timezone_page.dart | 数据准确性 |
-| 🟡 P1 | 6 | TaskItem 缺少不可变方法 | unified_timer_model.dart | 状态管理 |
-| 🟡 P1 | 10 | UnifiedTimerController 直接修改 currentTask | unified_timer_controller.dart | 状态管理 |
-| 🟡 P1 | 11 | ref.watch(FutureProvider.future) 错误 | practice_history_provider.dart | 状态管理 |
-| 🟢 P2 | 8 | 异步操作后缺少 mounted 检查 | 多个文件 | 稳定性 |
-| 🟢 P2 | 9 | Print 语句用于错误日志 | practice_history_service.dart | 日志管理 |
-| 🟡 P1 | 10 | UnifiedTimerController 直接修改 currentTask | unified_timer_controller.dart | 状态管理 |
-| 🟡 P1 | 11 | ref.watch(FutureProvider.future) 错误 | practice_history_provider.dart | 状态管理 |
-| 🟢 P2 | 8 | 异步操作后缺少 mounted 检查 | 多个文件 | 稳定性 |
-| 🟢 P2 | 9 | Print 语句用于错误日志 | practice_history_service.dart | 日志管理 |
-| **总计** | **12** | - |
+| 🟢 P2 | 6 | 异步操作后缺少 mounted 检查 | 多个文件 | 稳定性 |
+| 🟢 P2 | 7 | Print 语句用于错误日志 | practice_history_service.dart | 日志管理 |
 
 ---
 
@@ -1067,17 +1061,13 @@ import 'package:flutter/foundation.dart';
 - ✅ 修复 P0-2: Late 变量未初始化风险
 
 ### 第二阶段（3-5天）
-- ✅ 修复 P1-3: 直接修改对象属性（TaskItem 需要添加 copyWith）
+- ✅ 修复 P1-3: 为 TaskItem 添加 copyWith 并重构 _toggleTask
 - ✅ 修复 P1-4: 移除静态 ValueNotifier，改用 Riverpod
 - ✅ 修复 P1-5: 统一时区处理方式
-- ✅ 修复 P1-6: 为 TaskItem 添加不可变方法
-- ✅ 修复 P1-7: 重构任务列表操作（创建新列表）
-- ✅ 修复 P1-10: 重构 UnifiedTimerController 任务状态管理
-- ✅ 修复 P1-11: 修复 ref.watch(FutureProvider.future) 错误
 
 ### 第三阶段（1-2天）
-- ✅ 修复 P2-8: 添加 mounted 检查
-- ✅ 修复 P2-9: 实现 logging 包
+- ✅ 修复 P2-6: 添加 mounted 检查
+- ✅ 修复 P2-7: 实现 logging 包
 
 ---
 

@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../features/practice_history/models/practice_record_model.dart';
 import '../providers/practice_history_provider.dart';
+import 'ai_analysis_history_service.dart';
 import 'ai_config.dart';
 import 'ai_models.dart';
 import 'ai_service_interface.dart';
@@ -30,6 +31,20 @@ final aiServiceProvider = Provider<AIService>((ref) {
         baseUrl: config.difyConfig.baseUrl,
       );
   }
+});
+
+/// AI分析历史服务Provider
+final aiAnalysisHistoryServiceProvider =
+    Provider<AIAnalysisHistoryService>((ref) {
+  return AIAnalysisHistoryService();
+});
+
+/// AI分析历史数据Provider
+final aiAnalysisHistoryProvider =
+    FutureProvider<List<AIAnalysisResult>>((ref) async {
+  final service = ref.watch(aiAnalysisHistoryServiceProvider);
+  await service.initialize();
+  return service.getResults();
 });
 
 /// AI分析状态
@@ -69,12 +84,15 @@ class AIAnalysisState {
 class AIAnalysisNotifier extends StateNotifier<AIAnalysisState> {
   final AIService _service;
   final List<PracticeRecord> _records;
+  final AIAnalysisHistoryService _historyService;
+  final Ref _ref;
 
-  AIAnalysisNotifier(this._service, this._records)
+  AIAnalysisNotifier(this._service, this._records, this._historyService, this._ref)
       : super(const AIAnalysisState());
 
   Future<void> analyze({
     AnalysisType type = AnalysisType.comprehensive,
+    String? languageName,
   }) async {
     if (_records.isEmpty) {
       state = const AIAnalysisState(
@@ -98,11 +116,18 @@ class AIAnalysisNotifier extends StateNotifier<AIAnalysisState> {
       final result = await _service.analyzeTrainingData(
         records: _records,
         type: type,
+        languageName: languageName,
       );
       state = AIAnalysisState(
         status: AIAnalysisStatus.success,
         result: result,
       );
+      // 自动保存到历史
+      try {
+        await _historyService.initialize();
+        await _historyService.addResult(result);
+        _ref.invalidate(aiAnalysisHistoryProvider);
+      } catch (_) {}
     } catch (e) {
       state = AIAnalysisState(
         status: AIAnalysisStatus.error,
@@ -116,7 +141,7 @@ String _formatAIError(Object error) {
   if (error is TimeoutException) {
     return '请求超时：AI服务在规定时间内未响应\n\n'
         '可能原因：网络不可达/代理未配置、服务端响应较慢、或模型配置不正确\n\n'
-        '建议：检查网络后重试；如仍超时，可在 .env 中设置 VOLCENGINE_TIMEOUT=90 或更大';
+        '建议：检查网络后重试；如仍超时，可在 .env 中适当提高超时（例如 90 秒）';
   }
 
   if (error is SocketException) {
@@ -126,17 +151,17 @@ String _formatAIError(Object error) {
 
   final message = error.toString();
   if (message.contains('AI服务未配置')) {
-    return 'AI服务未配置：请在 .env 中设置 VOLCENGINE_API_KEY（以及 VOLCENGINE_MODEL）';
+    return 'AI服务未配置：请在 .env 中配置 API Key 与 Model';
   }
 
   if (message.contains('API请求失败')) {
-    return '$message\n\n建议：确认 VOLCENGINE_ENDPOINT / VOLCENGINE_MODEL 配置正确';
+    return '$message\n\n建议：确认 Endpoint / Model 配置正确';
   }
 
   if (message.contains('API未返回结构化结果')) {
     return 'AI返回结果格式不符合预期（未包含 function_call/tool_calls，也未输出 JSON）\n\n'
-        '常见原因：VOLCENGINE_MODEL 不支持工具/函数调用，或服务端忽略了 function_call\n\n'
-        '建议：检查 .env 中 VOLCENGINE_MODEL 是否为支持 function/tool 的模型，并重试';
+        '常见原因：当前模型不支持工具/函数调用，或服务端忽略了 function_call/tool_choice\n\n'
+        '建议：更换为支持工具/函数调用的模型，或让服务端直接输出 JSON 后重试';
   }
 
   return message;
@@ -149,7 +174,8 @@ final aiAnalysisProvider =
     final service = ref.watch(aiServiceProvider);
     final recordsAsync = ref.watch(practiceRecordsProvider);
     final records = recordsAsync.valueOrNull ?? [];
-    return AIAnalysisNotifier(service, records);
+    final historyService = ref.watch(aiAnalysisHistoryServiceProvider);
+    return AIAnalysisNotifier(service, records, historyService, ref);
   },
 );
 

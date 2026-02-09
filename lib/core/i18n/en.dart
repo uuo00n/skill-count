@@ -336,6 +336,8 @@ class EnStrings implements AppStrings {
   @override
   String get startAnalysis => 'Start Analysis';
   @override
+  String get reanalyze => 'Re-analyze';
+  @override
   String get aiServiceNotConfigured => 'AI service not configured. Set API key in .env file';
   @override
   String get retry => 'Retry';
@@ -343,4 +345,34 @@ class EnStrings implements AppStrings {
   String get send => 'Send';
   @override
   String get typeYourQuestion => 'Type your question...';
+
+  // AI Analysis History
+  @override
+  String get analysisHistory => 'Analysis History';
+  @override
+  String get noHistoryRecords => 'No analysis history';
+  @override
+  String get clearHistory => 'Clear History';
+
+  // Record Detail
+  @override
+  String get recordDetail => 'Record Detail';
+  @override
+  String get keyEvents => 'Key Events';
+
+  // Data Management
+  @override
+  String get clearRecords => 'Clear Practice Records';
+  @override
+  String get clearRecordsDesc => 'Delete all practice history records';
+  @override
+  String get clearRecordsWarning => 'This will delete all practice records and cannot be undone. Are you sure?';
+  @override
+  String get clearAIHistory => 'Clear AI Analysis History';
+  @override
+  String get clearAIHistoryDesc => 'Delete all AI analysis records';
+  @override
+  String get clearAIHistoryWarning => 'This will delete all AI analysis history and cannot be undone. Are you sure?';
+  @override
+  String get dataCleared => 'Cleared';
 }

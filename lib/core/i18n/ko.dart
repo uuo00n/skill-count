@@ -322,6 +322,8 @@ class KoStrings implements AppStrings {
   @override
   String get startAnalysis => '분석 시작';
   @override
+  String get reanalyze => '재분석';
+  @override
   String get aiServiceNotConfigured => 'AI 서비스 미설정. .env 파일에서 API 키를 설정하세요';
   @override
   String get retry => '재시도';
@@ -329,4 +331,34 @@ class KoStrings implements AppStrings {
   String get send => '보내기';
   @override
   String get typeYourQuestion => '질문을 입력하세요...';
+
+  // AI Analysis History
+  @override
+  String get analysisHistory => '분석 기록';
+  @override
+  String get noHistoryRecords => '분석 기록 없음';
+  @override
+  String get clearHistory => '기록 삭제';
+
+  // Record Detail
+  @override
+  String get recordDetail => '기록 상세';
+  @override
+  String get keyEvents => '주요 이벤트';
+
+  // Data Management
+  @override
+  String get clearRecords => '연습 기록 삭제';
+  @override
+  String get clearRecordsDesc => '모든 연습 기록 삭제';
+  @override
+  String get clearRecordsWarning => '모든 연습 기록이 삭제되며 복구할 수 없습니다. 계속할까요?';
+  @override
+  String get clearAIHistory => 'AI 분석 기록 삭제';
+  @override
+  String get clearAIHistoryDesc => '모든 AI 분석 기록 삭제';
+  @override
+  String get clearAIHistoryWarning => '모든 AI 분석 기록이 삭제되며 복구할 수 없습니다. 계속할까요?';
+  @override
+  String get dataCleared => '삭제 완료';
 }
