@@ -30,14 +30,7 @@ class AnalyticsChartsView extends StatelessWidget {
 
           // Module comparison chart (only if multiple modules)
           if (recordsByModule.length > 1) ...[
-            const Text(
-              '模块对比',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-                color: WsColors.textPrimary,
-              ),
-            ),
+            _buildSectionTitle('模块对比', Icons.compare_arrows),
             const SizedBox(height: 12),
             _buildModuleComparisonChart(recordsByModule),
             const SizedBox(height: 24),
@@ -45,14 +38,7 @@ class AnalyticsChartsView extends StatelessWidget {
 
           // Time trend chart
           if (records.length > 1) ...[
-            const Text(
-              '时间趋势',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-                color: WsColors.textPrimary,
-              ),
-            ),
+            _buildSectionTitle('时间趋势', Icons.trending_up),
             const SizedBox(height: 12),
             _buildTimeTrendChart(records),
             const SizedBox(height: 24),
@@ -65,6 +51,32 @@ class AnalyticsChartsView extends StatelessWidget {
     );
   }
 
+  Widget _buildSectionTitle(String title, IconData icon) {
+    return Row(
+      children: [
+        Container(
+          width: 4,
+          height: 16,
+          decoration: BoxDecoration(
+            color: WsColors.accentCyan,
+            borderRadius: BorderRadius.circular(2),
+          ),
+        ),
+        const SizedBox(width: 8),
+        Icon(icon, size: 18, color: WsColors.textPrimary),
+        const SizedBox(width: 8),
+        Text(
+          title,
+          style: const TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+            color: WsColors.textPrimary,
+          ),
+        ),
+      ],
+    );
+  }
+
   Widget _buildStatisticsCards() {
     final totalTime = records.fold<Duration>(Duration.zero, (sum, r) => sum + r.totalDuration);
     final avgTime = Duration(seconds: (totalTime.inSeconds / records.length).toInt());
@@ -72,41 +84,59 @@ class AnalyticsChartsView extends StatelessWidget {
 
     return Row(
       children: [
-        _buildStatCard('总计划数', '${records.length}', WsColors.accentCyan),
+        _buildStatCard('总计划数', '${records.length}', WsColors.accentCyan, Icons.list_alt),
         const SizedBox(width: 12),
-        _buildStatCard('总耗时', '${totalTime.inHours}h', WsColors.accentGreen),
+        _buildStatCard('总耗时', '${totalTime.inHours}h', WsColors.accentGreen, Icons.timer),
         const SizedBox(width: 12),
-        _buildStatCard('平均耗时', '${avgTime.inMinutes}m', WsColors.accentYellow),
+        _buildStatCard('平均耗时', '${avgTime.inMinutes}m', WsColors.accentYellow, Icons.schedule),
         const SizedBox(width: 12),
-        _buildStatCard('平均效率', '${(avgEfficiency * 100).toInt()}%', WsColors.accentBlue),
+        _buildStatCard('平均效率', '${(avgEfficiency * 100).toInt()}%', WsColors.accentBlue, Icons.speed),
       ],
     );
   }
 
-  Widget _buildStatCard(String label, String value, Color color) {
+  Widget _buildStatCard(String label, String value, Color color, IconData icon) {
     return Expanded(
       child: Container(
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: color.withAlpha(60)),
-          color: color.withAlpha(20),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: color.withOpacity(0.2)),
+          color: Color.alphaBlend(color.withOpacity(0.05), WsColors.surface),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 4,
+              offset: const Offset(0, 2),
+            ),
+          ],
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              label,
-              style: const TextStyle(
-                fontSize: 11,
-                color: WsColors.textSecondary,
-              ),
+            Row(
+              children: [
+                Icon(icon, size: 14, color: color),
+                const SizedBox(width: 4),
+                Expanded(
+                  child: Text(
+                    label,
+                    style: TextStyle(
+                      fontSize: 11,
+                      color: WsColors.textSecondary,
+                      fontWeight: FontWeight.w600,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(height: 4),
+            const SizedBox(height: 8),
             Text(
               value,
               style: TextStyle(
-                fontSize: 14,
+                fontSize: 16,
                 fontWeight: FontWeight.bold,
                 color: color,
                 fontFamily: 'JetBrainsMono',
@@ -143,8 +173,16 @@ class AnalyticsChartsView extends StatelessWidget {
       height: 300,
       padding: const EdgeInsets.symmetric(vertical: 12),
       decoration: BoxDecoration(
+        color: WsColors.surface,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: WsColors.border),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: BarChart(
         BarChartData(
@@ -203,8 +241,16 @@ class AnalyticsChartsView extends StatelessWidget {
       height: 280,
       padding: const EdgeInsets.symmetric(vertical: 12),
       decoration: BoxDecoration(
+        color: WsColors.surface,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: WsColors.border),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: LineChart(
         LineChartData(
@@ -303,20 +349,21 @@ class AnalyticsChartsView extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
+        color: WsColors.surface,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: WsColors.border),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            '效率分布',
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-              color: WsColors.textPrimary,
-            ),
-          ),
+          _buildSectionTitle('效率分布', Icons.pie_chart),
           const SizedBox(height: 16),
           Center(
             child: SizedBox(

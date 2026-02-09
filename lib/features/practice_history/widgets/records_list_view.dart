@@ -42,20 +42,33 @@ class RecordsListView extends StatelessWidget {
 
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: Container(
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: const BorderSide(color: WsColors.border),
+      ),
+      child: Padding(
         padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: WsColors.border),
-        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Header
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: WsColors.accentCyan.withAlpha(25),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Icon(
+                    Icons.extension_outlined,
+                    color: WsColors.accentCyan,
+                    size: 20,
+                  ),
+                ),
+                const SizedBox(width: 12),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -65,51 +78,77 @@ class RecordsListView extends StatelessWidget {
                         style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
-                          color: WsColors.darkBlue,
+                          color: WsColors.textPrimary,
                         ),
                       ),
                       const SizedBox(height: 4),
-                      Text(
-                        _formatDate(record.completedAt),
-                        style: const TextStyle(
-                          fontSize: 12,
-                          color: WsColors.textSecondary,
-                        ),
+                      Row(
+                        children: [
+                          const Icon(
+                            Icons.calendar_today_outlined,
+                            size: 12,
+                            color: WsColors.textSecondary,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            _formatDate(record.completedAt),
+                            style: const TextStyle(
+                              fontSize: 12,
+                              color: WsColors.textSecondary,
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),
                 ),
                 // Efficiency badge
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                   decoration: BoxDecoration(
                     color: efficiencyColor.withAlpha(20),
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: efficiencyColor.withAlpha(60)),
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(color: efficiencyColor.withAlpha(50)),
                   ),
-                  child: Text(
-                    '${(record.efficiency * 100).toStringAsFixed(0)}%',
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                      color: efficiencyColor,
-                    ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.speed,
+                        size: 14,
+                        color: efficiencyColor,
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        '${(record.efficiency * 100).toStringAsFixed(0)}%',
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                          color: efficiencyColor,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 12),
+            const Padding(
+              padding: EdgeInsets.symmetric(vertical: 12),
+              child: Divider(height: 1, color: WsColors.border),
+            ),
             // Stats row
             Row(
               children: [
-                _statItem('耗时', durationStr),
-                const SizedBox(width: 16),
+                _statItem(Icons.timer_outlined, '耗时', durationStr),
+                _verticalDivider(),
                 _statItem(
+                  Icons.check_circle_outline,
                   '完成度',
                   '${record.completedTasks}/${record.totalTasks}',
                 ),
-                const SizedBox(width: 16),
+                _verticalDivider(),
                 _statItem(
+                  Icons.schedule,
                   '平均',
                   _formatDuration(record.averageTaskDuration),
                 ),
@@ -121,17 +160,32 @@ class RecordsListView extends StatelessWidget {
     );
   }
 
-  Widget _statItem(String label, String value) {
+  Widget _verticalDivider() {
+    return Container(
+      height: 24,
+      width: 1,
+      color: WsColors.border,
+      margin: const EdgeInsets.symmetric(horizontal: 8),
+    );
+  }
+
+  Widget _statItem(IconData icon, String label, String value) {
     return Expanded(
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            label,
-            style: const TextStyle(
-              fontSize: 11,
-              color: WsColors.textSecondary,
-            ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(icon, size: 12, color: WsColors.textSecondary),
+              const SizedBox(width: 4),
+              Text(
+                label,
+                style: const TextStyle(
+                  fontSize: 12,
+                  color: WsColors.textSecondary,
+                ),
+              ),
+            ],
           ),
           const SizedBox(height: 4),
           Text(

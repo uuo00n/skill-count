@@ -38,17 +38,30 @@ class _PracticeHistoryPageState extends ConsumerState<PracticeHistoryPage>
       children: [
         // TabBar
         Container(
+          margin: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: WsColors.surface,
-            border: const Border(
-              bottom: BorderSide(color: WsColors.border, width: 1),
-            ),
+            color: WsColors.bgPrimary,
+            borderRadius: BorderRadius.circular(12),
           ),
           child: TabBar(
             controller: _tabController,
-            indicatorColor: WsColors.accentCyan,
+            indicator: BoxDecoration(
+              borderRadius: BorderRadius.circular(10),
+              color: WsColors.white,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withAlpha(10),
+                  blurRadius: 4,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            indicatorSize: TabBarIndicatorSize.tab,
+            indicatorPadding: const EdgeInsets.all(4),
             labelColor: WsColors.accentCyan,
             unselectedLabelColor: WsColors.textSecondary,
+            labelStyle: const TextStyle(fontWeight: FontWeight.bold),
+            dividerColor: Colors.transparent,
             tabs: [
               Tab(text: s.recordsList),
               Tab(text: s.analyticsCharts),
