@@ -217,6 +217,8 @@ class EnStrings implements AppStrings {
   String get confirmStopTimer => 'Do you want to stop the current timer? Timer progress will be reset.';
   @override
   String get confirmResetTimer => 'Do you want to reset the timer? Current progress will be cleared.';
+  @override
+  String get moduleComplete => 'Module Complete';
 
   // Milestone Management
   @override

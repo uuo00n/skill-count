@@ -205,6 +205,8 @@ class JaStrings implements AppStrings {
   String get confirmStopTimer => '現在のタイマーを停止しますか？進捗はリセットされます。';
   @override
   String get confirmResetTimer => 'タイマーをリセットしますか？現在の進捗は消去されます。';
+  @override
+  String get moduleComplete => 'モジュール完了';
 
   @override
   String get addMilestone => 'マイルストーン追加';

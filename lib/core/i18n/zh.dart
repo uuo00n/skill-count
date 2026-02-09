@@ -217,6 +217,8 @@ class ZhStrings implements AppStrings {
   String get confirmStopTimer => '是否要终止当前计时？计时进度将被重置。';
   @override
   String get confirmResetTimer => '是否要重置计时？当前进度将被清零。';
+  @override
+  String get moduleComplete => '模块完成';
 
   // Milestone Management
   @override

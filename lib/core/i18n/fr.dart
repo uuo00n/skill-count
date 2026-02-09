@@ -205,6 +205,8 @@ class FrStrings implements AppStrings {
   String get confirmStopTimer => 'Voulez-vous arrêter le minuteur actuel ? La progression sera réinitialisée.';
   @override
   String get confirmResetTimer => 'Voulez-vous réinitialiser le minuteur ? La progression actuelle sera effacée.';
+  @override
+  String get moduleComplete => 'Module terminé';
 
   @override
   String get addMilestone => 'Ajouter un jalon';

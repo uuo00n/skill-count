@@ -118,6 +118,7 @@ abstract class AppStrings {
   String get stopTimer;
   String get confirmStopTimer;
   String get confirmResetTimer;
+  String get moduleComplete;
 
   // Milestone Management
   String get addMilestone;

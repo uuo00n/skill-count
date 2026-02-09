@@ -321,17 +321,6 @@ class _UnifiedTimerPageState extends ConsumerState<UnifiedTimerPage> {
     }
   }
 
-  void _completeCurrentTask() {
-    if (!_controller.isRunning) return;
-    setState(() {
-      _ensureCurrentTask();
-      if (_controller.currentTask == null) return;
-      _controller.completeTask();
-      _controller.nextTask();
-    });
-    _addKeyEvent(ph.KeyEventType.taskComplete);
-  }
-
   void _handleModuleComplete() {
     if (!_controller.isRunning) return;
     _finalizeModuleCompletion(isManual: true);
@@ -1216,9 +1205,7 @@ class _UnifiedTimerPageState extends ConsumerState<UnifiedTimerPage> {
                   color: Colors.transparent,
                   child: InkWell(
                     borderRadius: BorderRadius.circular(24),
-                    onTap: _hasPendingTasks
-                        ? _completeCurrentTask
-                        : _handleModuleComplete,
+                    onTap: _handleModuleComplete,
                     child: Container(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 20,
@@ -1231,13 +1218,13 @@ class _UnifiedTimerPageState extends ConsumerState<UnifiedTimerPage> {
                       child: Row(
                         children: [
                           Icon(
-                            _hasPendingTasks ? Icons.check : Icons.celebration,
+                            Icons.celebration,
                             color: WsColors.white,
                             size: 20,
                           ),
                           const SizedBox(width: 6),
                           Text(
-                            _hasPendingTasks ? s.done.toUpperCase() : '模块完成',
+                            s.moduleComplete.toUpperCase(),
                             style: const TextStyle(
                               fontSize: 13,
                               fontWeight: FontWeight.w700,

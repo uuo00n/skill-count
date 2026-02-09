@@ -205,6 +205,8 @@ class KoStrings implements AppStrings {
   String get confirmStopTimer => '현재 타이머를 중지할까요? 진행 상황이 초기화됩니다.';
   @override
   String get confirmResetTimer => '타이머를 초기화할까요? 현재 진행 상황이 지워집니다.';
+  @override
+  String get moduleComplete => '모듈 완료';
 
   @override
   String get addMilestone => '마일스톤 추가';

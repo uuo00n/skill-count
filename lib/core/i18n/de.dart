@@ -205,6 +205,8 @@ class DeStrings implements AppStrings {
   String get confirmStopTimer => 'Möchten Sie den aktuellen Timer stoppen? Der Fortschritt wird zurückgesetzt.';
   @override
   String get confirmResetTimer => 'Möchten Sie den Timer zurücksetzen? Der aktuelle Fortschritt wird gelöscht.';
+  @override
+  String get moduleComplete => 'Modul abgeschlossen';
 
   @override
   String get addMilestone => 'Meilenstein hinzufügen';
