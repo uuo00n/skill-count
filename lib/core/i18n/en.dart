@@ -28,6 +28,10 @@ class EnStrings implements AppStrings {
   @override
   String get reset => 'Reset';
   @override
+  String get resume => 'Resume';
+  @override
+  String get restart => 'Restart';
+  @override
   String get days => 'Days';
   @override
   String get hours => 'Hours';

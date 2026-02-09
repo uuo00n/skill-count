@@ -28,6 +28,10 @@ class DeStrings implements AppStrings {
   @override
   String get reset => 'Zurücksetzen';
   @override
+  String get resume => 'Fortsetzen';
+  @override
+  String get restart => 'Neustart';
+  @override
   String get days => 'Tage';
   @override
   String get hours => 'Stunden';

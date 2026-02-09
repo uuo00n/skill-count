@@ -28,6 +28,10 @@ class ZhStrings implements AppStrings {
   @override
   String get reset => '重置';
   @override
+  String get resume => '继续';
+  @override
+  String get restart => '重新开始';
+  @override
   String get days => '天';
   @override
   String get hours => '时';

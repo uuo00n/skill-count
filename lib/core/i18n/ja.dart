@@ -28,6 +28,10 @@ class JaStrings implements AppStrings {
   @override
   String get reset => 'リセット';
   @override
+  String get resume => '再開';
+  @override
+  String get restart => '再開始';
+  @override
   String get days => '日';
   @override
   String get hours => '時間';

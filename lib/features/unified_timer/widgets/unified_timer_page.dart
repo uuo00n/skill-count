@@ -289,8 +289,15 @@ class _UnifiedTimerPageState extends ConsumerState<UnifiedTimerPage> {
         task.status = TaskStatus.upcoming;
         task.completedAt = null;
       } else {
-        task.status = TaskStatus.done;
-        task.completedAt = DateTime.now();
+        if (_controller.currentTask == task) {
+          _controller.completeTask();
+          if (_controller.isRunning) {
+            _controller.nextTask();
+          }
+        } else {
+          task.status = TaskStatus.done;
+          task.completedAt = DateTime.now();
+        }
       }
     });
   }
@@ -349,6 +356,15 @@ class _UnifiedTimerPageState extends ConsumerState<UnifiedTimerPage> {
     );
   }
 
+  void _resetAllTasks() {
+    for (final task in _selectedModule.tasks) {
+      task.status = TaskStatus.upcoming;
+      task.actualSpent = Duration.zero;
+      task.completedAt = null;
+    }
+    _controller.currentTask = null;
+  }
+
   void _resetSessionState() {
     _hasCompleted = false;
     _hasSavedRecord = false;
@@ -401,6 +417,17 @@ class _UnifiedTimerPageState extends ConsumerState<UnifiedTimerPage> {
       await service.addRecord(record);
       ref.read(recordsRefreshTriggerProvider.notifier).state++;
       _hasSavedRecord = true;
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text('Record save failed'),
+            backgroundColor: WsColors.errorRed,
+            behavior: SnackBarBehavior.floating,
+            duration: const Duration(seconds: 3),
+          ),
+        );
+      }
     } finally {
       _isSavingRecord = false;
     }
@@ -492,10 +519,16 @@ class _UnifiedTimerPageState extends ConsumerState<UnifiedTimerPage> {
         moduleType: module.type,
         onSave: (updatedModule) {
           setState(() {
+            final durationChanged =
+                updatedModule.defaultDuration != module.defaultDuration;
             _currentModules[index] = updatedModule;
             if (index == _selectedModuleIndex) {
-              _controller.startModule(updatedModule);
-              _resetSessionState();
+              if (durationChanged) {
+                _controller.startModule(updatedModule);
+                _resetSessionState();
+              } else {
+                _controller.currentModule = updatedModule;
+              }
             }
           });
         },
@@ -597,9 +630,10 @@ class _UnifiedTimerPageState extends ConsumerState<UnifiedTimerPage> {
           ElevatedButton(
             onPressed: () {
               Navigator.of(ctx).pop();
+              _addKeyEvent(ph.KeyEventType.timerStop);
+              _savePracticeRecord(recordType: ph.RecordType.partial);
               setState(() {
                 _controller.reset();
-                _addKeyEvent(ph.KeyEventType.timerStop);
                 _resetSessionState();
               });
               UnifiedTimerPage.isTimerRunning.value = false;
@@ -714,6 +748,19 @@ class _UnifiedTimerPageState extends ConsumerState<UnifiedTimerPage> {
         ],
       ),
     );
+  }
+
+  void _restartTimer() {
+    setState(() {
+      _controller.reset();
+      _resetSessionState();
+      _resetAllTasks();
+      _ensureCurrentTask();
+      _controller.start();
+      _addKeyEvent(ph.KeyEventType.timerStart);
+      _hasStartedSession = true;
+      UnifiedTimerPage.isTimerRunning.value = _controller.isRunning;
+    });
   }
 
   @override
@@ -1107,6 +1154,15 @@ class _UnifiedTimerPageState extends ConsumerState<UnifiedTimerPage> {
 
     final accentColor =
         _isPracticeMode ? WsColors.accentGreen : WsColors.accentCyan;
+    final isCompleted = _controller.isCompleted || _hasCompleted;
+    final isPaused = !_controller.isRunning && _hasStartedSession && !isCompleted;
+    final actionLabel = _controller.isRunning
+        ? s.pause
+        : isCompleted
+            ? s.restart
+            : isPaused
+                ? s.resume
+                : s.start;
 
     return Center(
       child: Column(
@@ -1282,19 +1338,30 @@ class _UnifiedTimerPageState extends ConsumerState<UnifiedTimerPage> {
                 child: InkWell(
                   borderRadius: BorderRadius.circular(24),
                   onTap: () {
-                    setState(() {
-                      if (_controller.isRunning) {
+                    if (_controller.isRunning) {
+                      setState(() {
                         _controller.pause();
                         _addKeyEvent(ph.KeyEventType.timerPause);
+                        UnifiedTimerPage.isTimerRunning.value =
+                            _controller.isRunning;
+                      });
+                      return;
+                    }
+                    if (isCompleted) {
+                      _restartTimer();
+                      return;
+                    }
+                    setState(() {
+                      if (!_hasStartedSession) {
+                        _resetAllTasks();
+                      }
+                      _controller.start();
+                      _ensureCurrentTask();
+                      if (_hasStartedSession) {
+                        _addKeyEvent(ph.KeyEventType.timerResume);
                       } else {
-                        _controller.start();
-                        _ensureCurrentTask();
-                        if (_hasStartedSession) {
-                          _addKeyEvent(ph.KeyEventType.timerResume);
-                        } else {
-                          _addKeyEvent(ph.KeyEventType.timerStart);
-                          _hasStartedSession = true;
-                        }
+                        _addKeyEvent(ph.KeyEventType.timerStart);
+                        _hasStartedSession = true;
                       }
                       UnifiedTimerPage.isTimerRunning.value =
                           _controller.isRunning;
@@ -1314,15 +1381,15 @@ class _UnifiedTimerPageState extends ConsumerState<UnifiedTimerPage> {
                         Icon(
                           _controller.isRunning
                               ? Icons.pause
-                              : Icons.play_arrow,
+                              : isCompleted
+                                  ? Icons.refresh
+                                  : Icons.play_arrow,
                           color: WsColors.white,
                           size: 20,
                         ),
                         const SizedBox(width: 8),
                         Text(
-                          _controller.isRunning
-                              ? s.pause.toUpperCase()
-                              : s.start.toUpperCase(),
+                          actionLabel.toUpperCase(),
                           style: const TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.w700,

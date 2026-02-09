@@ -11,6 +11,8 @@ abstract class AppStrings {
   String get start;
   String get pause;
   String get reset;
+  String get resume;
+  String get restart;
   String get days;
   String get hours;
   String get minutes;

@@ -11,24 +11,28 @@ final practiceHistoryServiceProvider = FutureProvider<PracticeHistoryService>((r
 
 /// 所有练习记录 Provider
 final practiceRecordsProvider = FutureProvider<List<PracticeRecord>>((ref) async {
+  ref.watch(recordsRefreshTriggerProvider);
   final service = await ref.watch(practiceHistoryServiceProvider.future);
   return service.getRecords();
 });
 
 /// 按模块 ID 获取记录的 Provider
 final moduleRecordsProvider = FutureProvider.family<List<PracticeRecord>, String>((ref, moduleId) async {
+  ref.watch(recordsRefreshTriggerProvider);
   final service = await ref.watch(practiceHistoryServiceProvider.future);
   return service.getRecordsByModuleId(moduleId);
 });
 
 /// 整体统计数据 Provider
 final practiceStatisticsProvider = FutureProvider<Map<String, dynamic>>((ref) async {
+  ref.watch(recordsRefreshTriggerProvider);
   final service = await ref.watch(practiceHistoryServiceProvider.future);
   return service.getStatistics();
 });
 
 /// 按模块的统计数据 Provider
 final moduleStatisticsProvider = FutureProvider.family<Map<String, dynamic>, String>((ref, moduleId) async {
+  ref.watch(recordsRefreshTriggerProvider);
   final service = await ref.watch(practiceHistoryServiceProvider.future);
   return service.getModuleStatistics(moduleId);
 });

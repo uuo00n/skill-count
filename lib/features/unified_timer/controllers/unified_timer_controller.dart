@@ -16,6 +16,7 @@ class UnifiedTimerController {
 
   CompetitionTimer _timer;
   StreamSubscription<Duration>? _subscription;
+  Duration _lastElapsed = Duration.zero;
 
   UnifiedTimerController({
     required this.totalDuration,
@@ -109,10 +110,13 @@ class UnifiedTimerController {
   }
 
   void _listenTimer() {
+    _lastElapsed = Duration.zero;
     _subscription = _timer.timeUpdates.listen((_) {
-      if (currentTask != null && isRunning) {
-        currentTask!.actualSpent += const Duration(seconds: 1);
+      final elapsed = _timer.elapsed;
+      if (currentTask != null && elapsed > _lastElapsed) {
+        currentTask!.actualSpent += elapsed - _lastElapsed;
       }
+      _lastElapsed = elapsed;
       onTick();
     });
   }

@@ -28,6 +28,10 @@ class FrStrings implements AppStrings {
   @override
   String get reset => 'Réinitialiser';
   @override
+  String get resume => 'Reprendre';
+  @override
+  String get restart => 'Redémarrer';
+  @override
   String get days => 'Jours';
   @override
   String get hours => 'Heures';

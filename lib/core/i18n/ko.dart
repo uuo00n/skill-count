@@ -28,6 +28,10 @@ class KoStrings implements AppStrings {
   @override
   String get reset => '초기화';
   @override
+  String get resume => '계속';
+  @override
+  String get restart => '다시 시작';
+  @override
   String get days => '일';
   @override
   String get hours => '시간';
