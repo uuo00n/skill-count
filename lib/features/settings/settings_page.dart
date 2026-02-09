@@ -39,7 +39,7 @@ class SettingsPage extends ConsumerWidget {
 
     return Center(
       child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 480),
+        constraints: const BoxConstraints(maxWidth: 1000),
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(32),
           child: Column(

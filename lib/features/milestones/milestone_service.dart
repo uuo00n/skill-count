@@ -3,7 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'milestone_model.dart';
 
 class MilestoneService {
-  static const String _storageKey = 'milestones';
+  static const String _storageKey = 'milestones_v2';
   SharedPreferences? _prefs;
 
   MilestoneService();

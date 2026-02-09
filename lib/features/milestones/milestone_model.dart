@@ -81,28 +81,46 @@ class Milestone {
   static List<Milestone> getDefaultMilestones() {
     return [
       Milestone(
-        id: 'reg_deadline',
-        title: 'Registration Deadline',
-        targetTime: DateTime.utc(2026, 3, 31, 16, 0, 0),
+        id: 'selection',
+        title: '选手选拔',
+        description: '全国各省市及地区开展技能大赛选手选拔工作，确定最终参赛名单。',
+        targetTime: DateTime.utc(2026, 4, 10, 0, 0, 0),
         priority: 1,
       ),
       Milestone(
-        id: 'tech_desc',
-        title: 'Technical Description',
-        targetTime: DateTime.utc(2026, 6, 1, 0, 0, 0),
+        id: 'reg_deadline',
+        title: '选手报名截止',
+        description: '所有参赛选手的最终报名信息录入截止，逾期将无法更改。',
+        targetTime: DateTime.utc(2026, 5, 20, 0, 0, 0),
         priority: 2,
       ),
       Milestone(
-        id: 'toolbox',
-        title: 'Toolbox Check',
-        targetTime: DateTime.utc(2026, 9, 2, 0, 0, 0),
+        id: 'tech_docs',
+        title: '各项目技术文件发布',
+        description: '发布各竞赛项目的技术说明书、评分标准及样题。',
+        targetTime: DateTime.utc(2026, 6, 1, 0, 0, 0),
         priority: 3,
       ),
       Milestone(
-        id: 'infra_setup',
-        title: 'Infrastructure Setup',
-        targetTime: DateTime.utc(2026, 9, 15, 0, 0, 0),
+        id: 'opening',
+        title: '赛事开幕式',
+        description: '2026年上海世界技能大赛盛大开幕，欢迎来自全球的技能精英。',
+        targetTime: DateTime.utc(2026, 6, 20, 0, 0, 0),
         priority: 4,
+      ),
+      Milestone(
+        id: 'closing',
+        title: '赛事闭幕式',
+        description: '大赛圆满落幕，颁奖典礼及交接仪式。',
+        targetTime: DateTime.utc(2026, 7, 10, 0, 0, 0),
+        priority: 4,
+      ),
+      Milestone(
+        id: 'summary',
+        title: '赛项结束总结',
+        description: '各项目裁判长及专家组进行赛事技术点评与总结。',
+        targetTime: DateTime.utc(2026, 7, 10, 0, 0, 0),
+        priority: 5,
       ),
     ];
   }

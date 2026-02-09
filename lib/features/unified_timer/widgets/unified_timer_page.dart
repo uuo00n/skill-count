@@ -32,7 +32,7 @@ class _UnifiedTimerPageState extends ConsumerState<UnifiedTimerPage> {
   bool _hasStartedSession = false;
   bool _isSavingRecord = false;
   bool _isPracticeMode = false;
-  int _selectedModuleIndex = 1;
+  int _selectedModuleIndex = 0;
   int? _hoveredTaskIndex;
   int? _hoveredModuleIndex;
   final List<ph.KeyEvent> _sessionKeyEvents = [];
@@ -58,123 +58,171 @@ class _UnifiedTimerPageState extends ConsumerState<UnifiedTimerPage> {
     _competitionModules = [
       ModuleModel(
         id: 'A',
-        name: 'Module A - Design',
-        description:
-            'Create responsive web design mockups and implement HTML/CSS layouts according to specifications.',
-        defaultDuration: const Duration(hours: 3),
-        status: ModuleStatus.completed,
-        type: ModuleType.competition,
-        tasks: [
-          TaskItem(
-              id: 'a1', title: 'Wireframe Design', status: TaskStatus.done),
-          TaskItem(
-              id: 'a2', title: 'HTML Structure', status: TaskStatus.done),
-          TaskItem(id: 'a3', title: 'CSS Styling', status: TaskStatus.done),
-          TaskItem(
-              id: 'a4', title: 'Responsive Layout', status: TaskStatus.done),
-        ],
-      ),
-      ModuleModel(
-        id: 'B',
-        name: 'Module B - Frontend',
-        description:
-            'Build interactive frontend components with JavaScript frameworks and client-side logic.',
+        name: 'A模块：APP原型设计',
+        description: '基于 Flutter 的高保真界面构建与交互设计，实现 Pixel-Perfect 的 UI 还原。',
         defaultDuration: const Duration(hours: 3),
         status: ModuleStatus.inProgress,
         type: ModuleType.competition,
         tasks: [
           TaskItem(
-            id: 'b1',
-            title: 'Component Architecture',
+            id: 'a1',
+            title: 'UI 架构搭建与路由配置',
             status: TaskStatus.done,
+            estimatedDuration: const Duration(minutes: 30),
           ),
           TaskItem(
-            id: 'b2',
-            title: 'State Management',
+            id: 'a2',
+            title: '核心页面静态布局实现',
             status: TaskStatus.current,
-            estimatedDuration: const Duration(minutes: 45),
-          ),
-          TaskItem(
-            id: 'b3',
-            title: 'API Integration',
-            status: TaskStatus.upcoming,
             estimatedDuration: const Duration(minutes: 60),
           ),
           TaskItem(
-            id: 'b4',
-            title: 'Form Validation',
+            id: 'a3',
+            title: '自定义组件封装与复用',
             status: TaskStatus.upcoming,
-            estimatedDuration: const Duration(minutes: 30),
+            estimatedDuration: const Duration(minutes: 45),
+          ),
+          TaskItem(
+            id: 'a4',
+            title: '复杂动画与交互效果',
+            status: TaskStatus.upcoming,
+            estimatedDuration: const Duration(minutes: 45),
+          ),
+        ],
+      ),
+      ModuleModel(
+        id: 'B',
+        name: 'B模块：单机APP开发',
+        description: '开发具备本地持久化能力的离线应用，集成 SQLite 数据库与文件系统。',
+        defaultDuration: const Duration(hours: 3),
+        status: ModuleStatus.upcoming,
+        type: ModuleType.competition,
+        tasks: [
+          TaskItem(
+            id: 'b1',
+            title: '本地数据库模型设计 (Drift/Isar)',
+            status: TaskStatus.upcoming,
+            estimatedDuration: const Duration(minutes: 40),
+          ),
+          TaskItem(
+            id: 'b2',
+            title: 'Riverpod 状态管理架构',
+            status: TaskStatus.upcoming,
+            estimatedDuration: const Duration(minutes: 40),
+          ),
+          TaskItem(
+            id: 'b3',
+            title: '业务逻辑层 (Service) 实现',
+            status: TaskStatus.upcoming,
+            estimatedDuration: const Duration(minutes: 50),
+          ),
+          TaskItem(
+            id: 'b4',
+            title: '本地数据 CRUD 完整链路',
+            status: TaskStatus.upcoming,
+            estimatedDuration: const Duration(minutes: 50),
           ),
         ],
       ),
       ModuleModel(
         id: 'C',
-        name: 'Module C - Backend',
-        description:
-            'Develop server-side APIs, database schemas, and business logic implementation.',
+        name: 'C模块：联网APP开发',
+        description: '实现 RESTful API 完整对接，处理复杂的网络状态、缓存策略与异常管理。',
         defaultDuration: const Duration(hours: 3),
         status: ModuleStatus.upcoming,
         type: ModuleType.competition,
         tasks: [
           TaskItem(
             id: 'c1',
-            title: 'Database Design',
-            status: TaskStatus.upcoming,
-            estimatedDuration: const Duration(minutes: 40),
-          ),
-          TaskItem(
-            id: 'c2',
-            title: 'REST API Endpoints',
-            status: TaskStatus.upcoming,
-            estimatedDuration: const Duration(minutes: 50),
-          ),
-          TaskItem(
-            id: 'c3',
-            title: 'Authentication',
+            title: '网络层封装与拦截器 (Dio)',
             status: TaskStatus.upcoming,
             estimatedDuration: const Duration(minutes: 30),
           ),
           TaskItem(
-            id: 'c4',
-            title: 'Data Validation',
+            id: 'c2',
+            title: '用户认证与 Token 刷新机制',
             status: TaskStatus.upcoming,
-            estimatedDuration: const Duration(minutes: 20),
+            estimatedDuration: const Duration(minutes: 40),
+          ),
+          TaskItem(
+            id: 'c3',
+            title: 'API 数据序列化 (JsonSerializable)',
+            status: TaskStatus.upcoming,
+            estimatedDuration: const Duration(minutes: 50),
+          ),
+          TaskItem(
+            id: 'c4',
+            title: '分页加载与下拉刷新实现',
+            status: TaskStatus.upcoming,
+            estimatedDuration: const Duration(minutes: 60),
           ),
         ],
       ),
       ModuleModel(
         id: 'D',
-        name: 'Module D - Integration',
-        description:
-            'Connect frontend and backend, deploy application, and perform integration testing.',
+        name: 'D模块：游戏APP开发',
+        description: '基于 Flame 引擎或 Flutter 渲染机制开发 2D 休闲游戏，包含物理引擎与粒子效果。',
         defaultDuration: const Duration(hours: 3),
         status: ModuleStatus.upcoming,
         type: ModuleType.competition,
         tasks: [
           TaskItem(
             id: 'd1',
-            title: 'API Connection',
-            status: TaskStatus.upcoming,
-            estimatedDuration: const Duration(minutes: 35),
-          ),
-          TaskItem(
-            id: 'd2',
-            title: 'Error Handling',
-            status: TaskStatus.upcoming,
-            estimatedDuration: const Duration(minutes: 25),
-          ),
-          TaskItem(
-            id: 'd3',
-            title: 'Performance Optimization',
+            title: '游戏循环与场景管理器',
             status: TaskStatus.upcoming,
             estimatedDuration: const Duration(minutes: 40),
           ),
           TaskItem(
-            id: 'd4',
-            title: 'Final Testing',
+            id: 'd2',
+            title: '精灵动画与资源加载',
             status: TaskStatus.upcoming,
-            estimatedDuration: const Duration(minutes: 30),
+            estimatedDuration: const Duration(minutes: 40),
+          ),
+          TaskItem(
+            id: 'd3',
+            title: '物理碰撞检测系统',
+            status: TaskStatus.upcoming,
+            estimatedDuration: const Duration(minutes: 50),
+          ),
+          TaskItem(
+            id: 'd4',
+            title: '游戏状态与得分系统',
+            status: TaskStatus.upcoming,
+            estimatedDuration: const Duration(minutes: 50),
+          ),
+        ],
+      ),
+      ModuleModel(
+        id: 'E',
+        name: 'E模块：vibe coding APP开发',
+        description: '探索 AI 辅助编程与智能化应用场景，集成 LLM 能力提升编码体验。',
+        defaultDuration: const Duration(hours: 3),
+        status: ModuleStatus.upcoming,
+        type: ModuleType.competition,
+        tasks: [
+          TaskItem(
+            id: 'e1',
+            title: 'AI 模型接口对接 (OpenAI/Gemini)',
+            status: TaskStatus.upcoming,
+            estimatedDuration: const Duration(minutes: 40),
+          ),
+          TaskItem(
+            id: 'e2',
+            title: 'Prompt 工程与上下文管理',
+            status: TaskStatus.upcoming,
+            estimatedDuration: const Duration(minutes: 50),
+          ),
+          TaskItem(
+            id: 'e3',
+            title: '流式响应与打字机效果',
+            status: TaskStatus.upcoming,
+            estimatedDuration: const Duration(minutes: 40),
+          ),
+          TaskItem(
+            id: 'e4',
+            title: '代码高亮与差异对比视图',
+            status: TaskStatus.upcoming,
+            estimatedDuration: const Duration(minutes: 50),
           ),
         ],
       ),
