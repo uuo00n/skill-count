@@ -61,19 +61,19 @@ class _UnifiedTimerPageState extends ConsumerState<UnifiedTimerPage> {
         name: 'A模块：APP原型设计',
         description: '基于 Flutter 的高保真界面构建与交互设计，实现 Pixel-Perfect 的 UI 还原。',
         defaultDuration: const Duration(hours: 3),
-        status: ModuleStatus.inProgress,
+        status: ModuleStatus.upcoming,
         type: ModuleType.competition,
         tasks: [
           TaskItem(
             id: 'a1',
             title: 'UI 架构搭建与路由配置',
-            status: TaskStatus.done,
+            status: TaskStatus.upcoming,
             estimatedDuration: const Duration(minutes: 30),
           ),
           TaskItem(
             id: 'a2',
             title: '核心页面静态布局实现',
-            status: TaskStatus.current,
+            status: TaskStatus.upcoming,
             estimatedDuration: const Duration(minutes: 60),
           ),
           TaskItem(
