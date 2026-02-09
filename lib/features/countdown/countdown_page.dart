@@ -22,7 +22,7 @@ class CountdownPage extends ConsumerWidget {
     final hours = safe.inHours % 24;
     final minutes = safe.inMinutes % 60;
     final seconds = safe.inSeconds % 60;
-    final is2026 = DateTime.now().year == 2026;
+    final is2026 = DateTime.now().toUtc().year == 2026;
     final logoAsset = is2026
         ? 'assets/images/Logo_WS_Shanghai2026_White_RGB.png'
         : 'assets/images/WS_Logo_DarkBlue_RGB.png';

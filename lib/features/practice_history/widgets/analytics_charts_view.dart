@@ -33,9 +33,7 @@ class AnalyticsChartsView extends StatelessWidget {
 
           // Module comparison chart (only if multiple modules)
           if (recordsByModule.length > 1) ...[
-            _buildSectionTitle(s.moduleComparison, Icons.compare_arrows),
-            const SizedBox(height: 12),
-            _buildModuleComparisonChart(recordsByModule),
+            _buildModuleComparisonChart(recordsByModule, s),
             const SizedBox(height: 24),
           ],
 
@@ -177,7 +175,7 @@ class AnalyticsChartsView extends StatelessWidget {
     );
   }
 
-  Widget _buildModuleComparisonChart(Map<String, List<PracticeRecord>> recordsByModule) {
+  Widget _buildModuleComparisonChart(Map<String, List<PracticeRecord>> recordsByModule, AppStrings s) {
     final modules = recordsByModule.entries.toList();
     final data = modules.map((entry) {
       final avgDuration = entry.value.fold<Duration>(
@@ -192,15 +190,19 @@ class AnalyticsChartsView extends StatelessWidget {
             toY: avgDuration,
             color: WsColors.accentCyan,
             width: 20,
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(8)),
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(4)),
+            backDrawRodData: BackgroundBarChartRodData(
+              show: true,
+              toY: avgDuration * 1.1, // Slightly higher than the bar for visual consistency
+              color: WsColors.accentCyan.withValues(alpha: 0.05),
+            ),
           ),
         ],
       );
     }).toList();
 
     return Container(
-      height: 300,
-      padding: const EdgeInsets.symmetric(vertical: 12),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: WsColors.surface,
         borderRadius: BorderRadius.circular(12),
@@ -213,44 +215,104 @@ class AnalyticsChartsView extends StatelessWidget {
           ),
         ],
       ),
-      child: BarChart(
-        BarChartData(
-          barGroups: data,
-          borderData: FlBorderData(show: false),
-          gridData: const FlGridData(show: false),
-          titlesData: FlTitlesData(
-            leftTitles: AxisTitles(
-              sideTitles: SideTitles(
-                showTitles: true,
-                reservedSize: 40,
-                getTitlesWidget: (value, meta) {
-                  return Text(
-                    _formatAxisDuration(value),
-                    style: const TextStyle(fontSize: 10, color: WsColors.textSecondary),
-                  );
-                },
-              ),
-            ),
-            bottomTitles: AxisTitles(
-              sideTitles: SideTitles(
-                showTitles: true,
-                getTitlesWidget: (value, meta) {
-                  final idx = value.toInt();
-                  if (idx >= 0 && idx < modules.length) {
-                    return Padding(
-                      padding: const EdgeInsets.only(top: 8),
-                      child: Text(
-                        modules[idx].value[0].moduleName.substring(0, 3),
-                        style: const TextStyle(fontSize: 10, color: WsColors.textSecondary),
-                      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildSectionTitle(s.moduleComparison, Icons.compare_arrows),
+          const SizedBox(height: 24),
+          SizedBox(
+            height: 240,
+            child: BarChart(
+              BarChartData(
+                barGroups: data,
+                barTouchData: BarTouchData(
+                  touchTooltipData: BarTouchTooltipData(
+                    getTooltipColor: (group) => WsColors.surface,
+                    tooltipBorder: const BorderSide(color: WsColors.border),
+                    tooltipRoundedRadius: 8,
+                    getTooltipItem: (group, groupIndex, rod, rodIndex) {
+                      final idx = group.x.toInt();
+                      final moduleName = modules[idx].value[0].moduleName;
+                      final durationStr = _formatDurationLabel(Duration(seconds: rod.toY.toInt()));
+                      return BarTooltipItem(
+                        '$moduleName\n',
+                        const TextStyle(
+                          color: WsColors.textSecondary,
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        children: [
+                          TextSpan(
+                            text: durationStr,
+                            style: const TextStyle(
+                              color: WsColors.accentCyan,
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      );
+                    },
+                  ),
+                ),
+                borderData: FlBorderData(show: false),
+                gridData: FlGridData(
+                  show: true,
+                  drawVerticalLine: false,
+                  getDrawingHorizontalLine: (value) {
+                    return FlLine(
+                      color: WsColors.border.withValues(alpha: 0.5),
+                      strokeWidth: 1,
+                      dashArray: [5, 5],
                     );
-                  }
-                  return const SizedBox();
-                },
+                  },
+                ),
+                titlesData: FlTitlesData(
+                  rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                  topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                  leftTitles: AxisTitles(
+                    sideTitles: SideTitles(
+                      showTitles: true,
+                      reservedSize: 40,
+                      getTitlesWidget: (value, meta) {
+                        if (value == meta.min || value == meta.max) return const SizedBox();
+                        return Text(
+                          _formatAxisDuration(value),
+                          style: const TextStyle(fontSize: 10, color: WsColors.textSecondary),
+                        );
+                      },
+                    ),
+                  ),
+                  bottomTitles: AxisTitles(
+                    sideTitles: SideTitles(
+                      showTitles: true,
+                      reservedSize: 40,
+                      getTitlesWidget: (value, meta) {
+                        final idx = value.toInt();
+                        if (idx >= 0 && idx < modules.length) {
+                          return Padding(
+                            padding: const EdgeInsets.only(top: 8),
+                            child: SizedBox(
+                              width: 60,
+                              child: Text(
+                                modules[idx].value[0].moduleName,
+                                style: const TextStyle(fontSize: 10, color: WsColors.textSecondary),
+                                textAlign: TextAlign.center,
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          );
+                        }
+                        return const SizedBox();
+                      },
+                    ),
+                  ),
+                ),
               ),
             ),
           ),
-        ),
+        ],
       ),
     );
   }

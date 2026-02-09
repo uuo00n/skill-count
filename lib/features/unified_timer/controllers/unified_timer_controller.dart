@@ -75,7 +75,7 @@ class UnifiedTimerController {
   void completeTask() {
     if (currentTask != null) {
       currentTask!.status = TaskStatus.done;
-      currentTask!.completedAt = DateTime.now();
+      currentTask!.completedAt = DateTime.now().toUtc();
       currentTask = null;
       onTick();
     }

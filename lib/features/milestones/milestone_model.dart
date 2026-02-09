@@ -17,7 +17,7 @@ class Milestone {
     this.isCompleted = false,
     this.priority = 0,
     DateTime? createdAt,
-  }) : createdAt = createdAt ?? DateTime.now();
+  }) : createdAt = createdAt ?? DateTime.now().toUtc();
 
   bool get isPast => DateTime.now().toUtc().isAfter(targetTime);
 

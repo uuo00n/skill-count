@@ -296,7 +296,7 @@ class _UnifiedTimerPageState extends ConsumerState<UnifiedTimerPage> {
           }
         } else {
           task.status = TaskStatus.done;
-          task.completedAt = DateTime.now();
+          task.completedAt = DateTime.now().toUtc();
         }
       }
     });
@@ -377,7 +377,7 @@ class _UnifiedTimerPageState extends ConsumerState<UnifiedTimerPage> {
     _sessionKeyEvents.add(
       ph.KeyEvent(
         type: type,
-        timestamp: DateTime.now(),
+        timestamp: DateTime.now().toUtc(),
         data: data,
       ),
     );
@@ -395,7 +395,7 @@ class _UnifiedTimerPageState extends ConsumerState<UnifiedTimerPage> {
       moduleId: module.id,
       moduleName: module.name,
       recordType: recordType,
-      completedAt: DateTime.now(),
+      completedAt: DateTime.now().toUtc(),
       totalDuration: safeActualDuration,
       estimatedDuration: _controller.totalDuration,
       taskRecords: module.tasks
