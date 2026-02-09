@@ -207,4 +207,7 @@ abstract class AppStrings {
   String get clearAIHistoryDesc;
   String get clearAIHistoryWarning;
   String get dataCleared;
+
+  // Month names
+  List<String> get monthNames;
 }

@@ -375,4 +375,11 @@ class EnStrings implements AppStrings {
   String get clearAIHistoryWarning => 'This will delete all AI analysis history and cannot be undone. Are you sure?';
   @override
   String get dataCleared => 'Cleared';
+
+  // Month names
+  @override
+  List<String> get monthNames => const [
+    'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+    'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+  ];
 }

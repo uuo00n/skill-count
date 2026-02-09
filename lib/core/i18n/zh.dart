@@ -375,4 +375,11 @@ class ZhStrings implements AppStrings {
   String get clearAIHistoryWarning => '此操作将删除所有AI分析历史，且无法恢复。确定要清空吗？';
   @override
   String get dataCleared => '已清空';
+
+  // Month names
+  @override
+  List<String> get monthNames => const [
+    '1月', '2月', '3月', '4月', '5月', '6月',
+    '7月', '8月', '9月', '10月', '11月', '12月',
+  ];
 }

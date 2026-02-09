@@ -361,4 +361,11 @@ class JaStrings implements AppStrings {
   String get clearAIHistoryWarning => 'すべてのAI分析履歴が削除され、元に戻せません。消去しますか？';
   @override
   String get dataCleared => '消去しました';
+
+  // Month names
+  @override
+  List<String> get monthNames => const [
+    '1月', '2月', '3月', '4月', '5月', '6月',
+    '7月', '8月', '9月', '10月', '11月', '12月',
+  ];
 }

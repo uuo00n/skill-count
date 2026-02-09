@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:timezone/timezone.dart' as tz;
 
 import '../constants/ws_times.dart';
@@ -41,9 +42,33 @@ final unifiedTimeProvider =
   (ref) => UnifiedTimeService(),
 );
 
-/// 用户选择的显示时区（IANA 时区 ID）
-final appTimezoneProvider = StateProvider<String>(
-  (ref) => 'Asia/Shanghai',
+/// 持久化时区服务
+class AppTimezoneService extends StateNotifier<String> {
+  static const String _storageKey = 'app_timezone';
+
+  AppTimezoneService() : super('Asia/Shanghai') {
+    _load();
+  }
+
+  Future<void> _load() async {
+    final prefs = await SharedPreferences.getInstance();
+    final saved = prefs.getString(_storageKey);
+    if (saved != null) {
+      state = saved;
+    }
+  }
+
+  Future<void> setTimezone(String timezoneId) async {
+    state = timezoneId;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_storageKey, timezoneId);
+  }
+}
+
+/// 用户选择的显示时区（IANA 时区 ID，持久化到 SharedPreferences）
+final appTimezoneProvider =
+    StateNotifierProvider<AppTimezoneService, String>(
+  (ref) => AppTimezoneService(),
 );
 
 final competitionCountdownProvider = StateProvider<DateTime>(

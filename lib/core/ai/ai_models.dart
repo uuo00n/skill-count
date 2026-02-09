@@ -161,7 +161,7 @@ class AIAnalysisResult {
   });
 
   factory AIAnalysisResult.fromJson(Map<String, dynamic> json) {
-    final now = DateTime.now();
+    final now = DateTime.now().toUtc();
     return AIAnalysisResult(
       id: json['id'] as String? ??
           now.millisecondsSinceEpoch.toString(),

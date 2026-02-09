@@ -1,25 +1,44 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/constants/ws_colors.dart';
 import '../../core/i18n/locale_provider.dart';
+import '../../core/providers/time_providers.dart';
 import 'milestone_model.dart';
 import 'milestone_card.dart';
 import 'milestone_edit_dialog.dart';
 import 'milestone_delete_dialog.dart';
+import 'milestone_service.dart';
 
-class MilestoneList extends StatefulWidget {
+class MilestoneList extends ConsumerStatefulWidget {
   const MilestoneList({super.key});
 
   @override
-  State<MilestoneList> createState() => _MilestoneListState();
+  ConsumerState<MilestoneList> createState() => _MilestoneListState();
 }
 
-class _MilestoneListState extends State<MilestoneList> {
-  late List<Milestone> _milestones;
+class _MilestoneListState extends ConsumerState<MilestoneList> {
+  List<Milestone> _milestones = [];
+  final _service = MilestoneService();
+  bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
-    _milestones = Milestone.getDefaultMilestones();
+    _loadMilestones();
+  }
+
+  Future<void> _loadMilestones() async {
+    final milestones = await _service.getMilestones();
+    if (!mounted) return;
+    setState(() {
+      _milestones = milestones;
+      _isLoading = false;
+    });
+    _sortMilestones();
+  }
+
+  Future<void> _persist() async {
+    await _service.saveMilestones(_milestones);
   }
 
   void _sortMilestones() {
@@ -40,6 +59,7 @@ class _MilestoneListState extends State<MilestoneList> {
             _milestones.add(newMilestone);
             _sortMilestones();
           });
+          _persist();
         },
       ),
     );
@@ -58,6 +78,7 @@ class _MilestoneListState extends State<MilestoneList> {
               _sortMilestones();
             }
           });
+          _persist();
         },
       ),
     );
@@ -74,6 +95,7 @@ class _MilestoneListState extends State<MilestoneList> {
           setState(() {
             _milestones.removeWhere((m) => m.id == milestoneId);
           });
+          _persist();
         },
       ),
     );
@@ -82,6 +104,8 @@ class _MilestoneListState extends State<MilestoneList> {
   @override
   Widget build(BuildContext context) {
     final s = LocaleScope.of(context);
+    final utcNow = ref.watch(unifiedTimeProvider);
+    final selectedTz = ref.watch(appTimezoneProvider);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -109,7 +133,14 @@ class _MilestoneListState extends State<MilestoneList> {
         ),
         const SizedBox(height: 16),
         Expanded(
-          child: _milestones.isEmpty
+          child: _isLoading
+              ? const Center(
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: WsColors.accentCyan,
+                  ),
+                )
+              : _milestones.isEmpty
               ? _buildEmptyState(s)
               : ListView.separated(
                   itemCount: _milestones.length,
@@ -117,6 +148,8 @@ class _MilestoneListState extends State<MilestoneList> {
                   itemBuilder: (context, index) {
                     return MilestoneCard(
                       milestone: _milestones[index],
+                      utcNow: utcNow,
+                      timezoneId: selectedTz,
                       onEdit: (milestone) => _showEditDialog(milestone),
                       onDelete: (milestoneId) =>
                           _showDeleteDialog(milestoneId),

@@ -35,6 +35,12 @@ class CompetitionTimer implements BaseTimerController {
   bool _isRunning = false;
   bool _isCompleted = false;
 
+  /// 墙钟时间追踪：记录本次 start 的时刻
+  DateTime? _startedAt;
+
+  /// 暂停前已累积的时间
+  Duration _accumulatedBeforePause = Duration.zero;
+
   final _controller = StreamController<Duration>.broadcast();
 
   CompetitionTimer({
@@ -84,8 +90,10 @@ class CompetitionTimer implements BaseTimerController {
   void start() {
     if (_isRunning || _isCompleted) return;
     _isRunning = true;
+    _startedAt = DateTime.now();
     _timer = Timer.periodic(const Duration(seconds: 1), (_) {
-      _elapsed += const Duration(seconds: 1);
+      _elapsed =
+          _accumulatedBeforePause + DateTime.now().difference(_startedAt!);
       _controller.add(remaining);
 
       if (_mode == TimerMode.countDown && remaining <= Duration.zero) {
@@ -101,6 +109,8 @@ class CompetitionTimer implements BaseTimerController {
     _timer?.cancel();
     _timer = null;
     _isRunning = false;
+    _accumulatedBeforePause = _elapsed;
+    _startedAt = null;
     _controller.add(remaining);
   }
 
@@ -111,6 +121,8 @@ class CompetitionTimer implements BaseTimerController {
     _isRunning = false;
     _isCompleted = false;
     _elapsed = Duration.zero;
+    _accumulatedBeforePause = Duration.zero;
+    _startedAt = null;
     _controller.add(remaining);
   }
 

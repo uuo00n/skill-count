@@ -1,17 +1,21 @@
 import 'package:flutter/material.dart';
 import '../../core/constants/ws_colors.dart';
 import '../../core/i18n/locale_provider.dart';
-import '../../core/utils/time_utils.dart';
+import '../../features/timezone/timezone_converter.dart';
 import 'milestone_model.dart';
 
 class MilestoneCard extends StatelessWidget {
   final Milestone milestone;
+  final DateTime utcNow;
+  final String timezoneId;
   final Function(Milestone)? onEdit;
   final Function(String)? onDelete;
 
   const MilestoneCard({
     super.key,
     required this.milestone,
+    required this.utcNow,
+    required this.timezoneId,
     this.onEdit,
     this.onDelete,
   });
@@ -77,17 +81,17 @@ class MilestoneCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final s = LocaleScope.of(context);
-    final remaining = TimeUtils.timeLeft(milestone.targetTime);
-    final days = remaining.inDays;
-    final isPast = remaining == Duration.zero;
+    final remaining = milestone.targetTime.difference(utcNow);
+    final isPast = remaining.isNegative || remaining == Duration.zero;
+    final days = isPast ? 0 : remaining.inDays;
 
     final statusLabel = isPast ? s.completed : s.milestoneEvent;
     final statusColor = isPast ? WsColors.accentGreen : WsColors.accentYellow;
 
-    // Format target date
-    final target = milestone.targetTime.toLocal();
+    // Format target date using selected timezone
+    final target = TimezoneConverter.convert(milestone.targetTime, timezoneId);
     final dateStr =
-        '${_monthName(target.month)} ${target.day.toString().padLeft(2, '0')}, ${target.year}';
+        '${s.monthNames[target.month - 1]} ${target.day.toString().padLeft(2, '0')}, ${target.year}';
 
     return GestureDetector(
       onLongPress: () => _showActionMenu(context),
@@ -184,11 +188,4 @@ class MilestoneCard extends StatelessWidget {
     );
   }
 
-  String _monthName(int month) {
-    const months = [
-      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
-    ];
-    return months[month - 1];
-  }
 }

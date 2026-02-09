@@ -361,4 +361,11 @@ class FrStrings implements AppStrings {
   String get clearAIHistoryWarning => 'Tout l\'historique d\'analyse IA sera supprimé de manière irréversible. Continuer ?';
   @override
   String get dataCleared => 'Effacé';
+
+  // Month names
+  @override
+  List<String> get monthNames => const [
+    'janv', 'févr', 'mars', 'avr', 'mai', 'juin',
+    'juil', 'août', 'sept', 'oct', 'nov', 'déc',
+  ];
 }

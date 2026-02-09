@@ -361,4 +361,11 @@ class KoStrings implements AppStrings {
   String get clearAIHistoryWarning => '모든 AI 분석 기록이 삭제되며 복구할 수 없습니다. 계속할까요?';
   @override
   String get dataCleared => '삭제 완료';
+
+  // Month names
+  @override
+  List<String> get monthNames => const [
+    '1월', '2월', '3월', '4월', '5월', '6월',
+    '7월', '8월', '9월', '10월', '11월', '12월',
+  ];
 }

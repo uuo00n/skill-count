@@ -15,6 +15,21 @@ class TimezoneConverter {
     return tz.TZDateTime.now(location);
   }
 
+  /// 将本地时间（在指定时区下）转换为 UTC
+  static DateTime toUtc(DateTime localTime, String timezoneId) {
+    final location = tz.getLocation(timezoneId);
+    final tzTime = tz.TZDateTime(
+      location,
+      localTime.year,
+      localTime.month,
+      localTime.day,
+      localTime.hour,
+      localTime.minute,
+      localTime.second,
+    );
+    return tzTime.toUtc();
+  }
+
   /// 获取实际 UTC 偏移（考虑夏令时），返回小时数（可能含小数）
   static Duration getUtcOffset(String timezoneId, DateTime utcNow) {
     final location = tz.getLocation(timezoneId);

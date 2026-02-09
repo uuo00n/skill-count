@@ -34,6 +34,7 @@ class TaskRecord {
   double get efficiency {
     if (estimatedDuration == null || estimatedDuration!.inSeconds == 0) return 1.0;
     final actualSeconds = actualSpent.inSeconds.toDouble();
+    if (actualSeconds == 0) return 1.0;
     final estimatedSeconds = estimatedDuration!.inSeconds.toDouble();
     return (estimatedSeconds / actualSeconds).clamp(0.0, 2.0);
   }
@@ -118,6 +119,7 @@ class PracticeRecord {
   double get efficiency {
     if (estimatedDuration.inSeconds == 0) return 1.0;
     final actualSeconds = totalDuration.inSeconds.toDouble();
+    if (actualSeconds == 0) return 1.0;
     final estimatedSeconds = estimatedDuration.inSeconds.toDouble();
     return (estimatedSeconds / actualSeconds).clamp(0.0, 2.0);
   }

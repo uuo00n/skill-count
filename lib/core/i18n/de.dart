@@ -361,4 +361,11 @@ class DeStrings implements AppStrings {
   String get clearAIHistoryWarning => 'Der gesamte KI-Analyseverlauf wird gelöscht und kann nicht wiederhergestellt werden. Fortfahren?';
   @override
   String get dataCleared => 'Gelöscht';
+
+  // Month names
+  @override
+  List<String> get monthNames => const [
+    'Jan', 'Feb', 'Mär', 'Apr', 'Mai', 'Jun',
+    'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez',
+  ];
 }

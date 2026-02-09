@@ -220,7 +220,7 @@ class AIChatNotifier extends StateNotifier<AIChatState> {
     final userMessage = ChatMessage(
       role: 'user',
       content: message,
-      timestamp: DateTime.now(),
+      timestamp: DateTime.now().toUtc(),
     );
 
     state = state.copyWith(
@@ -242,7 +242,7 @@ class AIChatNotifier extends StateNotifier<AIChatState> {
       final assistantMessage = ChatMessage(
         role: 'assistant',
         content: buffer.toString(),
-        timestamp: DateTime.now(),
+        timestamp: DateTime.now().toUtc(),
       );
 
       state = state.copyWith(
@@ -254,7 +254,7 @@ class AIChatNotifier extends StateNotifier<AIChatState> {
       final errorMessage = ChatMessage(
         role: 'assistant',
         content: _formatAIError(e),
-        timestamp: DateTime.now(),
+        timestamp: DateTime.now().toUtc(),
       );
       state = state.copyWith(
         isLoading: false,

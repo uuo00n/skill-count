@@ -347,9 +347,12 @@ class SettingsPage extends ConsumerWidget {
     WidgetRef ref,
     DateTime current,
   ) async {
+    final selectedTz = ref.read(appTimezoneProvider);
+    final currentInSelectedTz = TimezoneConverter.convert(current, selectedTz);
+
     final pickedDate = await showDatePicker(
       context: context,
-      initialDate: current.toLocal(),
+      initialDate: currentInSelectedTz,
       firstDate: DateTime(2024),
       lastDate: DateTime(2100),
     );
@@ -360,7 +363,7 @@ class SettingsPage extends ConsumerWidget {
 
     final pickedTime = await showTimePicker(
       context: context,
-      initialTime: TimeOfDay.fromDateTime(current.toLocal()),
+      initialTime: TimeOfDay.fromDateTime(currentInSelectedTz),
     );
 
     if (!context.mounted) return;
@@ -375,8 +378,8 @@ class SettingsPage extends ConsumerWidget {
       pickedTime.minute,
     );
 
-    ref.read(competitionCountdownProvider.notifier).state = localDateTime
-        .toUtc();
+    final utcDateTime = TimezoneConverter.toUtc(localDateTime, selectedTz);
+    ref.read(competitionCountdownProvider.notifier).state = utcDateTime;
   }
 
   String _formatDateTime(DateTime dateTime) {
@@ -445,8 +448,9 @@ class SettingsPage extends ConsumerWidget {
                       child: InkWell(
                         borderRadius: BorderRadius.circular(10),
                         onTap: () {
-                          ref.read(appTimezoneProvider.notifier).state =
-                              city.timezoneId;
+                          ref
+                              .read(appTimezoneProvider.notifier)
+                              .setTimezone(city.timezoneId);
                           Navigator.of(context).pop();
                         },
                         child: Container(

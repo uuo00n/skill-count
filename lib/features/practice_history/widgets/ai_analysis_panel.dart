@@ -6,6 +6,8 @@ import '../../../core/ai/ai_providers.dart';
 import '../../../core/ai/prompts/training_analysis_prompt.dart';
 import '../../../core/constants/ws_colors.dart';
 import '../../../core/i18n/locale_provider.dart';
+import '../../../core/providers/time_providers.dart';
+import '../../timezone/timezone_converter.dart';
 
 /// AI分析面板 - 练习历史中的AI分析Tab
 class AIAnalysisPanel extends ConsumerStatefulWidget {
@@ -1088,11 +1090,13 @@ class _AIAnalysisPanelState extends ConsumerState<AIAnalysisPanel> {
   }
 
   String _formatDateTime(DateTime dt) {
-    final y = dt.year;
-    final m = dt.month.toString().padLeft(2, '0');
-    final d = dt.day.toString().padLeft(2, '0');
-    final h = dt.hour.toString().padLeft(2, '0');
-    final min = dt.minute.toString().padLeft(2, '0');
+    final tz = ref.read(appTimezoneProvider);
+    final local = TimezoneConverter.convert(dt, tz);
+    final y = local.year;
+    final m = local.month.toString().padLeft(2, '0');
+    final d = local.day.toString().padLeft(2, '0');
+    final h = local.hour.toString().padLeft(2, '0');
+    final min = local.minute.toString().padLeft(2, '0');
     return '$y-$m-$d $h:$min';
   }
 

@@ -14,7 +14,7 @@ class TimeZoneCity {
       timezoneId: 'Asia/Shanghai',
     ),
     TimeZoneCity(
-      name: '台北',
+      name: '臺北',
       timezoneId: 'Asia/Taipei',
     ),
     TimeZoneCity(
@@ -22,11 +22,15 @@ class TimeZoneCity {
       timezoneId: 'Asia/Hong_Kong',
     ),
     TimeZoneCity(
+      name: '澳門',
+      timezoneId: 'Asia/Macau',
+    ),
+    TimeZoneCity(
       name: 'New York',
       timezoneId: 'America/New_York',
     ),
     TimeZoneCity(
-      name: 'Tokyo',
+      name: '東京',
       timezoneId: 'Asia/Tokyo',
     ),
     TimeZoneCity(
@@ -38,7 +42,7 @@ class TimeZoneCity {
       timezoneId: 'Europe/Paris',
     ),
     TimeZoneCity(
-      name: 'Seoul',
+      name: '서울',
       timezoneId: 'Asia/Seoul',
     ),
   ];

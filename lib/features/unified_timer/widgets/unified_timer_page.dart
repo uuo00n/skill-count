@@ -1,6 +1,7 @@
 import 'package:confetti/confetti.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:just_audio/just_audio.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
 import '../../../core/constants/ws_colors.dart';
 import '../../../core/i18n/locale_provider.dart';
@@ -25,6 +26,7 @@ class UnifiedTimerPage extends ConsumerStatefulWidget {
 class _UnifiedTimerPageState extends ConsumerState<UnifiedTimerPage> {
   late UnifiedTimerController _controller;
   late ConfettiController _confettiController;
+  final AudioPlayer _timerEndPlayer = AudioPlayer();
   bool _hasCompleted = false;
   bool _hasSavedRecord = false;
   bool _hasStartedSession = false;
@@ -50,6 +52,8 @@ class _UnifiedTimerPageState extends ConsumerState<UnifiedTimerPage> {
     super.initState();
     _confettiController =
         ConfettiController(duration: const Duration(seconds: 3));
+
+    _timerEndPlayer.setAsset('assets/audio/timer-end.wav');
 
     _competitionModules = [
       ModuleModel(
@@ -254,6 +258,7 @@ class _UnifiedTimerPageState extends ConsumerState<UnifiedTimerPage> {
   void dispose() {
     _controller.dispose();
     _confettiController.dispose();
+    _timerEndPlayer.dispose();
     super.dispose();
   }
 
@@ -338,6 +343,9 @@ class _UnifiedTimerPageState extends ConsumerState<UnifiedTimerPage> {
 
   void _finalizeModuleCompletion({required bool isManual}) {
     if (_hasCompleted) return;
+
+    _playTimerEndSound();
+
     final allTasksDone = !_hasPendingTasks;
     _addKeyEvent(
       ph.KeyEventType.moduleComplete,
@@ -357,6 +365,20 @@ class _UnifiedTimerPageState extends ConsumerState<UnifiedTimerPage> {
           ? ph.RecordType.moduleComplete
           : ph.RecordType.partial,
     );
+  }
+
+  void _playTimerEndSound() {
+    if (_timerEndPlayer.processingState == ProcessingState.idle) {
+      _timerEndPlayer
+          .setAsset('assets/audio/timer-end.wav')
+          .then((_) => _timerEndPlayer.seek(Duration.zero))
+          .then((_) => _timerEndPlayer.play())
+          .catchError((_) {});
+      return;
+    }
+
+    _timerEndPlayer.seek(Duration.zero);
+    _timerEndPlayer.play();
   }
 
   void _resetAllTasks() {
