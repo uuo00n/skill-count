@@ -126,6 +126,7 @@ abstract class AppStrings {
   String get enterMilestoneTitle;
   String get targetDateTime;
   String get milestonePriority;
+  String get milestoneEvent;
   String get confirmDeleteMilestone;
   String get deleteMilestoneWarning;
   String get noMilestones;

@@ -219,6 +219,8 @@ class JaStrings implements AppStrings {
   @override
   String get milestonePriority => '優先度';
   @override
+  String get milestoneEvent => 'イベント';
+  @override
   String get confirmDeleteMilestone => 'マイルストーン削除の確認';
   @override
   String get deleteMilestoneWarning => 'この操作は取り消せません。マイルストーンは完全に削除されます。';

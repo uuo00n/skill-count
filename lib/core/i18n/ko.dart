@@ -219,6 +219,8 @@ class KoStrings implements AppStrings {
   @override
   String get milestonePriority => '우선순위';
   @override
+  String get milestoneEvent => '이벤트';
+  @override
   String get confirmDeleteMilestone => '마일스톤 삭제 확인';
   @override
   String get deleteMilestoneWarning => '이 작업은 되돌릴 수 없습니다. 마일스톤이 영구 삭제됩니다.';

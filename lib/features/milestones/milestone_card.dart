@@ -81,7 +81,7 @@ class MilestoneCard extends StatelessWidget {
     final days = remaining.inDays;
     final isPast = remaining == Duration.zero;
 
-    final statusLabel = isPast ? s.completed : s.upcoming;
+    final statusLabel = isPast ? s.completed : s.milestoneEvent;
     final statusColor = isPast ? WsColors.accentGreen : WsColors.accentYellow;
 
     // Format target date

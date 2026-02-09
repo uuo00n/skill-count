@@ -219,6 +219,8 @@ class DeStrings implements AppStrings {
   @override
   String get milestonePriority => 'Priorität';
   @override
+  String get milestoneEvent => 'Ereignis';
+  @override
   String get confirmDeleteMilestone => 'Meilenstein löschen bestätigen';
   @override
   String get deleteMilestoneWarning => 'Diese Aktion kann nicht rückgängig gemacht werden. Der Meilenstein wird dauerhaft entfernt.';

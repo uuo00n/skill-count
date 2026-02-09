@@ -219,6 +219,8 @@ class FrStrings implements AppStrings {
   @override
   String get milestonePriority => 'Priorité';
   @override
+  String get milestoneEvent => 'Événement';
+  @override
   String get confirmDeleteMilestone => 'Confirmer la suppression du jalon';
   @override
   String get deleteMilestoneWarning => 'Cette action est irréversible. Le jalon sera supprimé définitivement.';

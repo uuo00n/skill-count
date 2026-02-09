@@ -232,6 +232,8 @@ class ZhStrings implements AppStrings {
   @override
   String get milestonePriority => '优先级';
   @override
+  String get milestoneEvent => '事件';
+  @override
   String get confirmDeleteMilestone => '确认删除里程碑';
   @override
   String get deleteMilestoneWarning => '此操作无法撤销，里程碑将被永久删除。';

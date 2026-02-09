@@ -232,6 +232,8 @@ class EnStrings implements AppStrings {
   @override
   String get milestonePriority => 'Priority';
   @override
+  String get milestoneEvent => 'Event';
+  @override
   String get confirmDeleteMilestone => 'Confirm Delete Milestone';
   @override
   String get deleteMilestoneWarning => 'This action cannot be undone. The milestone will be permanently removed.';
