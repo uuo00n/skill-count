@@ -19,7 +19,11 @@
       "Bash(flutter pub get:*)",
       "Bash(flutter run:*)",
       "Bash(flutter clean:*)",
-      "Bash(grep:*)"
+      "Bash(grep:*)",
+      "WebFetch(domain:pub.dev)",
+      "WebFetch(domain:github.com)",
+      "Bash(dart pub cache:*)",
+      "Bash(flutter build:*)"
     ]
   }
 }

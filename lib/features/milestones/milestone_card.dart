@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 import '../../core/constants/ws_colors.dart';
 import '../../core/i18n/locale_provider.dart';
 import '../../features/timezone/timezone_converter.dart';
+import '../../widgets/ws_flip_digit.dart';
 import 'milestone_model.dart';
 
-class MilestoneCard extends StatelessWidget {
+class MilestoneCard extends StatefulWidget {
   final Milestone milestone;
   final DateTime utcNow;
   final String timezoneId;
@@ -20,6 +21,16 @@ class MilestoneCard extends StatelessWidget {
     this.onDelete,
   });
 
+  @override
+  State<MilestoneCard> createState() => _MilestoneCardState();
+}
+
+class _MilestoneCardState extends State<MilestoneCard> {
+  @override
+  void didUpdateWidget(MilestoneCard oldWidget) {
+    super.didUpdateWidget(oldWidget);
+  }
+
   void _showActionMenu(BuildContext context) {
     final s = LocaleScope.of(context);
     showDialog(
@@ -30,7 +41,7 @@ class MilestoneCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(12),
         ),
         title: Text(
-          milestone.title,
+          widget.milestone.title,
           style: const TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w600,
@@ -38,18 +49,18 @@ class MilestoneCard extends StatelessWidget {
           ),
         ),
         content: Text(
-          milestone.description ?? '',
+          widget.milestone.description ?? '',
           style: const TextStyle(
             fontSize: 12,
             color: WsColors.textSecondary,
           ),
         ),
         actions: [
-          if (onEdit != null)
+          if (widget.onEdit != null)
             TextButton.icon(
               onPressed: () {
                 Navigator.of(ctx).pop();
-                onEdit!(milestone);
+                widget.onEdit!(widget.milestone);
               },
               icon: const Icon(Icons.edit_outlined, size: 18),
               label: Text(s.editMilestone),
@@ -57,11 +68,11 @@ class MilestoneCard extends StatelessWidget {
                 foregroundColor: WsColors.accentCyan,
               ),
             ),
-          if (onDelete != null)
+          if (widget.onDelete != null)
             TextButton.icon(
               onPressed: () {
                 Navigator.of(ctx).pop();
-                onDelete!(milestone.id);
+                widget.onDelete!(widget.milestone.id);
               },
               icon: const Icon(Icons.delete_outline, size: 18),
               label: Text(s.confirmDelete),
@@ -81,7 +92,7 @@ class MilestoneCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final s = LocaleScope.of(context);
-    final remaining = milestone.targetTime.difference(utcNow);
+    final remaining = widget.milestone.targetTime.difference(widget.utcNow);
     final isPast = remaining.isNegative || remaining == Duration.zero;
     final days = isPast ? 0 : remaining.inDays;
 
@@ -89,7 +100,8 @@ class MilestoneCard extends StatelessWidget {
     final statusColor = isPast ? WsColors.accentGreen : WsColors.accentYellow;
 
     // Format target date using selected timezone
-    final target = TimezoneConverter.convert(milestone.targetTime, timezoneId);
+    final target =
+        TimezoneConverter.convert(widget.milestone.targetTime, widget.timezoneId);
     final dateStr =
         '${s.monthNames[target.month - 1]} ${target.day.toString().padLeft(2, '0')}, ${target.year}';
 
@@ -140,18 +152,18 @@ class MilestoneCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 6),
                   Text(
-                    milestone.title,
+                    widget.milestone.title,
                     style: const TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
                       color: WsColors.textPrimary,
                     ),
                   ),
-                  if (milestone.description != null &&
-                      milestone.description!.isNotEmpty) ...[
+                  if (widget.milestone.description != null &&
+                      widget.milestone.description!.isNotEmpty) ...[
                     const SizedBox(height: 4),
                     Text(
-                      milestone.description!,
+                      widget.milestone.description!,
                       style: const TextStyle(
                         fontSize: 11,
                         color: WsColors.textSecondary,
@@ -171,28 +183,52 @@ class MilestoneCard extends StatelessWidget {
                 ],
               ),
             ),
-            const SizedBox(width: 16),
-            // Right days count
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.baseline,
-              textBaseline: TextBaseline.alphabetic,
+            const SizedBox(width: 12),
+            // Right days ticker
+            Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                Text(
-                  isPast ? '--' : days.toString().padLeft(2, '0'),
-                  style: TextStyle(
-                    fontFamily: 'JetBrainsMono',
-                    fontSize: 28,
-                    fontWeight: FontWeight.bold,
-                    color: isPast
-                        ? WsColors.textSecondary
-                        : WsColors.textPrimary,
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
+                  decoration: BoxDecoration(
+                    color: isPast ? WsColors.bgDeep : WsColors.darkBlue,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: days.toString().split('').map((digit) {
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 1),
+                        child: WsFlipDigit(
+                          value: int.parse(digit),
+                          width: 18,
+                          height: 26,
+                          textStyle: TextStyle(
+                            fontFamily: 'JetBrainsMono',
+                            fontSize: 22,
+                            fontWeight: FontWeight.bold,
+                            color: isPast
+                                ? WsColors.textSecondary
+                                : WsColors.white,
+                            height: 1.0,
+                          ),
+                          backgroundColor:
+                              isPast ? WsColors.bgDeep : WsColors.darkBlue,
+                          borderColor: Colors.transparent,
+                        ),
+                      );
+                    }).toList(),
                   ),
                 ),
-                const SizedBox(width: 6),
+                const SizedBox(height: 3),
                 Text(
                   s.days,
                   style: TextStyle(
-                    fontSize: 14,
+                    fontSize: 10,
                     fontWeight: FontWeight.w600,
                     color: isPast
                         ? WsColors.textSecondary
@@ -206,5 +242,4 @@ class MilestoneCard extends StatelessWidget {
       ),
     );
   }
-
 }

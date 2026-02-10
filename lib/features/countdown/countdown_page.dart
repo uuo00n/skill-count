@@ -4,14 +4,20 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/constants/ws_colors.dart';
 import '../../core/i18n/locale_provider.dart';
 import '../../core/providers/time_providers.dart';
+import '../../widgets/ws_flip_digit.dart';
 import '../../widgets/ws_timer_text.dart';
 import '../milestones/milestone_list.dart';
 
-class CountdownPage extends ConsumerWidget {
+class CountdownPage extends ConsumerStatefulWidget {
   const CountdownPage({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<CountdownPage> createState() => _CountdownPageState();
+}
+
+class _CountdownPageState extends ConsumerState<CountdownPage> {
+  @override
+  Widget build(BuildContext context) {
     final s = LocaleScope.of(context);
     final now = ref.watch(unifiedTimeProvider);
     final target = ref.watch(competitionCountdownProvider);
@@ -49,32 +55,80 @@ class CountdownPage extends ConsumerWidget {
                   colorBlendMode: logoColor == null ? null : BlendMode.srcIn,
                 ),
                 const SizedBox(height: 24),
+                // Days ticker display
                 FittedBox(
                   fit: BoxFit.scaleDown,
                   alignment: Alignment.centerLeft,
-                  child: Text(
-                    '$days ${s.days.toUpperCase()}',
-                    style: const TextStyle(
-                      fontFamily: 'Inter',
-                      fontSize: 72,
-                      fontWeight: FontWeight.w900,
-                      color: WsColors.darkBlue,
-                      height: 1.0,
-                    ),
-                  ),
-                ),
-                FittedBox(
-                  fit: BoxFit.scaleDown,
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    s.remaining.toUpperCase(),
-                    style: const TextStyle(
-                      fontFamily: 'Inter',
-                      fontSize: 72,
-                      fontWeight: FontWeight.w900,
-                      color: WsColors.accentCyan,
-                      height: 1.0,
-                    ),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 28,
+                          vertical: 16,
+                        ),
+                        decoration: BoxDecoration(
+                          color: WsColors.darkBlue,
+                          borderRadius: BorderRadius.circular(16),
+                          boxShadow: [
+                            BoxShadow(
+                              color: WsColors.darkBlue.withAlpha(50),
+                              blurRadius: 20,
+                              offset: const Offset(0, 8),
+                            ),
+                          ],
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: days.toString().split('').map((digit) {
+                            return Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 2),
+                              child: WsFlipDigit(
+                                value: int.parse(digit),
+                                width: 54,
+                                height: 82,
+                                textStyle: const TextStyle(
+                                  fontFamily: 'JetBrainsMono',
+                                  fontSize: 72,
+                                  fontWeight: FontWeight.bold,
+                                  color: WsColors.white,
+                                  height: 1.0,
+                                ),
+                                backgroundColor: WsColors.darkBlue,
+                                borderColor: Colors.transparent,
+                              ),
+                            );
+                          }).toList(),
+                        ),
+                      ),
+                      const SizedBox(width: 24),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            s.days.toUpperCase(),
+                            style: const TextStyle(
+                              fontFamily: 'Inter',
+                              fontSize: 40,
+                              fontWeight: FontWeight.w900,
+                              color: WsColors.darkBlue,
+                              height: 1.2,
+                            ),
+                          ),
+                          Text(
+                            s.remaining.toUpperCase(),
+                            style: const TextStyle(
+                              fontFamily: 'Inter',
+                              fontSize: 22,
+                              fontWeight: FontWeight.w700,
+                              color: WsColors.accentCyan,
+                              height: 1.3,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
                   ),
                 ),
                 const SizedBox(height: 32),
@@ -84,7 +138,7 @@ class CountdownPage extends ConsumerWidget {
                   child: Row(
                     children: [
                       WsTimerText(
-                        value: hours.toString().padLeft(2, '0'),
+                        value: hours,
                         label: s.hours.toUpperCase(),
                       ),
                       const Padding(
@@ -104,7 +158,7 @@ class CountdownPage extends ConsumerWidget {
                         ),
                       ),
                       WsTimerText(
-                        value: minutes.toString().padLeft(2, '0'),
+                        value: minutes,
                         label: s.minutes.toUpperCase(),
                       ),
                       const Padding(
@@ -124,7 +178,7 @@ class CountdownPage extends ConsumerWidget {
                         ),
                       ),
                       WsTimerText(
-                        value: seconds.toString().padLeft(2, '0'),
+                        value: seconds,
                         label: s.seconds.toUpperCase(),
                       ),
                     ],

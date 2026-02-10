@@ -66,6 +66,9 @@ dependencies:
   # Charts and data visualization
   fl_chart: ^0.68.0
 
+  # Number ticker animation
+  number_ticker: ^0.0.2+1
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
