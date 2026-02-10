@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart' hide KeyEvent;
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/constants/ws_colors.dart';
 import '../../../core/i18n/locale_provider.dart';
 import '../../../core/i18n/strings.dart';
+import '../../../core/providers/time_providers.dart';
+import '../../timezone/timezone_converter.dart';
 import '../models/practice_record_model.dart';
 
-class RecordsListView extends StatelessWidget {
+class RecordsListView extends ConsumerWidget {
   final List<PracticeRecord> records;
 
   const RecordsListView({
@@ -13,8 +16,9 @@ class RecordsListView extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final s = LocaleScope.of(context);
+    final selectedTz = ref.watch(appTimezoneProvider);
     // Sort records by date, newest first
     final sortedRecords = List<PracticeRecord>.from(records)
       ..sort((a, b) => b.completedAt.compareTo(a.completedAt));
@@ -24,7 +28,7 @@ class RecordsListView extends StatelessWidget {
       itemCount: sortedRecords.length,
       itemBuilder: (context, index) {
         final record = sortedRecords[index];
-        return _buildRecordCard(context, record, s);
+        return _buildRecordCard(context, record, s, selectedTz);
       },
     );
   }
@@ -33,6 +37,7 @@ class RecordsListView extends StatelessWidget {
     BuildContext context,
     PracticeRecord record,
     AppStrings s,
+    String timezoneId,
   ) {
     final hours = record.totalDuration.inHours;
     final minutes = (record.totalDuration.inMinutes % 60);
@@ -56,7 +61,7 @@ class RecordsListView extends StatelessWidget {
       ),
       child: InkWell(
         borderRadius: BorderRadius.circular(16),
-        onTap: () => _showRecordDetail(context, record, s),
+        onTap: () => _showRecordDetail(context, record, s, timezoneId),
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: Column(
@@ -101,7 +106,7 @@ class RecordsListView extends StatelessWidget {
                             ),
                             const SizedBox(width: 4),
                             Text(
-                              _formatDate(record.completedAt),
+                              _formatDate(record.completedAt, timezoneId),
                               style: const TextStyle(
                                 fontSize: 12,
                                 color: WsColors.textSecondary,
@@ -178,6 +183,7 @@ class RecordsListView extends StatelessWidget {
     BuildContext context,
     PracticeRecord record,
     AppStrings s,
+    String timezoneId,
   ) {
     showDialog(
       context: context,
@@ -191,7 +197,7 @@ class RecordsListView extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               // Dialog header
-              _buildDetailHeader(ctx, record, s),
+              _buildDetailHeader(ctx, record, s, timezoneId),
               const Divider(height: 1),
               // Content
               Flexible(
@@ -207,7 +213,7 @@ class RecordsListView extends StatelessWidget {
                       ],
                       if (record.keyEvents.isNotEmpty) ...[
                         const SizedBox(height: 16),
-                        _buildKeyEventsSection(record, s),
+                        _buildKeyEventsSection(record, s, timezoneId),
                       ],
                     ],
                   ),
@@ -224,6 +230,7 @@ class RecordsListView extends StatelessWidget {
     BuildContext ctx,
     PracticeRecord record,
     AppStrings s,
+    String timezoneId,
   ) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 12, 8, 8),
@@ -255,7 +262,7 @@ class RecordsListView extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  _formatDate(record.completedAt),
+                  _formatDate(record.completedAt, timezoneId),
                   style: const TextStyle(
                     fontSize: 12,
                     color: WsColors.textSecondary,
@@ -486,7 +493,11 @@ class RecordsListView extends StatelessWidget {
     );
   }
 
-  Widget _buildKeyEventsSection(PracticeRecord record, AppStrings s) {
+  Widget _buildKeyEventsSection(
+    PracticeRecord record,
+    AppStrings s,
+    String timezoneId,
+  ) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -516,16 +527,16 @@ class RecordsListView extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 12),
-          ...record.keyEvents.map((event) => _buildEventRow(event)),
+          ...record.keyEvents.map((event) =>
+              _buildEventRow(event, timezoneId)),
         ],
       ),
     );
   }
 
-  Widget _buildEventRow(KeyEvent event) {
+  Widget _buildEventRow(KeyEvent event, String timezoneId) {
     final (icon, color, label) = _eventMeta(event.type);
-    final time =
-        '${event.timestamp.hour.toString().padLeft(2, '0')}:${event.timestamp.minute.toString().padLeft(2, '0')}:${event.timestamp.second.toString().padLeft(2, '0')}';
+    final time = _formatTime(event.timestamp, timezoneId);
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
@@ -641,9 +652,15 @@ class RecordsListView extends StatelessWidget {
     );
   }
 
-  String _formatDate(DateTime dt) {
-    return '${dt.year}-${dt.month.toString().padLeft(2, '0')}-${dt.day.toString().padLeft(2, '0')} '
-        '${dt.hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')}';
+  String _formatDate(DateTime dt, String timezoneId) {
+    final local = TimezoneConverter.convert(dt, timezoneId);
+    return '${local.year}-${local.month.toString().padLeft(2, '0')}-${local.day.toString().padLeft(2, '0')} '
+        '${local.hour.toString().padLeft(2, '0')}:${local.minute.toString().padLeft(2, '0')}';
+  }
+
+  String _formatTime(DateTime dt, String timezoneId) {
+    final local = TimezoneConverter.convert(dt, timezoneId);
+    return '${local.hour.toString().padLeft(2, '0')}:${local.minute.toString().padLeft(2, '0')}:${local.second.toString().padLeft(2, '0')}';
   }
 
   String _formatDuration(Duration d) {

@@ -68,7 +68,7 @@ class UnifiedTimerController {
     currentTask = task;
     if (task.status == TaskStatus.upcoming && currentModule != null) {
       final tasks = currentModule!.tasks;
-      final idx = tasks.indexOf(task);
+      final idx = tasks.indexWhere((t) => t.id == task.id);
       if (idx != -1) {
         currentModule!.tasks[idx] = task.copyWith(status: TaskStatus.current);
         currentTask = currentModule!.tasks[idx];
@@ -80,7 +80,7 @@ class UnifiedTimerController {
   void completeTask() {
     if (currentTask != null && currentModule != null) {
       final tasks = currentModule!.tasks;
-      final idx = tasks.indexOf(currentTask!);
+      final idx = tasks.indexWhere((t) => t.id == currentTask!.id);
       if (idx != -1) {
         final updated = currentTask!.copyWith(
           status: TaskStatus.done,
@@ -128,7 +128,7 @@ class UnifiedTimerController {
       if (currentTask != null && elapsed > _lastElapsed && currentModule != null) {
         final delta = elapsed - _lastElapsed;
         final tasks = currentModule!.tasks;
-        final idx = tasks.indexOf(currentTask!);
+        final idx = tasks.indexWhere((t) => t.id == currentTask!.id);
         if (idx != -1) {
           final updated = currentTask!.copyWith(
             actualSpent: currentTask!.actualSpent + delta,

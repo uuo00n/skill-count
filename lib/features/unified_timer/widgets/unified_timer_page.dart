@@ -47,6 +47,35 @@ class _UnifiedTimerPageState extends ConsumerState<UnifiedTimerPage> {
 
   ModuleModel get _selectedModule => _currentModules[_selectedModuleIndex];
 
+  void _updateSelectedModule(ModuleModel updatedModule) {
+    _currentModules[_selectedModuleIndex] = updatedModule;
+    if (_controller.currentModule?.id == updatedModule.id) {
+      _controller.currentModule = updatedModule;
+      final currentTask = _controller.currentTask;
+      if (currentTask != null) {
+        TaskItem? matched;
+        for (final t in updatedModule.tasks) {
+          if (t.id == currentTask.id) {
+            matched = t;
+            break;
+          }
+        }
+        if (matched != null) {
+          _controller.currentTask = matched;
+        }
+      }
+    }
+  }
+
+  ModuleModel _resolveModuleForRecord() {
+    final active = _controller.currentModule;
+    if (active == null) return _selectedModule;
+    for (final m in _currentModules) {
+      if (m.id == active.id) return m;
+    }
+    return active;
+  }
+
   @override
   void initState() {
     super.initState();
@@ -423,7 +452,7 @@ class _UnifiedTimerPageState extends ConsumerState<UnifiedTimerPage> {
           clearCompletedAt: true,
         );
       } else {
-        if (_controller.currentTask == task) {
+        if (_controller.currentTask?.id == task.id) {
           _controller.completeTask();
           if (_controller.isRunning) {
             _controller.nextTask();
@@ -440,13 +469,20 @@ class _UnifiedTimerPageState extends ConsumerState<UnifiedTimerPage> {
 
   void _ensureCurrentTask() {
     final currentTask = _controller.currentTask;
-    if (currentTask != null &&
-        _selectedModule.tasks.contains(currentTask) &&
-        currentTask.status != TaskStatus.done) {
-      if (currentTask.status != TaskStatus.current) {
-        _controller.selectTask(currentTask);
+    if (currentTask != null) {
+      TaskItem? taskInModule;
+      for (final t in _selectedModule.tasks) {
+        if (t.id == currentTask.id) {
+          taskInModule = t;
+          break;
+        }
       }
-      return;
+      if (taskInModule != null && taskInModule.status != TaskStatus.done) {
+        if (taskInModule.status != TaskStatus.current) {
+          _controller.selectTask(taskInModule);
+        }
+        return;
+      }
     }
 
     for (final task in _selectedModule.tasks) {
@@ -517,8 +553,7 @@ class _UnifiedTimerPageState extends ConsumerState<UnifiedTimerPage> {
               clearCompletedAt: true,
             ))
         .toList();
-    _currentModules[_selectedModuleIndex] =
-        _selectedModule.copyWith(tasks: newTasks);
+    _updateSelectedModule(_selectedModule.copyWith(tasks: newTasks));
     _controller.currentTask = null;
   }
 
@@ -543,7 +578,7 @@ class _UnifiedTimerPageState extends ConsumerState<UnifiedTimerPage> {
   Future<void> _savePracticeRecord({required ph.RecordType recordType}) async {
     if (_hasSavedRecord || _isSavingRecord) return;
     _isSavingRecord = true;
-    final module = _controller.currentModule ?? _selectedModule;
+    final module = _resolveModuleForRecord();
     final actualDuration = _controller.totalDuration - _controller.remaining;
     final safeActualDuration =
         actualDuration.isNegative ? Duration.zero : actualDuration;
@@ -620,8 +655,7 @@ class _UnifiedTimerPageState extends ConsumerState<UnifiedTimerPage> {
               ..._selectedModule.tasks.sublist(0, index),
               ..._selectedModule.tasks.sublist(index + 1),
             ];
-            _currentModules[_selectedModuleIndex] =
-                _selectedModule.copyWith(tasks: newTasks);
+            _updateSelectedModule(_selectedModule.copyWith(tasks: newTasks));
             _hoveredTaskIndex = null;
           });
         },
@@ -650,9 +684,9 @@ class _UnifiedTimerPageState extends ConsumerState<UnifiedTimerPage> {
       builder: (ctx) => TaskEditDialog(
         onSave: (newTask) {
           setState(() {
-            _currentModules[_selectedModuleIndex] =
-                _selectedModule.copyWith(
-                    tasks: [..._selectedModule.tasks, newTask]);
+            _updateSelectedModule(
+              _selectedModule.copyWith(tasks: [..._selectedModule.tasks, newTask]),
+            );
           });
         },
       ),
@@ -748,8 +782,7 @@ class _UnifiedTimerPageState extends ConsumerState<UnifiedTimerPage> {
       if (newIndex > oldIndex) newIndex -= 1;
       final task = tasks.removeAt(oldIndex);
       tasks.insert(newIndex, task);
-      _currentModules[_selectedModuleIndex] =
-          _selectedModule.copyWith(tasks: tasks);
+      _updateSelectedModule(_selectedModule.copyWith(tasks: tasks));
     });
   }
 
